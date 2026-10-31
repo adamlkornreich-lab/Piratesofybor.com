@@ -45,6 +45,13 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 #call.on{opacity:1}
 #l3{position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(var(--ctrl,130px) + 64px);display:flex;font-family:var(--display);z-index:4;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s;transform:translateX(-120%);opacity:0;pointer-events:none}
 #l3.on{transform:none;opacity:1}
+#shot{position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(var(--ctrl,130px) + 64px);z-index:4;background:var(--panel-solid);border-top:3px solid var(--gold);min-width:210px;font-family:var(--display);transform:translateX(-120%);opacity:0;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#shot.on{transform:none;opacity:1}
+#shot .sh-h{display:flex;justify-content:space-between;gap:12px;padding:6px 12px;background:var(--gold);color:#1b1206;font-weight:800;letter-spacing:.08em;font-size:14px}
+#shot .sh-g{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px 10px;text-align:center}
+#shot .sh-g b{display:block;font-size:26px;line-height:1;font-weight:800}#shot .sh-g small{font-size:11px;letter-spacing:.1em;color:var(--mute);font-weight:600}
+#fohint{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 86px);transform:translateX(-50%);z-index:5;background:var(--panel-solid);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font:700 13px var(--display);letter-spacing:.1em;color:var(--gold);pointer-events:none;white-space:nowrap}
+#c,#swing{touch-action:none}
 #l3 .num{background:var(--gold);color:#1b1206;font-size:40px;font-weight:800;padding:2px 12px;line-height:1.1;display:flex;align-items:center}
 #l3 .txt{background:var(--panel-solid);padding:6px 12px;border-top:2px solid var(--gold)}
 #l3 .txt b{display:block;font-family:var(--pirate);font-weight:400;font-size:24px;line-height:1.05}
@@ -100,7 +107,7 @@ tr.me td{background:rgba(233,180,76,.12)}
 .celeb{position:relative}
 .celeb .burst{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 30% 30%,rgba(255,220,120,.5) 0 3px,transparent 4px),radial-gradient(circle at 70% 20%,rgba(255,255,255,.6) 0 2px,transparent 3px),radial-gradient(circle at 80% 60%,rgba(255,220,120,.5) 0 3px,transparent 4px),radial-gradient(circle at 20% 70%,rgba(255,255,255,.5) 0 2px,transparent 3px);animation:tw 1.2s ease-in-out infinite alternate}
 @keyframes tw{from{opacity:.4}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){#l3,#pop,#call{transition:none}.celeb .burst{animation:none}}
+@media (prefers-reduced-motion:reduce){#l3,#pop,#call,#shot{transition:none}.celeb .burst{animation:none}}
 @media (max-height:560px){.hero{height:150px}#map{height:110px;width:56px}}
 </style>
 
@@ -118,11 +125,13 @@ tr.me td{background:rgba(233,180,76,.12)}
 <div id="side">
   <div id="mapw"><canvas id="map" width="148" height="300" aria-label="Hole map"></canvas></div>
   <div id="wind" title="Wind"><svg viewBox="0 0 24 24" id="warr"><path d="M12 3 L18 13 H14 V21 H10 V13 H6 Z" fill="#e9b44c"/></svg><span id="wtxt">0</span></div>
-  <div id="aud"><button id="bSfx" aria-pressed="true" aria-label="Sound effects">🔊</button><button id="bMus">♫ WEST</button><button id="bVox" aria-pressed="true" aria-label="Commentary voice">🎙</button></div>
+  <div id="aud"><button id="bSfx" aria-pressed="true" aria-label="Sound effects">🔊</button><button id="bMus">♫ WEST</button><button id="bVox" aria-pressed="true" aria-label="Commentary voice">🎙</button><button id="bSwg" aria-label="Swing style">🎯 PRO</button></div>
 </div>
 
 <div id="call"></div>
 <div id="pop"></div>
+<div id="shot" aria-live="polite"></div>
+<div id="fohint" hidden>FLYOVER · TAP TO SKIP</div>
 <div id="l3"><div class="num" id="l3n">1</div><div class="txt"><b id="l3a">Skull Cove</b><span id="l3b">PAR 4 · 395 YDS</span></div></div>
 
 <div id="ctrl">
@@ -344,6 +353,7 @@ let hi=0,h=mkHole(0),B={x:0,y:0,z:0},last={x:0,y:0},strokes=0,card=[],club=0,aim
 let meter={m:0,ph:'idle',pw:0,acc:0},F=null,R=null,P=null,trace=[],timer=0,swingT=0,need=1,puttMax=10,flash=0,AI=[];
 const PROS=["Calico Jack","Anne Bonny","Black Bart","Mary Read","Long Ben"];
 let best=null;try{const v=localStorage.getItem('agc-best');if(v!==null)best=+v}catch(e){}
+let swingMode='pro';try{const v=localStorage.getItem('agc-swing');if(v==='classic'||v==='pro')swingMode=v}catch(e){}
 
 function toPin(){return Math.hypot(h.cup.x-B.x,h.cup.y-B.y)}
 function onGreenish(){const t=ter(B.x,B.y);return t===2||(t===8&&toPin()<22)}
@@ -490,12 +500,27 @@ function saveAud(){try{localStorage.setItem('agc-music',musicMode);localStorage.
 const SNAP=.08,FULL=.85,SPD=.95;
 function tap(){
   ac();
+  if(S==='flyover'){endFly();return}
   if(S==='intro'||S==='result')return;
   if(S!=='aim'&&S!=='meter')return;
   if(meter.ph==='idle'){S='meter';meter.ph='up';meter.m=0;sfx.tick();return}
   if(meter.ph==='up'){sfx.tick();meter.pw=meter.m/FULL;if(club===PUTTER){strike(Math.min(1,meter.pw),0);return}meter.ph='down';return}
   if(meter.ph==='down'){let e=(meter.m-SNAP)/.075;if(meter.pw>1)e*=1+(meter.pw-1)*4;strike(Math.min(1.12,meter.pw),e)}
 }
+let G2=null;const FULLPX=()=>Math.max(120,Math.min(250,VH*.26)),DEG=10;
+function proDown(e){if(swingMode!=='pro'||S!=='aim')return false;e.preventDefault();ac();try{e.currentTarget.setPointerCapture(e.pointerId)}catch(_){}
+  G2={x0:e.clientX,y0:e.clientY,ph:'back',low:e.clientY,lowX:e.clientX,tf:0,pts:[{x:e.clientX,y:e.clientY}]};S='meter';meter.ph='pro';meter.pw=0;meter.m=0;sfx.tick();return true}
+function proMove(e){if(!G2)return;const x=e.clientX,y=e.clientY;G2.pts.push({x,y});if(G2.pts.length>90)G2.pts.shift();
+  if(G2.ph==='back'){if(y>G2.low){G2.low=y;G2.lowX=x}else if(G2.low-y>16&&G2.low-G2.y0>14){G2.ph='fwd';G2.tf=performance.now();sfx.tick()}
+    meter.pw=Math.min(1.12,(G2.low-G2.y0)/FULLPX())}
+  else if(G2.low-y>=(G2.low-G2.y0)+10||y<G2.y0-FULLPX()*.35)proRelease(x,y,true)}
+function proCancel(){if(!G2)return;G2=null;S='aim';meter.ph='idle';meter.pw=0}
+function proUp(e){if(!G2)return;if(G2.ph==='fwd')proRelease(e.clientX,e.clientY,false);else{proCancel();say('Drag down to take it back, then push up to swing.',2200,'')}}
+function proRelease(x,y,through){const back=Math.max(1,G2.low-G2.y0),fwd=Math.max(1,G2.low-y),dx=x-G2.lowX,ms=performance.now()-G2.tf;
+  let pw=Math.min(1.12,back/FULLPX());if(!through)pw*=Math.max(.55,Math.min(1,fwd/back));meter.pw=pw;G2=null;
+  if(club===PUTTER){strike(Math.max(.02,Math.min(1,pw)),0);return}
+  let err=Math.atan2(dx,fwd)*180/Math.PI/DEG;if(ms>700)err+=(err>=0?1:-1)*.5;if(pw>1)err*=1+(pw-1)*4;strike(pw,err)}
+window.addEventListener('pointermove',proMove);window.addEventListener('pointerup',proUp);window.addEventListener('pointercancel',proCancel);
 function strike(pw,err){
   meter.ph='done';strokes++;last={x:B.x,y:B.y};const c=CLUBS[club];
   if(Math.abs(err)<.18&&club!==PUTTER){err=0;pop('PERFECT')}
@@ -536,7 +561,7 @@ function rollDone(){
   // chip-in / ace check along roll
   const ax=R.a.x,ay=R.a.y,bx=R.b.x,by=R.b.y,dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy||1,u=Math.max(0,Math.min(1,((h.cup.x-ax)*dx+(h.cup.y-ay)*dy)/L2));
   if(Math.hypot(ax+dx*u-h.cup.x,ay+dy*u-h.cup.y)<.1){B={x:h.cup.x,y:h.cup.y,z:0};holed();return}
-  const t=ter(B.x,B.y),d=toPin();
+  const t=ter(B.x,B.y),d=toPin();shotCard(t);
   if(t===2&&d<3)say(pick(["Stuck it close! That's tap-in range.","Darts it right at the flag!"]));
   else if(t===2)say(pick(["On the dance floor.","Puts it on the green. Nicely done.","Green in regulation for Andy."]));
   else if(t===0)say(pick(["Right down the middle.","He's found the short grass.","That's a beauty, Andy."]));
@@ -545,6 +570,10 @@ function rollDone(){
   else if(t===1)say(pick(["Caught the rough.","A little long grass there.","He'll have a tricky lie in the rough."]));
   S='settle';timer=1.1;
 }
+let shotT=0;const LIE={0:'FAIRWAY',1:'ROUGH',2:'GREEN',3:'BUNKER',7:'TEE BOX',8:'FRINGE'};
+function shotCard(t){if(!F)return;const tot=Math.hypot(B.x-last.x,B.y-last.y),c=CLUBS[club],d=toPin(),onG=t===2;
+  const e=$('shot');e.innerHTML=`<div class="sh-h"><b>${c.n.toUpperCase()}</b><span>${LIE[t]||''}</span></div><div class="sh-g"><div><b>${Math.round(F.carry)}</b><small>CARRY</small></div><div><b>${Math.round(tot)}</b><small>TOTAL</small></div><div><b>${onG?Math.round(d*3):Math.round(d)}</b><small>${onG?'FT LEFT':'TO PIN'}</small></div></div>`;
+  e.classList.add('on');clearTimeout(shotT);shotT=setTimeout(()=>e.classList.remove('on'),3400)}
 function stepPutt(dt){
   const n=Math.ceil(dt*240),h1=dt/n;
   for(let i=0;i<n;i++){
@@ -604,9 +633,17 @@ function loadHole(i){
   hi=i;h=mkHole(i);strokes=0;B={x:0,y:0,z:0};last={x:0,y:0};trace=[];P=F=R=null;buildMap();
   $('l3n').textContent=i+1;$('l3a').textContent=h.n;$('l3b').textContent=`PAR ${h.par} · ${h.L} YDS · WIND ${h.wind.s} MPH`;
   const l=$('l3');l.classList.add('on');clearTimeout(l3T);l3T=setTimeout(()=>l.classList.remove('on'),3600);
-  flash=1;setupShot();
+  flash=1;setupShot();startFly();
   speak(`Hole ${i+1}. ${h.n}. Par ${h.par}, ${h.L} yards. Wind, ${h.wind.s} miles an hour.`);
 }
+
+/* ---------- Hole flyover ---------- */
+let FO=null;const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function startFly(){if(RM||S!=='aim')return;FO={t:0,dur:h.par===3?2.6:3.6};S='flyover';$('fohint').hidden=false}
+function endFly(){if(!FO)return;FO=null;$('fohint').hidden=true;S='aim';setCam();flash=1;hud()}
+function stepFly(dt){FO.t+=dt/FO.dur;const t=Math.min(1,FO.t),e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  const y=-14+(h.cup.y-42-(-14))*e,x=h.cx(Math.max(0,Math.min(h.L,y)));
+  cam.x=x;cam.y=y;cam.a=Math.atan2(h.cup.x-x,h.cup.y-y);cam.z=12-7*e;dirty=true;if(FO.t>=1)endFly()}
 
 /* ---------- Loop ---------- */
 let lt=0;
@@ -626,6 +663,7 @@ function update(dt){
   else if(S==='roll'){R.t+=dt/R.dur;const t=Math.min(1,R.t),e=1-(1-t)*(1-t);B={x:R.a.x+(R.b.x-R.a.x)*e,y:R.a.y+(R.b.y-R.a.y)*e,z:0};if(R.t>=1)rollDone()}
   else if(S==='putt'&&P)stepPutt(dt);
   else if(S==='settle'){timer-=dt;if(timer<=0){flash=1;setupShot()}}
+  else if(S==='flyover'&&FO)stepFly(dt);
 }
 function draw(){
   if(dirty)renderGround();
@@ -640,12 +678,15 @@ function draw(){
   if(club===PUTTER&&(S==='aim'||S==='meter')){const d=toPin();g.setLineDash([6,6]);g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=2;g.beginPath();let first=true;for(let k=1;k<=12;k++){const q=proj(B.x+Math.sin(aim)*d*k/12,B.y+Math.cos(aim)*d*k/12,0);if(!q)continue;first?g.moveTo(q.x,q.y):g.lineTo(q.x,q.y);first=false}g.stroke();g.setLineDash([])}
   // ball
   const bs=proj(B.x,B.y,0),bb=proj(B.x,B.y,B.z);
-  const showGolfer=S!=='fly'&&S!=='roll'&&S!=='settle'&&S!=='holedwait'||(S==='fly'&&F&&F.t<.25);
+  const showGolfer=S!=='flyover'&&(S!=='fly'&&S!=='roll'&&S!=='settle'&&S!=='holedwait'||(S==='fly'&&F&&F.t<.25));
   if(showGolfer){const gb=proj(last.x===B.x&&last.y===B.y?B.x:(S==='fly'?F.s.x:B.x),S==='fly'?F.s.y:B.y,0);drawGolfer(gb)}
   if(bs&&S!=='holedwait'){g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(bs.x,bs.y,Math.max(1.6,.06*bs.s),Math.max(.8,.025*bs.s),0,0,6.283);g.fill()}
   if(bb&&S!=='holedwait'){const r=Math.max(2,Math.min(14,.05*bb.s));g.fillStyle='#fff';g.beginPath();g.arc(bb.x,bb.y,r,0,6.283);g.fill();g.strokeStyle='rgba(0,0,0,.35)';g.lineWidth=1;g.stroke();
     if(r<3&&(S==='fly'||S==='roll')){g.strokeStyle='rgba(255,255,255,.8)';g.beginPath();g.arc(bb.x,bb.y,7,0,6.283);g.stroke()}}
   drawMeter();
+  if(G2&&G2.pts.length>1){g.save();g.setLineDash([4,8]);g.strokeStyle='rgba(127,227,255,.55)';g.lineWidth=2;g.beginPath();g.moveTo(G2.x0,G2.y0-FULLPX()*.5);g.lineTo(G2.x0,G2.y0+FULLPX());g.stroke();g.setLineDash([]);
+    const ny=G2.y0+FULLPX()*Math.min(1,need);g.fillStyle='#7fe3ff';g.beginPath();g.moveTo(G2.x0-9,ny);g.lineTo(G2.x0-1,ny);g.lineTo(G2.x0-5,ny+7);g.fill();
+    g.lineCap='round';g.lineJoin='round';g.strokeStyle=G2.ph==='fwd'?'#e9b44c':'rgba(255,255,255,.9)';g.lineWidth=6;g.beginPath();G2.pts.forEach((q,i)=>i?g.lineTo(q.x,q.y):g.moveTo(q.x,q.y));g.stroke();g.restore()}
   if(flash>0){g.fillStyle=`rgba(5,10,16,${flash})`;g.fillRect(0,0,VW,VH)}
 }
 function drawMeter(){
@@ -657,10 +698,12 @@ function drawMeter(){
   g.fillStyle='#fff';g.fillRect(x0+bw*SNAP-1.5,y-4,3,hh+8);
   g.fillStyle='#1b1206';g.fillRect(x0+bw*FULL-1,y,2,hh);
   const nx=x0+bw*Math.min(1,need*FULL);g.fillStyle='#7fe3ff';g.beginPath();g.moveTo(nx-5,y-7);g.lineTo(nx+5,y-7);g.lineTo(nx,y-1);g.fill();
-  if(meter.ph==='down'||meter.ph==='done'){const px=x0+bw*Math.min(1,meter.pw*FULL);g.fillStyle='#e9b44c';g.fillRect(px-2,y-4,4,hh+8)}
+  if(meter.ph==='pro'){g.fillStyle='rgba(255,255,255,.35)';g.fillRect(x0,y,bw*Math.min(1,meter.pw*FULL),hh)}
+  if(meter.ph==='down'||meter.ph==='done'||meter.ph==='pro'){const px=x0+bw*Math.min(1,meter.pw*FULL);g.fillStyle='#e9b44c';g.fillRect(px-2,y-4,4,hh+8)}
   if(meter.ph!=='idle'){const mx=x0+bw*Math.max(0,meter.m);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.roundRect(mx-3,y-6,6,hh+12,2);g.fill();g.stroke()}
   g.font='700 12px "Barlow Condensed",Arial Narrow,sans-serif';g.fillStyle='#f4efe2';g.textAlign='left';g.textBaseline='alphabetic';
-  const msg=meter.ph==='idle'?(club===PUTTER?'TAP SWING, THEN TAP AGAIN FOR PACE':'TAP SWING TO START'):meter.ph==='up'?(club===PUTTER?'TAP FOR PACE':'TAP FOR POWER'):meter.ph==='down'?'TAP ON THE WHITE LINE':'';
+  const pro=swingMode==='pro';
+  const msg=pro&&(meter.ph==='idle'||meter.ph==='pro')?(meter.ph==='pro'?(G2&&G2.ph==='fwd'?'PUSH STRAIGHT UP':(club===PUTTER?'PULL BACK FOR PACE':'PULL BACK FOR POWER')):'DRAG DOWN ON THE COURSE, THEN PUSH UP'):meter.ph==='idle'?(club===PUTTER?'TAP SWING, THEN TAP AGAIN FOR PACE':'TAP SWING TO START'):meter.ph==='up'?(club===PUTTER?'TAP FOR PACE':'TAP FOR POWER'):meter.ph==='down'?'TAP ON THE WHITE LINE':'';
   g.fillText(msg,x0,y-8);g.textAlign='right';g.fillStyle='#7fe3ff';g.fillText(club===PUTTER?'▼ PACE TO HOLE':'▼ DISTANCE TO PIN',x0+bw,y-8);g.textAlign='left';
 }
 function loop(ts){const dt=Math.min(.05,(ts-lt)/1000||.016);lt=ts;if(S!=='intro'&&S!=='result')update(dt);draw();requestAnimationFrame(loop)}
@@ -671,8 +714,10 @@ function chClub(dd){if(S!=='aim')return;if(club===PUTTER&&!onGreenish())return;l
 function holdBtn(el,fn){let iv=0,to=0;const stop=()=>{clearTimeout(to);clearInterval(iv)};el.addEventListener('pointerdown',e=>{e.preventDefault();fn();to=setTimeout(()=>iv=setInterval(fn,60),320)});['pointerup','pointerleave','pointercancel'].forEach(t=>el.addEventListener(t,stop))}
 holdBtn($('aL'),()=>rotAim(-(club===PUTTER?.004:.0087)));holdBtn($('aR'),()=>rotAim(club===PUTTER?.004:.0087));
 $('cDn').onclick=()=>chClub(-1);$('cUp').onclick=()=>chClub(1);
-$('swing').addEventListener('pointerdown',e=>{e.preventDefault();tap()});
-cv.addEventListener('pointerdown',e=>{if(S==='meter')tap()});
+$('swing').addEventListener('pointerdown',e=>{e.preventDefault();if(S==='flyover'){endFly();return}if(proDown(e))return;tap()});
+cv.addEventListener('pointerdown',e=>{if(S==='flyover'){endFly();return}if(proDown(e))return;if(S==='meter'&&meter.ph!=='pro')tap()});
+function swLabel(){const b=$('bSwg');b.textContent=swingMode==='pro'?'🎯 PRO':'⏱ 3-TAP';$('swing').textContent='SWING'}
+$('bSwg').onclick=()=>{if(S==='meter')return;swingMode=swingMode==='pro'?'classic':'pro';try{localStorage.setItem('agc-swing',swingMode)}catch(e){}swLabel();say(swingMode==='pro'?'Pro swing: drag down, then push up':'Three-tap swing',1800,'')};swLabel();
 $('bSfx').onclick=()=>{ac();sound=!sound;audLabels();saveAud()};$('bMus').onclick=()=>{musicMode=musicMode==='off'?'west':musicMode==='west'?'east':'off';startMusic();audLabels();saveAud();say(musicMode==='off'?'Music off':musicMode==='west'?'West Coast G-funk':'East Coast boom-bap',1400,'')};$('bVox').onclick=()=>{voiceOn=!voiceOn;if(!voiceOn)try{window.speechSynthesis.cancel()}catch(e){}audLabels();saveAud()};audLabels();
 window.addEventListener('keydown',e=>{
   const k=e.key;
@@ -685,8 +730,8 @@ window.addEventListener('keydown',e=>{
 function intro(resumeAt){
   showOverlay(`<div class="card"><div class="hero"><img src="${CARD}" alt="Andy"><div class="tag"><small>GASPAR'S BAY LINKS · PRO TOUR</small><h1>Andy Golf Club</h1></div></div>
   <div class="stats"><div><b>9</b><small>HOLES</small></div><div><b>${HOLES.reduce((a,H)=>a+H.par,0)}</b><small>PAR</small></div><div><b>${best===null?'—':fmtPar(best)}</b><small>YOUR BEST</small></div></div>
-  <div class="cb"><p>Andy tees it up against the pirate tour pros on nine seaside holes, island green included. Read the wind, pick your club, and nail the three-tap swing.</p>
-  <div class="how"><b>TAP 1</b><span>Start the backswing</span><b>TAP 2</b><span>Set power. The blue marker shows the distance to the pin</span><b>TAP 3</b><span>Stop on the white line for a straight, perfect strike</span><b>Aim</b><span>◂ ▸ to aim, ‹ › to change club. Putts show the break</span></div>
+  <div class="cb"><p>Andy tees it up against the pirate tour pros on nine seaside holes, island green included. Read the wind, pick your club, and swing it like the pros: drag back, push through.</p>
+  <div class="how"><b>PRO</b><span>Drag down on the course to take it back, then push straight up to swing. Pull back to the blue marker for the distance to the pin; push straight for a straight shot</span><b>3-TAP</b><span>Prefer buttons? Tap 🎯 PRO to switch to the classic three-tap swing</span><b>FLYOVER</b><span>Every hole opens with a flyover. Tap to skip</span><b>Aim</b><span>◂ ▸ to aim, ‹ › to change club. Putts show the break</span></div>
   <button class="go" id="nb">${resumeAt?'CONTINUE · HOLE '+(resumeAt+1):'TEE OFF'}</button>
   <div class="foot">Original West Coast and East Coast beats (♫ button) and a deep-voiced announcer (🎙). Keyboard and TV remote: arrows to aim and pick a club, Enter to swing</div></div></div>`);
   $('nb').onclick=()=>{ac();startMusic();hideOverlay();loadHole(resumeAt||0)};
