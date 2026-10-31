@@ -17,7 +17,11 @@
      store items unlocked by a test button. It only switches on at localhost or inside a
      developer build of the app; at thepiratesofybor.com it is ignored and cloud rules apply. */
   var LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)$/.test(location.hostname) || location.protocol === "file:";
-  var MODE = C.mode === "local" && (LOCAL_HOST || NATIVE) ? "local" : "cloud";
+  // A preview copy built by scripts/build-preview.mjs may also run test mode on a private preview link.
+  // The real domain is always excluded, whatever the settings say.
+  var REAL_SITE = /(^|\.)thepiratesofybor\.com$/i.test(location.hostname);
+  var PREVIEW = C.preview === true && !REAL_SITE;
+  var MODE = C.mode === "local" && !REAL_SITE && (LOCAL_HOST || NATIVE || PREVIEW) ? "local" : "cloud";
   var LOCAL = MODE === "local";
   if (C.mode === "local" && !LOCAL && window.console) console.warn("Pirates of Ybor: test mode ignored on " + location.hostname + "; using normal sign-in.");
   // Test unlocks are cached separately, so they can never unlock anything in normal mode.

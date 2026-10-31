@@ -62,7 +62,9 @@ You sign in to every service yourself. Never paste a password or secret key into
 
 ## Test mode (no sign-in, no backend)
 
-To try every feature on your own computer before any accounts exist:
+**No install needed:** open the private *Pirates of Ybor Test Ship* link (the whole site in test mode). To build that link again after changes, run `node scripts/build-preview.mjs` and publish the `preview/` folder.
+
+To try every feature on your own computer instead (needs Node.js):
 
 ```
 npm run dev:local
