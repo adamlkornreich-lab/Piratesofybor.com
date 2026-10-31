@@ -88,7 +88,7 @@ Keep the Pops & Pippy watermark and copyright line visible. Do not use screensho
 >
 > **Account deletion:** Account → Delete my account → type DELETE. It removes the profile, scores, purchase records and the auth user immediately.
 >
-> **In-app purchases** (Account → The ship's store) use StoreKit through RevenueCat. Signing in is required before purchasing so purchases follow the player across devices; "Restore purchases" is on the same screen. The Ybor Links Back Nine unlocks in Andy Golf Club with the "Play the Ybor Links Back Nine" button at the bottom of the golf screen.
+> **In-app purchases** (Account → The ship's store) use StoreKit through RevenueCat. Signing in is required before purchasing so purchases follow the player across devices; "Restore purchases" is on the same screen. The Ybor Links Back Nine unlocks in Andy Golf Club with the "Play the Ybor Links Back Nine" button near the top of the golf screen, shown before the first tee shot.
 >
 > **AI:** the Quartermaster (Movie Room → Ask anything) and the nightly trivia use Anthropic's Claude through our server, with a family-friendly system prompt, a second-pass content review for generated questions, and a daily limit per player.
 >

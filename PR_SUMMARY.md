@@ -25,7 +25,7 @@
 - `assets/ship.js`: Account link in the menu; Privacy · Support · Delete My Data · No Endorsement footer on every page that lacked it.
 - Privacy policy, Delete My Data, The App and the Grotto privacy page rewritten to match; domain changed to **thepiratesofybor.com** everywhere; Grotto service worker added (it was a 404).
 
-**Test mode** (`POY_APP_MODE=local`, run with `npm run dev:local`): no sign-in, a fixed local player, everything kept on the device, free test unlocks, a red TEST MODE label. Defaults to `cloud`; ignored at thepiratesofybor.com; the build refuses it on Codemagic; test unlocks never carry over to normal mode.
+**Test mode** (`POY_APP_MODE=local`, run with `npm run dev:local`): no sign-in, a fixed local player, everything kept on the device, free test unlocks, a slim red TEST MODE tab on the left edge. Defaults to `cloud`; ignored at thepiratesofybor.com; the build refuses it on Codemagic; test unlocks never carry over to normal mode.
 
 **Docs**: `APP_SETUP.md` (every click, plus the App Store privacy labels and Google Play data-safety answers), `STORE_LISTING.md`, `.env.example`.
 

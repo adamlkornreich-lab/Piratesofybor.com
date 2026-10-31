@@ -68,7 +68,7 @@ To try every feature on your own computer before any accounts exist:
 npm run dev:local
 ```
 
-Open http://localhost:8080. A red **🧪 TEST MODE** label sits in the corner. You play as "Local Pirate" with no sign-in; scores, the Account page, the ship's store and Captain's Quarters all work, but everything stays in that browser and store items unlock for free. Account → **Erase test data** wipes it. The Quartermaster and writing new questions need the real server, so they rest in test mode.
+Open http://localhost:8080. A slim red **🧪 TEST MODE** tab sits on the left edge of every page. You play as "Local Pirate" with no sign-in; scores, the Account page, the ship's store and Captain's Quarters all work, but everything stays in that browser and store items unlock for free. Account → **Erase test data** wipes it. The Quartermaster and writing new questions need the real server, so they rest in test mode.
 
 Test mode is controlled by `POY_APP_MODE` (`cloud` or `local`, default `cloud`). Three guards keep it out of real use:
 - It only switches on at localhost (or in a developer app build). At thepiratesofybor.com the same setting is ignored and normal sign-in applies.
@@ -79,7 +79,7 @@ Test mode is controlled by `POY_APP_MODE` (`cloud` or `local`, default `cloud`).
 
 - Sign in with Apple on an iPhone (TestFlight) and Google on Android. You should land back on the Account page signed in.
 - Play a game, then check Account → My scores. Sign in on a second device: your bests come with you.
-- Buy the course pack with a sandbox tester (Apple: Settings → App Store → Sandbox Account; Google: license testers). "Play the Ybor Links Back Nine" appears at the bottom of Andy Golf Club.
+- Buy the course pack with a sandbox tester (Apple: Settings → App Store → Sandbox Account; Google: license testers). "Play the Ybor Links Back Nine" appears at the top of the Andy Golf Club screen (it hides after your first tap).
 - Delete the app, reinstall, sign in, tap **Restore purchases**.
 - Delete the account; confirm the user is gone in Supabase → Authentication.
 - Open /admin and press **Write fresh questions now**; approve a few; they show up in Gaspar's Grotto Trivia within 12 hours (or after clearing the app's data).
