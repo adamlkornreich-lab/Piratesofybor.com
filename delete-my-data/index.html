@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Delete My Data · Pirates of Ybor</title><link rel="icon" href="../assets/watermark.png">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Alegreya:wght@400;700&display=swap" rel="stylesheet">
+<style>:root{--bg:#0b1a26;--ink:#f3ead7;--mute:#a9bcc0;--brass:#e0b056;--line:#28495b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Alegreya,Georgia,serif}
+main{max-width:720px;margin:0 auto;padding:28px 16px calc(120px + env(safe-area-inset-bottom,0px))}
+h1{font:400 clamp(2.2rem,8vw,3.2rem)/1.05 "Pirata One",Georgia,serif;color:var(--brass);margin:0 0 6px}
+h2{font:400 1.6rem/1.1 "Pirata One",Georgia,serif;color:var(--brass);margin:26px 0 6px}
+p,li{color:#e6dcc6}.mute{color:var(--mute)}a{color:var(--brass)}
+footer{border-top:1px solid var(--line);margin-top:30px;padding-top:14px;color:var(--mute);font-size:.9rem}</style></head><body><main>
+<h1>Delete My Data</h1><p class="mute">Last updated October 30, 2026</p>
+
+<p>The website keeps your scores and settings only in your own browser. You can erase them any time with the button below, or by clearing site data for piratesofybor.com in your browser settings.</p>
+<p><button id="wipe" style="font:inherit;font-weight:700;min-height:46px;padding:0 20px;border-radius:12px;border:0;background:#c4572b;color:#fff;cursor:pointer">Erase my saved game data</button></p>
+<p id="msg" class="mute" aria-live="polite"></p>
+<h2>App accounts</h2>
+<p>Once the app has sign-in, you will be able to delete your account from inside the app. Until then, or if you need help, email <a href="mailto:adamlkornreich@gmail.com?subject=Delete%20my%20data">adamlkornreich@gmail.com</a> with the subject "Delete my data" and we will reply within 30 days.</p>
+<script>document.getElementById("wipe").onclick=function(){var n=0;try{n=localStorage.length;localStorage.clear()}catch(e){}try{sessionStorage.clear()}catch(e){}document.getElementById("msg").textContent=n?"Done. Saved game data on this device has been erased.":"Nothing was saved on this device, so there is nothing to erase."};</script><footer>© 2026 Adam Kornreich / R.A. Consulting ❤ Pops &amp; Pippy. All rights reserved.<br>Contact: <a href="mailto:adamlkornreich@gmail.com">adamlkornreich@gmail.com</a></footer>
+</main><script src="../assets/ship.js" data-root="../" defer></script></body></html>
