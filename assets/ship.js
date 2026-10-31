@@ -7,7 +7,7 @@
   var root = (me && me.getAttribute("data-root")) || "/";
   var gameMode = me && me.getAttribute("data-mode") === "game";
   var links = [
-    ["", "The Ship"], ["arcade/", "Game Room"], ["play/", "Movie Room"], ["grotto-arcade/", "Gaspar's Grotto"],
+    ["", "The Ship"], ["golf/", "⛳ Andy Golf Club"], ["arcade/", "Game Room"], ["play/", "Movie Room"], ["grotto-arcade/", "Gaspar's Grotto"],
     ["crew/", "Family Room"], ["app/", "The App"]
   ];
   // Accounts: shown in the app, and on the website once sign-in is switched on in poy-config.js.

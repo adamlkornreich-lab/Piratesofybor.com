@@ -72,6 +72,20 @@ h2{font-size:clamp(2rem,6vw,2.6rem);color:var(--brass);margin-bottom:6px}
 .stores span{border:1px solid var(--line);border-radius:99px;padding:6px 14px;color:var(--mute);font-size:.92rem}
 .crew{background:var(--panel);border-radius:16px;padding:18px;border:1px solid var(--line)}
 .crew p{margin:6px 0;color:var(--mute)}
+.spot{padding-top:18px}
+.spot-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:0;background:linear-gradient(150deg,#13361f,#12293a 65%);border:1px solid #3f7a4a;border-radius:20px;overflow:hidden;text-decoration:none;color:var(--ink);transition:transform .2s,box-shadow .2s}
+.spot-card:hover,.spot-card:focus-visible{transform:translateY(-3px);box-shadow:0 14px 40px #000a;outline:none;border-color:var(--brass)}
+.spot-card:focus-visible{outline:3px solid var(--sea);outline-offset:3px}
+.spot-shot{width:100%;height:100%;max-height:440px;object-fit:cover;object-position:center 30%;display:block}
+.spot-text{padding:22px 20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.spot-text h2{font-size:clamp(2.4rem,7vw,3.4rem);margin:0}
+.spot-text p{margin:0;color:#d9e2d6}
+.spot-facts{list-style:none;margin:2px 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.spot-facts li{background:#0b1a26aa;border:1px solid #3f7a4a;border-radius:10px;padding:6px 12px;font-size:.95rem;color:var(--mute)}
+.spot-facts b{color:var(--brass);font-size:1.1rem;margin-right:4px}
+.spot-more{font-size:.95rem}
+.spot-btn{align-self:flex-start;margin-top:4px;display:inline-flex;align-items:center;min-height:48px;padding:0 22px;border-radius:12px;background:var(--brass);color:#1b1305;font-weight:700;font-size:1.05rem}
+@media (max-width:700px){.spot-card{grid-template-columns:1fr}.spot-shot{max-height:300px}}
 footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 calc(110px + env(safe-area-inset-bottom,0px));color:var(--mute);font-size:.92rem}
 footer nav{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:12px}
 footer nav a{color:var(--ink);text-decoration:none;padding:6px 0}
@@ -280,6 +294,20 @@ footer nav a:hover{color:var(--brass)}
   </div>
   <p class="hint">Tap any room on the ship to step inside.</p>
 
+  <section class="spot" aria-labelledby="agc">
+    <a class="spot-card" href="golf/index.html">
+      <img class="spot-shot" src="assets/andy-golf.jpg" alt="Andy Golf Club: Andy lines up his drive on hole 1, Skull Cove, par 4, with palm trees and Tampa Bay behind the fairway" width="560" height="638" loading="lazy">
+      <div class="spot-text">
+        <span class="kicker">Now on the first tee</span>
+        <h2 id="agc">Andy Golf Club</h2>
+        <p>Andy tees it up against the pirate tour pros on nine seaside holes: Skull Cove, Kraken’s Elbow, the island green at Davy Jones’ Drop, and a closing hole at Gaspar’s Grotto. Read the wind, pick your club and nail the three-tap swing.</p>
+        <ul class="spot-facts"><li><b>9</b> holes</li><li><b>Par 36</b></li><li><b>5</b> pirate pros</li><li><b>8</b> clubs</li></ul>
+        <p class="spot-more">Then take on the <b>Ybor Links Back Nine</b> in the app: Cigar Factory, Seventh Avenue, Gasparilla Gulch and six more.</p>
+        <span class="spot-btn">⛳ Tee off free</span>
+      </div>
+    </a>
+  </section>
+
   <section aria-labelledby="walk">
     <h2 id="walk">Walk the ship</h2>
     <p class="lead">Every deck is open, free, and plays right here on any phone, tablet, computer or TV.</p>
@@ -323,7 +351,8 @@ footer nav a:hover{color:var(--brass)}
     <h2 id="c">The crew</h2>
     <div class="crew">
       <p>Presented by Gaspar's Grotto, the notorious pirate bar of Ybor City. Crowned by Atara, blessed by Pippy. Pops is the bar cat, carrying on for the world famous Tanker Ray, and Pippy is our pirate chihuahua.</p>
-      <p>With thanks to Captain Shiller, Co-Navigator Shere and their family, Kornreich &amp; Associates, painter and musician Waldo Nuhel, Mark Brenner and Ed Lafferty.</p>
+      <p>With thanks to Captain Eric Schiller and Co-Navigator Shere Schiller and their family; Andy, the star of Andy Golf Club; Steph, Landon, and Stephania Schiller of the Pour-Off; painter and musician Waldo Nuhel and his great-grandson Waldo Jr. Jr.; Mark Brenner; Ed Lafferty; Ruben and Rene Alvarez and their whole family; Amber Kornreich; my dad; and Kornreich &amp; Associates.</p>
+      <p><a href="crew/index.html" style="color:var(--brass)">Meet the whole crew in the Family Room</a></p>
     </div>
   </section>
 
