@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Pirata+One&display=swap" rel="stylesheet">
+<html lang="en"><head><script src="../assets/poy-config.js"></script><script src="../assets/poy.js"></script><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Pirata+One&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pirates of Ybor — Trivia for Gaspar’s Grotto</title>
 <style>
@@ -87,7 +87,7 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:26px}
 <section><h2>Safe Seas</h2><p>This site does not support torrents or magnet links, and any such input is blocked to help keep visitors safe from risky downloads.</p></section>
 
 <section><h2>Copyright &amp; Permissions</h2><p>Movie titles, names, logos, and brands mentioned belong to their respective owners and appear for trivia and reference only. For copyright or permission requests, contact <a href="mailto:adamlkornreich@gmail.com">adamlkornreich@gmail.com</a>.</p></section>
-<footer>© 2026 R.A. Consulting · Gaspar’s Grotto · Fire Fox Games · piratesofybor.com</footer>
+<footer>© 2026 R.A. Consulting · Gaspar’s Grotto · Fire Fox Games · thepiratesofybor.com</footer>
 </main>
 <script>
 (function(){
@@ -102,6 +102,7 @@ var D={
 "🏴‍☠️ Pirates":[["What is the pirate flag called?","Jolly Roger",["Black Pearl","Red Baron","Blue Jack"]],["On a treasure map, what marks the spot?","X",["O","Z","A"]],["Where does a pirate stereotypically keep a parrot?","On the shoulder",["In a hat","On the mast","In a barrel"]],["Ybor City is part of which US city?","Tampa",["Miami","Orlando","Jacksonville"]],["What is the front of a ship called?","Bow",["Stern","Port","Keel"]]],
 "🌴 Florida Pirate Trail":[["Which legend is Tampa’s Gasparilla Pirate Festival named after?","José Gaspar",["Blackbeard","Jean Lafitte","Captain Kidd"]],["In what year did Tampa’s Gasparilla Pirate Festival first begin?","1904",["1812","1936","1968"]],["Is there solid historical evidence that José Gaspar really lived?","No evidence has been found",["Yes, his logbook survives","Yes, he is buried in Ybor","Yes, he ran Tampa’s port"]],["Which Tampa NFL team takes its name from the buccaneers?","Tampa Bay Buccaneers",["Tampa Bay Rays","Tampa Bay Rowdies","Tampa Bay Storm"]],["Which Tampa NHL team is called the Lightning?","Tampa Bay Lightning",["Tampa Bay Thunder","Tampa Bay Storm","Tampa Bay Gators"]],["Which Tampa neighborhood was famous for its cigar factories?","Ybor City",["Hyde Park","Davis Islands","Seminole Heights"]],["Which Orlando park opened first, in 1971?","Magic Kingdom",["Epcot","Universal Studios Florida","Animal Kingdom"]],["In what year did Universal Studios Florida open in Orlando?","1990",["1980","2000","1975"]],["Channelside is a waterfront district in which city?","Tampa",["Orlando","Miami","Jacksonville"]],["What is Florida’s official nickname?","The Sunshine State",["The Gator State","The Keys State","The Palm State"]]]
 };
+if(window.POY&&POY.trivia)POY.trivia.extend(D); /* fresh questions from the nightly generator */
 var $=function(i){return document.getElementById(i)},all=[];
 Object.keys(D).forEach(function(k){D[k].forEach(function(x){all.push(x)})});
 D["🎲 Mix It Up"]=all;
@@ -118,7 +119,7 @@ function show(){locked=false;var x=qs[i];$('cn').textContent=cat+' · '+(i+1)+'/
 $('q').textContent=x[0];$('next').classList.add('hide');say('🐈','Pops says: take your best guess!');
 $('opts').innerHTML='';sh([x[1]].concat(x[2])).forEach(function(o){var e=document.createElement('button');e.textContent=o;e.onclick=function(){pick(e,o)};$('opts').appendChild(e)})}
 var good=['Purrfect! Pops approves.','Arrr, nailed it!','Shiver me whiskers, correct!','Pops is purring!'],bad=['Not quite, matey. Tanker Ray says shake it off.','Close, but no treasure this time.','Tanker Ray winks: you’ll get the next one!'];
-function pick(el,o){if(locked)return;locked=true;var x=qs[i],ok=o===x[1];
+function pick(el,o){if(locked)return;locked=true;var x=qs[i],ok=o===x[1];if(window.POY&&POY.trivia)POY.trivia.answered(x,ok);
 [].forEach.call($('opts').children,function(b){b.disabled=true;if(b.textContent===x[1])b.classList.add('right')});
 if(ok){score++;streak++;say('🐈',good[Math.floor(Math.random()*good.length)])}else{streak=0;el.classList.add('wrong');say('🐈‍⬛',bad[Math.floor(Math.random()*bad.length)])}
 $('sc').textContent='Score '+score+(streak>1?' 🔥'+streak:'');$('next').textContent=i+1<qs.length?'Next ➜':'See results 🏆';$('next').classList.remove('hide')}

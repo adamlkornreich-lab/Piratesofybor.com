@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><script src="../assets/poy-config.js"></script><script src="../assets/poy.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Captain's Quarters · Pirates of Ybor</title><link rel="icon" href="../assets/watermark.png">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Alegreya:wght@400;700&display=swap" rel="stylesheet">
+<style>:root{--bg:#0b1a26;--card:#0f2433;--ink:#f3ead7;--mute:#a9bcc0;--brass:#e0b056;--line:#28495b;--sea:#3fb6a8;--red:#c4572b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Alegreya,Georgia,serif}
+main{max-width:860px;margin:0 auto;padding:24px 16px calc(130px + env(safe-area-inset-bottom,0px))}
+h1{font:400 clamp(2rem,7vw,3rem)/1.05 "Pirata One",Georgia,serif;color:var(--brass);margin:0 0 6px}
+.mute{color:var(--mute)}a{color:var(--brass)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+button,select{min-height:42px;border-radius:10px;border:1px solid var(--line);background:#132c3d;color:var(--ink);font:700 .95rem Alegreya,Georgia,serif;padding:0 14px;cursor:pointer}
+button:focus-visible,select:focus-visible{outline:3px solid var(--sea)}
+.ok{background:#1f6b4f;border-color:#1f6b4f}.no{background:transparent;border-color:#7a3a25;color:#ffb39a}.gold{background:var(--brass);color:#1b1305;border-color:var(--brass)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.q h3{margin:0 0 8px;font-size:1.05rem}.q ol{margin:0 0 8px;padding-left:22px}.q li.r{color:#7fe0b5;font-weight:700}
+.meta{font-size:.85rem;color:var(--mute)}.stats{display:flex;gap:10px;flex-wrap:wrap}.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px}
+.stat b{display:block;font-size:1.4rem;color:var(--brass);font-variant-numeric:tabular-nums}
+#msg{min-height:1.4em}[hidden]{display:none!important}
+</style></head><body><main>
+<h1>Captain's Quarters</h1>
+<p class="mute">Approve or reject the trivia questions the nightly generator wasn't sure about.</p>
+<p id="msg" role="status" aria-live="polite"></p>
+<section id="gate" hidden><p>Captain's quarters only. <a href="../account/index.html">Sign in</a> with the captain's account.</p></section>
+<section id="desk" hidden>
+  <div class="stats" id="stats"></div>
+  <div class="bar">
+    <label for="st" class="mute">Show</label>
+    <select id="st"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+    <button id="reload" type="button">Refresh</button>
+    <button id="gen" class="gold" type="button">Write fresh questions now</button>
+  </div>
+  <div id="list"></div>
+</section>
+<p class="mute" style="font-size:.85rem;margin-top:24px">© 2026 Adam Kornreich / R.A. Consulting ❤ Pops &amp; Pippy</p>
+</main>
+<script>
+(function(){
+var P=window.POY,$=function(i){return document.getElementById(i)};
+function say(t){$('msg').textContent=t||''}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+if(!P||!P.enabled){$('gate').hidden=false;say('The backend isn\'t configured yet.');return}
+var sb;
+function stats(){Promise.all(['pending','approved','rejected'].map(function(s){return sb.from('questions').select('id',{count:'exact',head:true}).eq('status',s).then(function(r){return[s,r.count||0]})}))
+  .then(function(a){$('stats').innerHTML=a.map(function(x){return '<div class="stat"><b>'+x[1]+'</b>'+x[0]+'</div>'}).join('')})}
+function load(){var s=$('st').value;say('Loading…');
+  sb.from('questions').select('*').eq('status',s).order('created_at',{ascending:false}).limit(100).then(function(r){
+    if(r.error){say(r.error.message);return}say(r.data.length?'':'Nothing '+s+'.');
+    $('list').innerHTML=r.data.map(function(q){var acc=q.times_served?Math.round(100*q.times_correct/q.times_served)+'% right of '+q.times_served:'not served yet';
+      return '<article class="q" data-id="'+q.id+'"><h3>'+esc(q.question)+'</h3><ol type="A">'+q.options.map(function(o,i){return '<li'+(i===q.correct_index?' class="r"':'')+'>'+esc(o)+'</li>'}).join('')+'</ol>'+
+      '<p class="meta">'+esc(q.category)+' · difficulty '+q.difficulty+(q.premium?' · Crew Pass pack':'')+(q.tone==='flirty'?' · 21+ flirty':'')+' · '+acc+'</p>'+
+      (q.explanation?'<p class="meta">Why: '+esc(q.explanation)+'</p>':'')+(q.review_note?'<p class="meta">'+esc(q.review_note)+'</p>':'')+
+      '<div class="bar">'+(s!=='approved'?'<button class="ok" data-s="approved" type="button">Approve</button>':'')+(s!=='rejected'?'<button class="no" data-s="rejected" type="button">Reject</button>':'')+(s!=='pending'?'<button data-s="pending" type="button">Back to pending</button>':'')+'</div></article>'}).join('');
+  })}
+$('list').onclick=function(e){var b=e.target.closest('[data-s]');if(!b)return;var card=b.closest('[data-id]');b.disabled=true;
+  sb.from('questions').update({status:b.getAttribute('data-s'),reviewed_at:new Date().toISOString()}).eq('id',card.getAttribute('data-id')).then(function(r){
+    if(r.error){say(r.error.message);b.disabled=false;return}card.remove();stats()})};
+$('st').onchange=load;$('reload').onclick=function(){load();stats()};
+$('gen').onclick=function(){var b=$('gen');b.disabled=true;say('Claude is writing and fact-checking fresh questions… this takes a minute or two.');
+  P.session().then(function(s){return fetch(P.config.supabaseUrl.replace(/\/$/,'')+'/functions/v1/generate-questions',{method:'POST',headers:{Authorization:'Bearer '+s.access_token,apikey:P.config.supabaseAnonKey,'Content-Type':'application/json'},body:'{}'})})
+   .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);
+     say(d.results.map(function(x){return x.category+': '+(x.error?'error':(x.approved||0)+' approved, '+(x.pending||0)+' pending, '+(x.rejected||0)+' rejected')}).join(' · '));load();stats()})
+   .catch(function(e){say('The generator didn\'t finish: '+e.message)}).then(function(){b.disabled=false})};
+P.client().then(function(c){sb=c;return sb.rpc('is_admin')}).then(function(r){
+  if(!r||!r.data){$('gate').hidden=false;return}$('desk').hidden=false;load();stats()}).catch(function(){$('gate').hidden=false});
+})();
+</script>
+<script src="../assets/ship.js" data-root="../" defer></script></body></html>

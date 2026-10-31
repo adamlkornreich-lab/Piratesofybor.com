@@ -1,0 +1,124 @@
+# Codemagic builds for Pirates of Ybor. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy
+# Secrets live in Codemagic environment groups, never in this repo:
+#   poy_public          POY_SUPABASE_URL, POY_SUPABASE_ANON_KEY, POY_REVENUECAT_APPLE_KEY,
+#                       POY_REVENUECAT_GOOGLE_KEY, POY_REVENUECAT_AMAZON_KEY, POY_LINK_* (optional)
+#   google_play         GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (Play Console service account JSON)
+#   android_signing     added under Team settings → Code signing identities → Android keystores (reference: poy_upload)
+#   App Store Connect   added under Team settings → Integrations → Developer Portal (name: poy_asc)
+
+definitions:
+  steps:
+    - &web
+      name: Install and build web bundle
+      script: |
+        npm install --no-audit --no-fund
+        npm run build:web
+    - &native
+      name: Add native projects if missing, sync, apply settings
+      script: |
+        [ -d android ] || npx cap add android
+        if [ "$(uname)" = "Darwin" ]; then
+          [ -d ios ] || npx cap add ios
+          npx cap sync
+        else
+          npx cap sync android
+        fi
+        npm run build:icons
+        node scripts/native-setup.mjs
+
+workflows:
+  ios-app-store:
+    name: iOS → TestFlight / App Store
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: poy_asc
+    environment:
+      groups: [poy_public]
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.raconsulting.piratesofybor
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - *web
+      - *native
+      - name: Signing
+        script: xcode-project use-profiles
+      - name: Build number
+        script: |
+          cd ios/App
+          agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0) + 1))
+      - name: Build IPA
+        script: xcode-project build-ipa --workspace ios/App/App.xcworkspace --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
+
+  android-google-play:
+    name: Android → Google Play (internal testing)
+    max_build_duration: 45
+    instance_type: linux_x2
+    environment:
+      groups: [poy_public, google_play]
+      android_signing: [poy_upload]
+      vars:
+        POY_ANDROID_STORE: google
+        PACKAGE_NAME: com.raconsulting.piratesofybor
+      node: 20
+      java: 17
+    scripts:
+      - *web
+      - *native
+      - name: Build AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+
+  android-amazon:
+    name: Android → Amazon Appstore (APK to upload)
+    max_build_duration: 45
+    instance_type: linux_x2
+    environment:
+      groups: [poy_public]
+      android_signing: [poy_upload]
+      vars: { POY_ANDROID_STORE: amazon }
+      node: 20
+      java: 17
+    scripts:
+      - *web
+      - *native
+      - name: Build APK
+        script: cd android && ./gradlew assembleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+
+  android-galaxy:
+    name: Android → Samsung Galaxy Store (free build, purchases off)
+    max_build_duration: 45
+    instance_type: linux_x2
+    environment:
+      groups: [poy_public]
+      android_signing: [poy_upload]
+      vars: { POY_ANDROID_STORE: samsung }
+      node: 20
+      java: 17
+    scripts:
+      - *web
+      - *native
+      - name: Build APK
+        script: cd android && ./gradlew assembleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
+    artifacts:
+      - android/app/build/outputs/**/*.apk

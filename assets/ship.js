@@ -10,6 +10,8 @@
     ["", "The Ship"], ["arcade/", "Game Room"], ["play/", "Movie Room"], ["grotto-arcade/", "Gaspar's Grotto"],
     ["crew/", "Family Room"], ["app/", "The App"]
   ];
+  // Accounts: shown in the app, and on the website once sign-in is switched on in poy-config.js.
+  if (window.POY && (window.POY.native || window.POY.enabled)) links.push(["account/", "Account"]);
   var css =
     ".poy-bar{position:sticky;top:0;z-index:2147482000;display:flex;align-items:center;gap:4px;overflow-x:auto;" +
     "padding:calc(env(safe-area-inset-top,0px) + 6px) 10px 6px;background:rgba(8,20,30,.94);border-bottom:1px solid #d6a84a55;" +
@@ -53,6 +55,15 @@
       document.body.appendChild(bar); document.body.appendChild(tab);
     } else {
       document.body.insertBefore(bar, document.body.firstChild);
+    }
+
+    // Footer links the stores and the no-endorsement notice need, on every non-game page that lacks them.
+    if (!gameMode && !document.querySelector("[data-poy-legal]") && !document.querySelector('a[href*="no-endorsement"]')) {
+      var f = document.createElement("p"); f.setAttribute("data-poy-legal", "");
+      f.style.cssText = "max-width:720px;margin:24px auto calc(130px + env(safe-area-inset-bottom,0px));padding:0 16px;font:13px/1.6 Georgia,serif;color:#a9bcc0;text-align:center";
+      var L = [["privacy/", "Privacy"], ["support/", "Support"], ["delete-my-data/", "Delete My Data"], ["no-endorsement/", "No Endorsement"]];
+      f.innerHTML = L.map(function (l) { return '<a style="color:#e0b056" href="' + root + l[0] + 'index.html">' + l[1] + "</a>"; }).join(" · ");
+      document.body.appendChild(f);
     }
 
     if (!document.querySelector(".pp-wm,.wm,.wmart")) {

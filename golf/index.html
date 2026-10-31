@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><script src="../assets/poy-config.js"></script><script src="../assets/poy.js"></script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Andy Golf Club</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#0b1a26">
@@ -166,6 +166,12 @@ const HOLES=[
  {n:"Skull Cove",par:4,L:395},{n:"Kraken’s Elbow",par:5,L:520},{n:"Davy Jones’ Drop",par:3,L:168,island:1},
  {n:"Barnacle Bend",par:4,L:430},{n:"Plank Walk",par:4,L:365},{n:"Doubloon Dell",par:3,L:195},
  {n:"Mermaid Lagoon",par:5,L:545},{n:"Cutlass Ridge",par:4,L:410},{n:"Gaspar’s Grotto",par:4,L:455}];
+/* Ybor Links Back Nine: the poy_course_pack store item. Unlocked through POY.golf.course(). */
+const BACK9=[
+ {n:"Cigar Factory",par:4,L:405,seed:101},{n:"Seventh Avenue",par:5,L:535,seed:102},{n:"Hillsborough Hop",par:3,L:182,island:1,seed:103},
+ {n:"Rooster Run",par:4,L:420,seed:104},{n:"Streetcar Line",par:4,L:380,seed:105},{n:"Gasparilla Gulch",par:3,L:205,seed:106},
+ {n:"Bayshore Bend",par:5,L:560,seed:107},{n:"Columbia Corner",par:4,L:398,seed:108},{n:"Pops' Perch",par:4,L:470,seed:109}];
+if(window.POY&&POY.golf&&POY.golf.course()==="ybor-links")HOLES.splice(0,HOLES.length,...BACK9);
 const CLUBS=[{n:"Driver",d:285,ap:30,roll:.13,L:1.12},{n:"3 Wood",d:245,ap:29,roll:.1,L:1.08},{n:"5 Iron",d:200,ap:30,roll:.07,L:1.02},
  {n:"7 Iron",d:170,ap:31,roll:.05,L:1},{n:"9 Iron",d:140,ap:32,roll:.035,L:.98},{n:"P Wedge",d:120,ap:31,roll:.025,L:.96},
  {n:"S Wedge",d:95,ap:27,roll:.015,L:.95},{n:"Putter",d:30,ap:0,roll:0,L:.9}];
@@ -174,7 +180,7 @@ function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t
 const ss=t=>t<=0?0:t>=1?1:t*t*(3-2*t);
 function inE(e,x,y){const a=(x-e.x)/e.rx,b=(y-e.y)/e.ry;return a*a+b*b<=1}
 function mkHole(i){
-  const H=Object.assign({},HOLES[i]),r=rng(i*7919+31);
+  const H=Object.assign({},HOLES[i]),r=rng(i*7919+31+(HOLES[i].seed||0)*104729);
   H.bend=H.par===3?(r()-.5)*10:(r()<.5?-1:1)*(18+r()*34);
   H.fw=H.par===3?16:17+r()*6;
   H.cx=y=>H.bend*ss(y/H.L);

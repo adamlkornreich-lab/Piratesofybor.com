@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><script src="../assets/poy-config.js"></script><script src="../assets/poy.js"></script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Pirates of Ybor</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -354,7 +354,7 @@ footer .wrap{display:grid;gap:6px}
       <button class="btn-gold" id="qm-send" type="button">Send</button>
       <button class="btn-ghost" id="qm-stop" type="button" hidden>Stop</button>
     </div>
-    <p class="note" id="qm-note">Answers use your own Claude account. In the store app, the Quartermaster runs through the Pirates of Ybor server.</p>
+    <p class="note" id="qm-note">The Quartermaster runs on Claude through the Pirates of Ybor server. Sign in (free) to chat; a few dozen questions a day per player.</p>
   </div>
 </section>
 
@@ -383,7 +383,7 @@ footer .wrap{display:grid;gap:6px}
     <div class="store"><span class="dot todo"></span><div><h3>Google Play</h3><ul><li>Play Console; new personal accounts run a closed test with testers first</li><li>Same Capacitor project builds the Android bundle (.aab)</li><li>Data safety form and content rating questionnaire</li></ul></div><span class="fee">$25 once</span></div>
     <div class="store"><span class="dot todo"></span><div><h3>Samsung Galaxy Store &amp; Amazon Appstore</h3><ul><li>Upload the same Android build to each</li></ul></div><span class="fee">Free</span></div>
     <div class="store"><span class="dot todo"></span><div><h3>Facebook &amp; Instagram</h3><ul><li>Marketplace on both only lists physical items, so the app itself can't go there</li><li>Facebook Instant Games can host trivia and Treasure Hunt inside Facebook and Messenger</li><li>Reel Maker videos post straight to Instagram Reels and Stories, which advertises the app</li></ul></div><span class="fee">Free to list</span></div>
-    <div class="store"><span class="dot ready"></span><div><h3>Website (piratesofybor.com)</h3><ul><li>This page works as the web version now; point the domain at the hosted build</li></ul></div><span class="fee">Hosting only</span></div>
+    <div class="store"><span class="dot ready"></span><div><h3>Website (thepiratesofybor.com)</h3><ul><li>This page works as the web version now; point the domain at the hosted build</li></ul></div><span class="fee">Hosting only</span></div>
   </div>
   <div class="panel">
     <h3>Before you hit submit</h3>
@@ -447,7 +447,7 @@ addEventListener('hashchange',route);
 /* ---------- Claude (sample) ---------- */
 let sample=null;
 const claudeReady=(window.claude&&window.claude.use)?window.claude.use('sample').then(s=>{sample=s;return s}).catch(()=>null):Promise.resolve(null);
-function qmCopy(code){return({not_granted:'Claude access was declined for this page.',sampling_disabled:'Claude isn\'t available on this account.',rate_limited:'The Quartermaster needs a breather. Try again in a minute.',refused:'The Quartermaster won\'t answer that one. Try asking another way.',session_expired:'Please sign in to Claude again.'})[code]||'Lost the signal for a moment. Try again.'}
+function qmCopy(code){return({not_granted:'Claude access was declined for this page.',sampling_disabled:'Claude isn\'t available on this account.',rate_limited:'The Quartermaster needs a breather. Try again in a minute.',refused:'The Quartermaster won\'t answer that one. Try asking another way.',session_expired:'Please sign in to Claude again.',signin:'Sign in on the Account page (top menu) to chat with the Quartermaster. Signing in is free.',network:'Lost the signal for a moment. Try again.'})[code]||'Lost the signal for a moment. Try again.'}
 const HIDE=['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
 
 /* ---------- trivia ---------- */
@@ -581,7 +581,7 @@ function titleCard(t){const W=cv.width,H=cv.height,s=S();velvet();sparkles(t,14)
 function endCard(t){const W=cv.width,H=cv.height,s=S();velvet();sparkles(t+3,18);
   const mw=s*.62;drawMark((W-mw)/2,H*.46-mw,mw,1);ctx.textAlign='center';
   ctx.fillStyle='#f6e9d6';ctx.font=serif(Math.round(s*.12),true);ctx.fillText('Welcome aboard.',W/2,H*.46+s*.12);
-  ctx.fillStyle='#f0b45c';ctx.font=sans(Math.round(s*.04),800);ctx.fillText('piratesofybor.com',W/2,H*.46+s*.2);
+  ctx.fillStyle='#f0b45c';ctx.font=sans(Math.round(s*.04),800);ctx.fillText('thepiratesofybor.com',W/2,H*.46+s*.2);
   ctx.fillStyle='#c4ada6';ctx.font=sans(Math.round(s*.026),500);ctx.fillText(COPY,W/2,H-s*.06)}
 function grade(){const W=cv.width,H=cv.height;const g=ctx.createRadialGradient(W/2,H/2,S()*.3,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'rgba(20,11,14,0)');g.addColorStop(1,'rgba(20,11,14,.6)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(240,180,92,.06)';ctx.fillRect(0,0,W,H)}
 function watermark(t){const W=cv.width,H=cv.height,s=S();const mw=s*.17;drawMark(W-mw-s*.04,H-mw*300/320-s*.09,mw,.6);
@@ -653,10 +653,10 @@ $('#rl-save').onclick=()=>{if(recording)return;let rec;try{rec=new MediaRecorder
 const RULES='You are the Quartermaster aboard Pirates of Ybor, a pirate-themed game and entertainment app from Ybor City in Tampa, Florida, inspired by Gaspar\'s Grotto, the pirate bar at 1805 E 7th Ave. The mascots are Pops, the bar cat, and Pippy, a pirate chihuahua. Games in the app: trivia (Silver Screen, Pirate Lore, Florida Pirate Trail), Treasure Hunt (find the chest in 6 digs on a 6x6 map; each dig shows how many steps away the chest is, counting rows plus columns), Reel Maker (turns photos into a short pirate movie), crews (private leaderboards for family, friends, camp, schools, prep schools and colleges), with Andy Golf Club, Shere\'s Revenge swordplay, pirate chess and checkers coming soon. Speak with warm, playful pirate flair and make every player feel welcome aboard. Keep it family-friendly, since students and kids play too. Keep answers under 120 words unless asked for more. Never give away answers to a trivia round in progress. For bar hours, menu, events or reservations, point people to gasparsgrotto.com because details change. You cannot place orders, book tables or see the player\'s scores.';
 let turns=[],qmCtl=null;
 function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;if(who==='qm'){const b=document.createElement('b');b.textContent='Quartermaster';d.appendChild(b)}const sp=document.createElement('span');sp.textContent=text;d.appendChild(sp);$('#chat').appendChild(d);$('#chat').scrollTop=$('#chat').scrollHeight;return sp}
-async function send(text){text=(text||'').trim();if(!text||qmCtl)return;if(!sample){$('#qm-note').textContent='The Quartermaster answers when this page is opened in Claude.';return}
+async function send(text){text=(text||'').trim();if(!text||qmCtl)return;if(!sample){$('#qm-note').textContent='The Quartermaster is resting. The built-in games all still work.';return}
   $('#qm-in').value='';addMsg('me',text);turns.push({role:'user',content:text});if(turns.length>16)turns=turns.slice(-16);while(turns.length&&turns[0].role!=='user')turns.shift();
   const out=addMsg('qm','Thinking…');qmCtl=new AbortController();$('#qm-send').hidden=true;$('#qm-stop').hidden=false;
-  try{const {text:reply}=await sample([{role:'user',content:RULES},...turns],{cache:false,modelTier:'quick',signal:qmCtl.signal,onText:({text})=>{out.textContent=text;$('#chat').scrollTop=$('#chat').scrollHeight}});turns.push({role:'assistant',content:reply})}
+  try{const {text:reply}=await sample(window.POY_SERVER_AI?turns.slice():[{role:'user',content:RULES},...turns],{cache:false,modelTier:'quick',signal:qmCtl.signal,onText:({text})=>{out.textContent=text;$('#chat').scrollTop=$('#chat').scrollHeight}});turns.push({role:'assistant',content:reply})}
   catch(e){const code=e&&e.code;if(code==='cancelled'){out.textContent=e.text||'(stopped)'}else if(code==='refused'){out.textContent=qmCopy(code)}else{out.textContent=e&&e.text?e.text+'\n\n(cut off)':qmCopy(code)}
     if(e&&e.text)turns.push({role:'assistant',content:e.text});else turns.pop();
     if(HIDE.includes(code)){$('#composer').hidden=true;$('#chips').hidden=true;$('#qm-note').textContent=qmCopy(code)}}
@@ -665,10 +665,10 @@ $('#qm-send').onclick=()=>send($('#qm-in').value);
 $('#qm-stop').onclick=()=>qmCtl&&qmCtl.abort();
 $('#qm-in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send($('#qm-in').value)}});
 $('#chips').addEventListener('click',e=>{if(e.target.tagName==='BUTTON')send(e.target.textContent)});
-claudeReady.then(s=>{if(s){$('#tv-ai').hidden=false}else{$('#composer').hidden=true;$('#chips').hidden=true;$('#qm-note').textContent='The Quartermaster answers when this page is opened in Claude. In the store app, he runs through the Pirates of Ybor server.'}});
+claudeReady.then(s=>{if(s){$('#tv-ai').hidden=false}else{$('#composer').hidden=true;$('#chips').hidden=true;$('#qm-note').textContent='The Quartermaster is resting right now. Everything else on this page still works.'}});
 
 /* ---------- launch checklist ---------- */
-const CHECKS=["Real Pops & Pippy poster art placed as the official watermark on every screen and video","Written permission from Gaspar's Grotto to use its name, logo and photos","Privacy policy and support pages live on piratesofybor.com","Age plan: all-ages deck for school, camp and prep crews; tavern games behind an age gate","Sign in with Apple added alongside Google and Facebook","Game unlocks through Apple and Google in-app purchases; merch through store checkout","Claude API key kept on the server only, never inside the app","App icon (1024px), splash screen and store screenshots for phone and tablet","Store description, keywords and promo video made in Reel Maker","No real-money wagering anywhere in bar games","Permission on file for every person named in credits","Test build on a real iPhone and Android phone"];
+const CHECKS=["Real Pops & Pippy poster art placed as the official watermark on every screen and video","Written permission from Gaspar's Grotto to use its name, logo and photos","Privacy policy and support pages live on thepiratesofybor.com","Age plan: all-ages deck for school, camp and prep crews; tavern games behind an age gate","Sign in with Apple added alongside Google and Facebook","Game unlocks through Apple and Google in-app purchases; merch through store checkout","Claude API key kept on the server only, never inside the app","App icon (1024px), splash screen and store screenshots for phone and tablet","Store description, keywords and promo video made in Reel Maker","No real-money wagering anywhere in bar games","Permission on file for every person named in credits","Test build on a real iPhone and Android phone"];
 const done=store.get('poy-checks',[]);const cb=$('#checks');
 CHECKS.forEach((t,i)=>{const l=document.createElement('label');l.className='check';l.innerHTML='<input type="checkbox" id="chk'+i+'"><span></span>';l.querySelector('span').textContent=t;const inp=l.querySelector('input');inp.checked=done.includes(i);
   inp.onchange=()=>{const d=store.get('poy-checks',[]).filter(x=>x!==i);if(inp.checked)d.push(i);store.set('poy-checks',d)};cb.appendChild(l)});
