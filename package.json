@@ -2,12 +2,13 @@
   "name": "pirates-of-ybor",
   "version": "1.0.0",
   "private": true,
-  "description": "Pirates of Ybor: the website and the iPhone / Android app built from it. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy",
+  "description": "Pirates of Ybor: the website and the iPhone / Android app built from it. \u00a9 2026 Adam Kornreich / R.A. Consulting \u2764 Pops & Pippy",
   "scripts": {
     "build:web": "node scripts/build-web.mjs",
     "build:icons": "npx @capacitor/assets generate --iconBackgroundColor '#0b1a26' --splashBackgroundColor '#0b1a26'",
     "sync": "npm run build:web && npx cap sync",
-    "check": "node scripts/check-site.mjs"
+    "check": "node scripts/check-site.mjs",
+    "dev:local": "node scripts/dev-local.mjs"
   },
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^6.0.0",

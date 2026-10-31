@@ -20,12 +20,19 @@ if (existsSync(join(ROOT, ".env"))) {
 }
 const env = (k, d = "") => process.env[k] ?? d;
 
+// APP mode: "cloud" (default) or "local" (test mode, no sign-in). Fail loudly on anything else,
+// and never let a CI / store build (Codemagic sets CI=true) ship with test mode on.
+const MODE = env("POY_APP_MODE", "cloud").trim().toLowerCase() || "cloud";
+if (!["cloud", "local"].includes(MODE)) { console.error(`POY_APP_MODE must be "cloud" or "local", got "${MODE}"`); process.exit(1); }
+if (MODE === "local" && (process.env.CI || process.env.CM_BUILD_ID)) { console.error("Refusing to build with POY_APP_MODE=local on CI: test mode must never reach the stores."); process.exit(1); }
+
 const SKIP = new Set(["node_modules", "www", "android", "ios", "supabase", "scripts", "resources", ".git", ".github",
   "package.json", "package-lock.json", "capacitor.config.json", "codemagic.yaml", ".env", ".env.example", ".gitignore"]);
 const isDoc = (n) => n.endsWith(".md");
 
 function config({ app }) {
   const cfg = {
+    mode: MODE,
     siteUrl: env("POY_SITE_URL", "https://thepiratesofybor.com"),
     appScheme: "com.raconsulting.piratesofybor",
     supabaseUrl: env("POY_SUPABASE_URL"),
@@ -66,4 +73,4 @@ else {
 
 let files = 0, bytes = 0;
 (function walk(d) { for (const n of readdirSync(d)) { const p = join(d, n); const s = statSync(p); if (s.isDirectory()) walk(p); else { files++; bytes += s.size; } } })(OUT);
-console.log(`www/ ready: ${files} files, ${(bytes / 1048576).toFixed(1)} MB, store=${env("POY_ANDROID_STORE", "google")}, backend=${env("POY_SUPABASE_URL") ? "on" : "off (set POY_SUPABASE_URL)"}`);
+console.log(`www/ ready: ${files} files, ${(bytes / 1048576).toFixed(1)} MB, mode=${MODE}, store=${env("POY_ANDROID_STORE", "google")}, backend=${env("POY_SUPABASE_URL") ? "on" : "off (set POY_SUPABASE_URL)"}`);

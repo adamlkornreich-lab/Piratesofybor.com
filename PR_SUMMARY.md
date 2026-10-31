@@ -25,10 +25,13 @@
 - `assets/ship.js`: Account link in the menu; Privacy · Support · Delete My Data · No Endorsement footer on every page that lacked it.
 - Privacy policy, Delete My Data, The App and the Grotto privacy page rewritten to match; domain changed to **thepiratesofybor.com** everywhere; Grotto service worker added (it was a 404).
 
+**Test mode** (`POY_APP_MODE=local`, run with `npm run dev:local`): no sign-in, a fixed local player, everything kept on the device, free test unlocks, a red TEST MODE label. Defaults to `cloud`; ignored at thepiratesofybor.com; the build refuses it on Codemagic; test unlocks never carry over to normal mode.
+
 **Docs**: `APP_SETUP.md` (every click, plus the App Store privacy labels and Google Play data-safety answers), `STORE_LISTING.md`, `.env.example`.
 
 ## Checked here
 - All 24 pages load with no script errors, menu bar and watermark present (the two Grotto policy pages now have the watermark too).
+- Test mode at localhost: Account, test unlocks, score saves, golf unlock, Captain's Quarters and Erase test data work; the same settings at thepiratesofybor.com stay in normal mode with no TEST MODE label; the build stops on `POY_APP_MODE=local` with CI set and on unknown values.
 - With a stand-in backend: sign-in buttons, Account page signed in/out, score upload and cross-device pull, trivia mixing, course pack unlock, 21+ gate, Quartermaster streaming and the AI trivia round.
 
 ## Not checked here (needs your accounts)

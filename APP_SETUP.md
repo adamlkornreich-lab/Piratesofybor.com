@@ -60,6 +60,21 @@ You sign in to every service yourself. Never paste a password or secret key into
 4. **Environment variables:** group `poy_public` with every `POY_` value from `.env.example`; group `google_play` with `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`.
 5. Start **iOS → TestFlight**, then **Android → Google Play**. The first build creates the native `ios/` and `android/` projects, the icons and splash from `resources/`, the sign-in return link and the Sign in with Apple capability automatically.
 
+## Test mode (no sign-in, no backend)
+
+To try every feature on your own computer before any accounts exist:
+
+```
+npm run dev:local
+```
+
+Open http://localhost:8080. A red **🧪 TEST MODE** label sits in the corner. You play as "Local Pirate" with no sign-in; scores, the Account page, the ship's store and Captain's Quarters all work, but everything stays in that browser and store items unlock for free. Account → **Erase test data** wipes it. The Quartermaster and writing new questions need the real server, so they rest in test mode.
+
+Test mode is controlled by `POY_APP_MODE` (`cloud` or `local`, default `cloud`). Three guards keep it out of real use:
+- It only switches on at localhost (or in a developer app build). At thepiratesofybor.com the same setting is ignored and normal sign-in applies.
+- `npm run build:web` refuses `POY_APP_MODE=local` on Codemagic, so a store build can never ship with it, and any other value stops the build.
+- Test unlocks are stored separately from real purchases, so switching back to `cloud` never leaves a free course pack behind.
+
 ## 5. Test before you submit
 
 - Sign in with Apple on an iPhone (TestFlight) and Google on Android. You should land back on the Account page signed in.

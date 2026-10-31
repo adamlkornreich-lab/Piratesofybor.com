@@ -12,7 +12,17 @@
   var NATIVE = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
   var PLATFORM = NATIVE ? Cap.getPlatform() : "web";
   var STORE = !NATIVE ? "web" : PLATFORM === "ios" ? "apple" : (C.androidStore || "google");
-  var ENABLED = !!(C.supabaseUrl && C.supabaseAnonKey);
+  /* APP mode. "cloud" (the default, and what any unknown value means) uses the real backend.
+     "local" is a test mode with no sign-in: a fixed local player, data kept only on this device,
+     store items unlocked by a test button. It only switches on at localhost or inside a
+     developer build of the app; at thepiratesofybor.com it is ignored and cloud rules apply. */
+  var LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)$/.test(location.hostname) || location.protocol === "file:";
+  var MODE = C.mode === "local" && (LOCAL_HOST || NATIVE) ? "local" : "cloud";
+  var LOCAL = MODE === "local";
+  if (C.mode === "local" && !LOCAL && window.console) console.warn("Pirates of Ybor: test mode ignored on " + location.hostname + "; using normal sign-in.");
+  // Test unlocks are cached separately, so they can never unlock anything in normal mode.
+  var ENT_KEY = LOCAL ? "poy-ent-local" : "poy-ent";
+  var ENABLED = LOCAL || !!(C.supabaseUrl && C.supabaseAnonKey);
   var CALLBACK = (C.appScheme || "com.raconsulting.piratesofybor") + "://auth-callback";
   var PATH = location.pathname;
 
@@ -60,7 +70,103 @@
       (document.head || document.documentElement).appendChild(s);
     });
   }
+  /* ---------- test mode: a tiny on-device stand-in for Supabase ---------- */
+  var LOCAL_USER = { id: "00000000-0000-0000-0000-000000000001", email: "local@localhost", user_metadata: { full_name: "Local Pirate" } };
+  var LOCAL_SESSION = { access_token: "local", user: LOCAL_USER };
+  function localDb() {
+    var KEY = "poy-local-db";
+    function load() {
+      var d = lsJSON(KEY, null);
+      if (!d) d = { profiles: [{ id: LOCAL_USER.id, display_name: "Local Pirate", avatar: "🏴‍☠️", created_at: new Date().toISOString() }], scores: [], entitlements: [], questions: [], admins: [{ user_id: LOCAL_USER.id }] };
+      return d;
+    }
+    function save(d) { lsSet(KEY, JSON.stringify(d)); }
+    function bestView(d) {
+      var by = {};
+      d.scores.forEach(function (r) {
+        var b = by[r.game], golfish = r.game.indexOf("golf") === 0;
+        if (!b) by[r.game] = { game: r.game, best: r.score, last_played: r.created_at };
+        else {
+          if (golfish ? r.score < b.best : r.score > b.best) b.best = r.score;
+          if (r.created_at > b.last_played) b.last_played = r.created_at;
+        }
+      });
+      return Object.keys(by).map(function (k) { return by[k]; });
+    }
+    function from(table) {
+      var st = { op: "select", payload: null, filters: [], order: null, limit: null, single: false, head: false, count: false };
+      var api = {
+        select: function (cols, o) { if (o && o.head) st.head = true; if (o && o.count) st.count = true; return api; },
+        eq: function (c, v) { st.filters.push(function (r) { return r[c] === v; }); return api; },
+        is: function (c, v) { st.filters.push(function (r) { return (r[c] == null ? null : r[c]) === v; }); return api; },
+        in: function (c, vs) { st.filters.push(function (r) { return vs.indexOf(r[c]) !== -1; }); return api; },
+        order: function (c, o) { st.order = [c, !(o && o.ascending === false)]; return api; },
+        limit: function (n) { st.limit = n; return api; },
+        maybeSingle: function () { st.single = true; return api; },
+        insert: function (p) { st.op = "insert"; st.payload = p; return api; },
+        upsert: function (p) { st.op = "upsert"; st.payload = p; return api; },
+        update: function (p) { st.op = "update"; st.payload = p; return api; },
+        delete: function () { st.op = "delete"; return api; },
+        then: function (res, rej) { return Promise.resolve().then(run).then(res, rej); }
+      };
+      function match(r) { return st.filters.every(function (f) { return f(r); }); }
+      function run() {
+        var d = load(), now = new Date().toISOString();
+        if (table === "my_best_scores") d.my_best_scores = bestView(d);
+        var rows = d[table] || (d[table] = []);
+        var stamp = function (r) { var x = Object.assign({}, r); if (!x.created_at) x.created_at = now; if (table !== "profiles" && x.user_id === undefined && table !== "questions") x.user_id = LOCAL_USER.id; if (table === "questions" && !x.id) x.id = "local-" + Math.random().toString(36).slice(2); return x; };
+        if (st.op === "insert") { [].concat(st.payload).forEach(function (r) { rows.push(stamp(r)); }); save(d); return { data: null, error: null }; }
+        if (st.op === "upsert") {
+          [].concat(st.payload).forEach(function (r) {
+            var k = table === "profiles" ? "id" : "id", i = r[k] != null ? rows.findIndex(function (x) { return x[k] === r[k]; }) : -1;
+            if (i >= 0) rows[i] = Object.assign(rows[i], r); else rows.push(stamp(r));
+          });
+          save(d); return { data: null, error: null };
+        }
+        if (st.op === "update") { rows.forEach(function (r) { if (match(r)) Object.assign(r, st.payload); }); save(d); return { data: null, error: null }; }
+        if (st.op === "delete") { d[table] = rows.filter(function (r) { return !match(r); }); save(d); return { data: null, error: null }; }
+        var out = rows.filter(match);
+        if (st.order) { var c = st.order[0], asc = st.order[1]; out = out.slice().sort(function (a, b) { return (a[c] > b[c] ? 1 : a[c] < b[c] ? -1 : 0) * (asc ? 1 : -1); }); }
+        var count = out.length;
+        if (st.limit != null) out = out.slice(0, st.limit);
+        if (st.head) return { data: null, count: count, error: null };
+        return { data: st.single ? (out[0] || null) : out, count: count, error: null };
+      }
+      return api;
+    }
+    function rpc(name, args) {
+      var d = load(), now = new Date();
+      var active = function (r) { return !r.consumed_at && (!r.expires_at || new Date(r.expires_at) > now); };
+      if (name === "is_admin") return Promise.resolve({ data: true, error: null });
+      if (name === "has_entitlement") return Promise.resolve({ data: d.entitlements.some(function (r) { return r.product_id === args.p_product && active(r); }), error: null });
+      if (name === "use_tournament_entry") {
+        var t = d.entitlements.filter(function (r) { return r.product_id === "poy_tournament_entry" && active(r); })[0];
+        if (t) { t.consumed_at = now.toISOString(); save(d); }
+        return Promise.resolve({ data: !!t, error: null });
+      }
+      return Promise.resolve({ data: null, error: null });
+    }
+    var listeners = [];
+    return {
+      auth: {
+        getSession: function () { return Promise.resolve({ data: { session: LOCAL_SESSION } }); },
+        onAuthStateChange: function (cb) { listeners.push(cb); return { data: { subscription: { unsubscribe: function () {} } } }; },
+        signOut: function () { return Promise.resolve({ error: null }); },
+        exchangeCodeForSession: function () { return Promise.resolve({ error: null }); }
+      },
+      from: from, rpc: rpc, _reset: function () { lsSet(KEY, ""); }
+    };
+  }
+
   function client() {
+    if (LOCAL) {
+      if (!clientP) {
+        var db = localDb();
+        clientP = Promise.resolve(db);
+        setTimeout(function () { emit("poy:auth", { event: "INITIAL_SESSION", user: LOCAL_USER }); afterSignIn(LOCAL_USER); }, 0);
+      }
+      return clientP;
+    }
     if (!ENABLED) return Promise.reject(err("not_configured"));
     if (clientP) return clientP;
     var src = /^https?:/.test(C.supabaseJs || "") ? C.supabaseJs : ROOT + (C.supabaseJs || "assets/vendor/supabase.js");
@@ -83,6 +189,7 @@
   function user() { return session().then(function (s) { return s ? s.user : null; }); }
   function fnUrl(name) { return C.supabaseUrl.replace(/\/$/, "") + "/functions/v1/" + name; }
   function callFn(name, body, opts) {
+    if (LOCAL) return Promise.reject(err("local_mode"));
     return session().then(function (s) {
       if (!s) throw err("signin");
       return fetch(fnUrl(name), {
@@ -105,6 +212,7 @@
     });
   }
   function signIn(provider) {
+    if (LOCAL) return client().then(function () { return LOCAL_USER; });
     if (provider === "tiktok" || provider === "samsung") return Promise.reject(err("unsupported"));
     return client().then(function (sb) {
       // iPhone: native Sign in with Apple sheet, then hand the token to Supabase.
@@ -132,7 +240,7 @@
       return sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: webRedirect() } }).then(function (r) { if (r.error) throw r.error; });
     });
   }
-  if (NATIVE && ENABLED) {
+  if (NATIVE && ENABLED && !LOCAL) {
     App.on("appUrlOpen", function (ev) {
       var url = ev && ev.url;
       if (!url || url.indexOf(CALLBACK) !== 0) return;
@@ -147,24 +255,26 @@
     });
   }
   function signOut() {
+    if (LOCAL) return Promise.resolve({ error: null }); // test mode always plays as the local pirate
     return client().then(function (sb) {
       if (NATIVE && rcReady) Purchases.call("logOut").catch(function () {});
-      lsSet("poy-ent", "[]");
+      lsSet(ENT_KEY, "[]");
       return sb.auth.signOut();
     });
   }
   function deleteAccount() {
+    if (LOCAL) return client().then(function (sb) { sb._reset(); lsSet(ENT_KEY, "[]"); lsSet("poy-synced", "{}"); return true; });
     return callFn("delete-account").then(function (res) {
       if (!res.ok) throw err("delete_failed");
       return client().then(function (sb) { return sb.auth.signOut({ scope: "local" }); }).then(function () {
-        lsSet("poy-ent", "[]"); lsSet("poy-synced", "{}");
+        lsSet(ENT_KEY, "[]"); lsSet("poy-synced", "{}");
         return true;
       });
     });
   }
 
   /* ---------- entitlements ---------- */
-  function entList() { return lsJSON("poy-ent", []); }
+  function entList() { return lsJSON(ENT_KEY, []); }
   function activeRow(r) { return !r.consumed_at && (!r.expires_at || new Date(r.expires_at) > new Date()); }
   function hasSync(product) { return entList().some(function (r) { return r.product_id === product && activeRow(r); }); }
   function tournamentEntries() { return entList().filter(function (r) { return r.product_id === "poy_tournament_entry" && activeRow(r); }).length; }
@@ -176,7 +286,7 @@
       var rows = r.data || [];
       // Keep anything the store just confirmed that the webhook hasn't written yet.
       entList().forEach(function (x) { if (x.source === "device" && activeRow(x) && !rows.some(function (y) { return y.product_id === x.product_id && activeRow(y); })) rows.push(x); });
-      lsSet("poy-ent", JSON.stringify(rows)); emit("poy:entitlements", rows); return rows;
+      lsSet(ENT_KEY, JSON.stringify(rows)); emit("poy:entitlements", rows); return rows;
     }).catch(function () { return entList(); });
   }
   function mergeCustomerInfo(info) {
@@ -191,12 +301,13 @@
     (ci.nonSubscriptionTransactions || []).forEach(function (t) {
       if (t.productIdentifier === "poy_course_pack") rows.push({ product_id: "poy_course_pack", expires_at: null, consumed_at: null, source: "device" });
     });
-    lsSet("poy-ent", JSON.stringify(rows)); emit("poy:entitlements", rows);
+    lsSet(ENT_KEY, JSON.stringify(rows)); emit("poy:entitlements", rows);
   }
 
   /* ---------- store purchases (RevenueCat) ---------- */
   var rcReady = null;
   function purchasesAvailable() {
+    if (LOCAL) return true; // test unlocks, no store and no money
     if (!NATIVE) return false;
     if (STORE === "samsung") return false; // Galaxy Store needs Samsung IAP; not wired up yet.
     var k = C.revenuecat || {};
@@ -214,6 +325,12 @@
   }
   function buy(productId) {
     var p = PRODUCTS[productId]; if (!p) return Promise.reject(err("unknown_product"));
+    if (LOCAL) {
+      return client().then(function (sb) {
+        var exp = p.type === "SUBSCRIPTION" ? new Date(Date.now() + 30 * 86400000).toISOString() : null;
+        return sb.from("entitlements").insert({ product_id: productId, source: "test", transaction_id: "test-" + Date.now(), expires_at: exp });
+      }).then(refreshEntitlements).then(function () { return true; });
+    }
     return user().then(function (u) {
       if (!u) throw err("signin"); // purchases are tied to an account so they follow the player to new devices
       return rcInit(u.id);
@@ -226,7 +343,7 @@
       mergeCustomerInfo(r);
       if (productId === "poy_tournament_entry") {
         var rows = entList(); rows.push({ product_id: productId, expires_at: null, consumed_at: null, source: "device" });
-        lsSet("poy-ent", JSON.stringify(rows));
+        lsSet(ENT_KEY, JSON.stringify(rows));
       }
       setTimeout(refreshEntitlements, 4000);
       return true;
@@ -236,6 +353,7 @@
     });
   }
   function restore() {
+    if (LOCAL) return refreshEntitlements();
     return user().then(function (u) {
       if (!u) throw err("signin");
       return rcInit(u.id);
@@ -249,6 +367,7 @@
     });
   }
   function prices() {
+    if (LOCAL) { var t = {}; Object.keys(PRODUCTS).forEach(function (id) { t[id] = "(test, free)"; }); return Promise.resolve(t); }
     if (!purchasesAvailable()) return Promise.resolve({});
     return rcInit().then(function () {
       return Promise.all(Object.keys(PRODUCTS).map(function (id) {
@@ -324,10 +443,10 @@
     Object.keys(GAME_KEYS).forEach(function (k) { var v = lsGet(k); if (v != null) queueScores(k, v); });
     pullScores().then(flushScores);
     refreshEntitlements();
-    if (purchasesAvailable()) rcInit(u.id).then(function () { return Purchases.call("getCustomerInfo"); }).then(mergeCustomerInfo).catch(function () {});
+    if (purchasesAvailable() && !LOCAL) rcInit(u.id).then(function () { return Purchases.call("getCustomerInfo"); }).then(mergeCustomerInfo).catch(function () {});
   }
   // Wake the session on every page so saves sync quietly in the background.
-  if (ENABLED && lsGet("poy-auth")) setTimeout(function () { client().catch(function () {}); }, 400);
+  if (ENABLED && (LOCAL || lsGet("poy-auth"))) setTimeout(function () { client().catch(function () {}); }, 400);
 
   /* ---------- 21+ gate for drink-themed games ---------- */
   var GATED = /\/(pour-off|tavern)\/|\/games\/(pour-off|tavern-games)\.html$/;
@@ -447,7 +566,7 @@
     };
     return sample;
   }
-  if (ENABLED && !window.claude && /\/play\//.test(PATH)) {
+  if (ENABLED && !LOCAL && !window.claude && /\/play\//.test(PATH)) {
     window.POY_SERVER_AI = true;
     window.claude = {
       use: function (name) { return name === "sample" ? Promise.resolve(makeSample()) : Promise.reject(err("not_granted")); }
@@ -455,7 +574,8 @@
   }
 
   /* ---------- shared styles for the gate, course pill and store badges ---------- */
-  var css = "#poy-gate{position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;padding:16px;background:rgba(5,12,18,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}" +
+  var css = ".poy-testmode{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:2147483100;background:#7a1f1f;color:#fff;border-radius:8px;padding:5px 9px;font:700 11px/1.2 system-ui,sans-serif;pointer-events:none;max-width:calc(100vw - 140px)}" +
+    "#poy-gate{position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;padding:16px;background:rgba(5,12,18,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}" +
     ".poy-gate-card{max-width:380px;width:100%;text-align:center;background:#0f2433;border:1px solid #e0b05666;border-radius:18px;padding:22px 18px;color:#f3ead7;font:17px/1.5 Georgia,serif;box-shadow:0 20px 60px #000a}" +
     ".poy-gate-card h2{margin:6px 0;color:#e0b056;font:400 1.8rem/1.1 'Pirata One',Georgia,serif}.poy-gate-card p{margin:0 0 14px;color:#d9ceb6}" +
     ".poy-gate-btns{display:grid;gap:10px}.poy-gate-btns button{min-height:48px;border-radius:12px;border:0;font:700 1rem Georgia,serif;cursor:pointer}" +
@@ -464,7 +584,15 @@
     ".poy-course{position:fixed;left:50%;transform:translateX(-50%);top:calc(72px + env(safe-area-inset-top,0px));z-index:2147482400;background:rgba(8,20,30,.9);color:#e0b056;border:1px solid #e0b05666;border-radius:999px;padding:8px 14px;font:600 13px/1.2 Georgia,serif;text-decoration:none;white-space:nowrap;max-width:calc(100vw - 150px);overflow:hidden;text-overflow:ellipsis}";
   var st = document.createElement("style"); st.textContent = css; (document.head || document.documentElement).appendChild(st);
 
+  /* ---------- test-mode badge, so it can never be mistaken for the real thing ---------- */
+  if (LOCAL) ready(function () {
+    var b = document.createElement("div"); b.className = "poy-testmode"; b.setAttribute("role", "note");
+    b.textContent = "🧪 TEST MODE · no sign-in · nothing leaves this device";
+    document.body.appendChild(b);
+  });
+
   window.POY = {
+    mode: MODE, localUser: LOCAL ? LOCAL_USER : null,
     config: C, root: ROOT, native: NATIVE, platform: PLATFORM, store: STORE, enabled: ENABLED,
     products: PRODUCTS, client: client, session: session, user: user,
     signIn: signIn, signOut: signOut, deleteAccount: deleteAccount,

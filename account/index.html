@@ -127,6 +127,8 @@ function renderScores(){
 
 function renderUser(u){
   show('out',!u);show('in',!!u);show('danger',!!u);
+  if(P.mode==='local'){$('so').hidden=true;$('del').textContent='Erase test data';$('dd-h').textContent='Erase all test data?';$('restore').textContent='Reload test unlocks';
+    $('msg').textContent='Test mode: you are the local pirate. Store buttons unlock items for free on this device only.'}
   renderShop(!!u);
   if(!u){show('scores',false);return}
   $('email').textContent=u.email||'';
@@ -160,7 +162,7 @@ $('so').onclick=function(){P.signOut().then(function(){say('Signed out. Your gam
 $('del').onclick=function(){$('dd-in').value='';$('dd-yes').disabled=true;$('dd').showModal();$('dd-in').focus()};
 $('dd-in').oninput=function(){$('dd-yes').disabled=this.value.trim().toUpperCase()!=='DELETE'};
 $('dd-no').onclick=function(){$('dd').close()};
-$('dd-yes').onclick=function(){$('dd-yes').disabled=true;P.deleteAccount().then(function(){$('dd').close();say('Your account and its data have been deleted. Fair winds, sailor.');renderUser(null)})
+$('dd-yes').onclick=function(){$('dd-yes').disabled=true;P.deleteAccount().then(function(){$('dd').close();if(P.mode==='local'){renderUser(P.localUser);say('Test data erased.');return}say('Your account and its data have been deleted. Fair winds, sailor.');renderUser(null)})
   .catch(function(){$('dd').close();say('We couldn\'t delete it just now. Try again, or email adamlkornreich@gmail.com and we\'ll do it for you.')})};
 
 window.addEventListener('poy:auth',function(e){renderUser(e.detail.user)});

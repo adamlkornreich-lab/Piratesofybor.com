@@ -55,7 +55,7 @@ $('list').onclick=function(e){var b=e.target.closest('[data-s]');if(!b)return;va
   sb.from('questions').update({status:b.getAttribute('data-s'),reviewed_at:new Date().toISOString()}).eq('id',card.getAttribute('data-id')).then(function(r){
     if(r.error){say(r.error.message);b.disabled=false;return}card.remove();stats()})};
 $('st').onchange=load;$('reload').onclick=function(){load();stats()};
-$('gen').onclick=function(){var b=$('gen');b.disabled=true;say('Claude is writing and fact-checking fresh questions… this takes a minute or two.');
+$('gen').onclick=function(){if(P.mode==='local'){say('Test mode: writing questions needs the real server and Claude key. Approve/reject still works on questions added to the local test data.');return}var b=$('gen');b.disabled=true;say('Claude is writing and fact-checking fresh questions… this takes a minute or two.');
   P.session().then(function(s){return fetch(P.config.supabaseUrl.replace(/\/$/,'')+'/functions/v1/generate-questions',{method:'POST',headers:{Authorization:'Bearer '+s.access_token,apikey:P.config.supabaseAnonKey,'Content-Type':'application/json'},body:'{}'})})
    .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);
      say(d.results.map(function(x){return x.category+': '+(x.error?'error':(x.approved||0)+' approved, '+(x.pending||0)+' pending, '+(x.rejected||0)+' rejected')}).join(' · '));load();stats()})
