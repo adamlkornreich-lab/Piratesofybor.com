@@ -574,7 +574,7 @@
   }
 
   /* ---------- shared styles for the gate, course pill and store badges ---------- */
-  var css = ".poy-testmode{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:2147483100;background:#7a1f1f;color:#fff;border-radius:8px;padding:5px 9px;font:700 11px/1.2 system-ui,sans-serif;pointer-events:none;max-width:calc(100vw - 140px)}" +
+  var css = ".poy-testmode{position:fixed;left:0;top:22%;z-index:2147483100;writing-mode:vertical-rl;transform:rotate(180deg);background:#7a1f1f;color:#fff;border-radius:0 8px 8px 0;padding:10px 4px;font:700 10px/1 system-ui,sans-serif;letter-spacing:.08em;pointer-events:none;opacity:.9}" +
     "#poy-gate{position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;padding:16px;background:rgba(5,12,18,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}" +
     ".poy-gate-card{max-width:380px;width:100%;text-align:center;background:#0f2433;border:1px solid #e0b05666;border-radius:18px;padding:22px 18px;color:#f3ead7;font:17px/1.5 Georgia,serif;box-shadow:0 20px 60px #000a}" +
     ".poy-gate-card h2{margin:6px 0;color:#e0b056;font:400 1.8rem/1.1 'Pirata One',Georgia,serif}.poy-gate-card p{margin:0 0 14px;color:#d9ceb6}" +
@@ -587,7 +587,7 @@
   /* ---------- test-mode badge, so it can never be mistaken for the real thing ---------- */
   if (LOCAL) ready(function () {
     var b = document.createElement("div"); b.className = "poy-testmode"; b.setAttribute("role", "note");
-    b.textContent = "🧪 TEST MODE · no sign-in · nothing leaves this device";
+    b.textContent = "🧪 TEST MODE"; b.title = "Test mode: no sign-in, nothing leaves this device";
     document.body.appendChild(b);
   });
 
