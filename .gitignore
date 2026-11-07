@@ -10,3 +10,11 @@ www/
 supabase/.temp/
 supabase/.branches/
 preview/
+
+# --- GitHub Pages / Jekyll (from the GitHub starter file) ---
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+/vendor
+Gemfile.lock
