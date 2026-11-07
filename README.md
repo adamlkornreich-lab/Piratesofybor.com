@@ -7,5 +7,7 @@ The Pirates of Ybor website and app: Andy Golf Club, Pirate Sports, Gaspar's Gro
 - **Put it online:** see `UPLOAD_STEPS.md`.
 - **Build the iPhone and Android apps:** see `APP_SETUP.md`.
 
-© 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy
+The standalone landing-page concept is available at `adventure.html`. Its
+booking section is a coming-soon placeholder and does not process reservations.
 
+© 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy
