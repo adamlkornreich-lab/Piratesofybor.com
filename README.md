@@ -1,12 +1,13 @@
-# Pirates of Ybor
+# Piratesofybor.com
+Open world game arcade and booking system
 
-An open-world arcade adventure concept inspired by Ybor City.
+The Pirates of Ybor website and app: Andy Golf Club, Pirate Sports, Gaspar's Grotto, trivia, the Movie Room and the Family Room, with Pops & Pippy.
 
-## Preview locally
+- **Play it:** open `index.html`, or run `npm run dev:local` for test mode (no sign-in).
+- **Put it online:** see `UPLOAD_STEPS.md`.
+- **Build the iPhone and Android apps:** see `APP_SETUP.md`.
 
-Open `index.html` in a browser, or serve this directory with any static file
-server. The site is plain HTML and CSS and can be deployed to GitHub Pages from
-the repository root.
+The standalone landing-page concept is available at `adventure.html`. Its
+booking section is a coming-soon placeholder and does not process reservations.
 
-The booking section is a coming-soon placeholder; it does not accept or process
-reservations.
+© 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy

@@ -1,0 +1,41 @@
+# Supabase project settings for Pirates of Ybor (used by `supabase link` / `supabase db push` / `supabase functions deploy`).
+project_id = "pirates-of-ybor"
+
+[auth]
+site_url = "https://thepiratesofybor.com"
+additional_redirect_urls = [
+  "https://thepiratesofybor.com/account/index.html",
+  "https://www.thepiratesofybor.com/account/index.html",
+  "com.raconsulting.piratesofybor://auth-callback",
+  "http://localhost:8080/account/index.html"
+]
+
+[auth.external.apple]
+enabled = true
+client_id = "env(SUPABASE_AUTH_APPLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_APPLE_SECRET)"
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+skip_nonce_check = true
+
+[auth.external.facebook]
+enabled = true
+client_id = "env(SUPABASE_AUTH_FACEBOOK_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_FACEBOOK_SECRET)"
+
+# These are called by the RevenueCat webhook and pg_cron with their own shared secret,
+# so Supabase's JWT check is switched off and each function checks its secret itself.
+[functions.revenuecat-webhook]
+verify_jwt = false
+
+[functions.generate-questions]
+verify_jwt = false
+
+[functions.ask-quartermaster]
+verify_jwt = true
+
+[functions.delete-account]
+verify_jwt = true
