@@ -41,7 +41,7 @@ canvas{width:100%;max-width:360px;display:block;margin:8px auto;border:3px solid
 <button class="g" onclick="go('pippy')"><b>🐕</b><span>Find Pippy</span><small>Hidden chihuahua pirate</small></button>
 <button class="g" onclick="go('tab')"><b>🍺</b><span>Pops’ Bar Tab</span><small>Daily 5 questions, build a streak</small></button>
 </div>
-<div class="c" style="margin-top:14px"><button class="b alt" onclick="alert('NO-ENDORSEMENT NOTICE\n\nNames, movies and brands appear in trivia for fun only. Their appearance does not mean any person or company endorses, sponsors or is affiliated with this Arcade, and we do not endorse anyone named.\n\nPermissions and copyright: adamlkornreich@gmail.com')">🚫 Not Endorsed Notice</button><button class="b alt" onclick="alert('PRIVACY\n\nThis Arcade keeps only your game score and daily streak on your own device. Nothing is sent to us.')">Privacy</button><button class="b alt" onclick="alert('SUPPORT\n\nQuestions and permissions: adamlkornreich@gmail.com')">Support</button><button class="b alt" onclick="try{localStorage.removeItem('popsTab')}catch(e){}coins=0;earn(0);alert('Your saved streak and score were deleted from this device.')">Delete My Data</button></div>
+<div class="c" style="margin-top:14px"><a class="b alt" href="../no-endorsement/index.html">🚫 Not Endorsed Notice</a><a class="b alt" href="../privacy/index.html">Privacy</a><a class="b alt" href="../support/index.html">Support</a><button class="b alt" onclick="try{localStorage.removeItem('popsTab')}catch(e){}coins=0;earn(0);this.textContent='Deleted from this device ✓'">Delete My Data</button></div>
 <p class="c" style="font-size:13px;opacity:.8;margin-top:16px">Credits: Captain Shiller &amp; Co-Navigator Shere and family · Kornreich &amp; Associates · Waldo Nuhel · Mark Brenner · Ed Lafferty</p></div>
 
 <div id="golf" class="view"><div class="c"><b style="color:var(--gold)">Andy Golf Club</b> · Hole <span id="gh">1</span> · Par <span id="gp">3</span> · Strokes <span id="gs">0</span></div>
@@ -229,5 +229,7 @@ function tugReset(){clearInterval(dT);tp=50;tOn=false;tdr();$('tmg').textContent
 function tugStart(){tugReset();tOn=true;$('tmg').textContent='PULL! 🦑 is fighting back!';dT=setInterval(()=>{tp-=.3+Math.random()*.3;tdr();tugEnd()},40)}
 function tugTap(){if(!tOn)return;tp+=2.2;tdr();tugEnd()}
 function tugEnd(){if(tp>=100){tOn=false;clearInterval(dT);$('tmg').textContent='🏆 The Kraken is beaten! +20 🪙';earn(20)}else if(tp<=0){tOn=false;clearInterval(dT);$('tmg').textContent='🌊 Dragged to Davy Jones’ locker!'}}
+
+(function(){function open(){var h=location.hash.slice(1),v=h&&document.getElementById(h);if(v&&v.classList.contains('view'))go(h)}open();window.addEventListener('hashchange',open)})();
 </script><script src="../assets/ship.js" data-root="../" defer></script>
 </body></html>

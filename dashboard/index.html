@@ -97,7 +97,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:v
 (function(){
 var $=function(i){return document.getElementById(i)};
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
-var tiles=[["Trivia","Movies, pirates, Ybor history","live"],["Treasure Hunt","Find the hidden chest","live"],["Pirate Chess","1 player vs AI or 2 players","live"],["Darts","Bar classic, 1P or 2P","soon"],["Ping Pong","Table across the tavern","soon"],["Bowling","Roll for rum","soon"],["Beer Pong","Tournament mode","soon"],["Shuffleboard","Slide the doubloons","soon"],["Swashbuckling","Duel on the deck","soon"],["Find It","Spot the hidden crew","soon"]];
+var tiles=[["Trivia","Movies, pirates, Ybor history","live"],["Treasure Hunt","Find the hidden chest","live"],["Pirate Chess","1 player vs AI or 2 players","live"],["Darts","Bar classic, 1P or 2P","live"],["Ping Pong","Table across the tavern","live"],["Bowling","Roll for rum","live"],["Beer Pong","Tournament mode","live"],["Shuffleboard","Slide the doubloons","live"],["Swashbuckling","Duel on the deck","live"],["Find It","Spot the hidden crew","live"]];
 $("tiles").innerHTML=tiles.map(function(t){return '<div class="tile"><span class="pill '+(t[2]==="live"?"live":"")+'">'+(t[2]==="live"?"playable":"coming")+'</span><b>'+t[0]+'</b><small>'+t[1]+'</small></div>'}).join("");
 
 var A=["Cannonball","Doubloon","Parrot","Kraken","Rum Barrel","Lantern","Plank","Compass","Treasure Map","Anchor","Cutlass","Crow’s Nest"];

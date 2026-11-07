@@ -89,5 +89,7 @@ x.fillStyle='#0e3b4a';x.fillRect(0,0,360,420);x.fillStyle='#6b4a2b';x.fillRect(6
 if(bph<=1){x.fillStyle='#f2b84b';x.fillRect(bax-2,380,4,30)}if(bph==1){x.fillStyle='#222';x.fillRect(320,100,16,280);x.fillStyle='#2a8c9a';x.fillRect(320,380-bpw*280,16,bpw*280)}
 if(bball){const t=bball.t,y=400+(bball.ty-400)*t-Math.sin(t*Math.PI)*90;x.fillStyle='#fff';x.beginPath();x.arc(bball.sx,y,7-3*t,0,7);x.fill()}}
 show('trivia');
+
+(function(){function open(){const h=location.hash.slice(1);if(G.some(([g])=>g===h))show(h)}open();window.addEventListener('hashchange',open)})();
 </script><script src="../assets/ship.js" data-root="../" defer></script>
 </body></html>
