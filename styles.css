@@ -363,7 +363,7 @@ h1 span {
 }
 
 .section-label {
-  color: #78786e;
+  color: #686b60;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .16em;
@@ -451,6 +451,11 @@ h1 span {
   font-size: 11px;
   line-height: 1.8;
   opacity: .8;
+}
+
+.feature-card-rust .feature-number,
+.feature-card-rust p {
+  opacity: 1;
 }
 
 .booking {
