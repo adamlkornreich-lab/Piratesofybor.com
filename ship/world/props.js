@@ -87,7 +87,15 @@ export function buildTown(ctx){const{root,M,colliders,platforms,portals,glowsN,l
  for(let i=0;i<24;i++){k.cyl(M.gold,[ax+(hash(i)-.5)*5,y0+.2,az+(hash(i,3)-.5)*4+1],[ax+(hash(i)-.5)*5,y0+.24+hash(i,7)*.1,az+(hash(i,3)-.5)*4+1],.18,.18,10)}
  portals.push({x:ax,z:az+2.3,name:'The App',url:'app/',r:4.5,icon:'app'});ctx.holo=[ax,y0+2.8,az];
  /* tram */
- ctx.buildTram=()=>{const t=new Kit(),g=new THREE.Group();t.box(M.maroon,0,1.6,0,10.5,1.5,2.5);t.box(M.cream,0,3,0,10.5,1.3,2.5);t.box(M.maroon,0,3.75,0,11,.18,2.8);for(let i=-2;i<=2;i++)for(const s of[-1,1])t.box(M.glass,i*2,3,s*1.27,1.6,1,.05);for(const x of[-5.27,5.27])t.box(M.glass,x,3,0,.05,1,1.9);t.box(M.gold,0,2.4,1.28,10.5,.08,.03);t.box(M.gold,0,2.4,-1.28,10.5,.08,.03);for(const x of[-3,3])for(const s of[-.8,.8])t.cyl(M.iron,[x,.45,s-.08],[x,.45,s+.08],.45,.45,14);t.box(M.iron,0,.85,0,9,.3,1.6);t.cyl(M.iron,[0,3.85,0],[2,5.4,0],.04,.04,5);t.geo(M.bulb,new THREE.SphereGeometry(.18,8,6),5.3,3,0);t.build(g);return g};
+ ctx.buildTram=()=>{const t=new Kit(),g=new THREE.Group();t.box(M.maroon,0,1.6,0,10.5,1.5,2.5);t.box(M.cream,0,3,0,10.5,1.3,2.5);t.box(M.maroon,0,3.75,0,11,.18,2.8);for(let i=-2;i<=2;i++)for(const s of[-1,1])t.box(M.glass,i*2,3,s*1.27,1.6,1,.05);for(const x of[-5.27,5.27])t.box(M.glass,x,3,0,.05,1,1.9);t.box(M.gold,0,2.4,1.28,10.5,.08,.03);t.box(M.gold,0,2.4,-1.28,10.5,.08,.03);for(const x of[-3,3])for(const s of[-.8,.8])t.cyl(M.iron,[x,.45,s-.08],[x,.45,s+.08],.45,.45,14);t.box(M.iron,0,.85,0,9,.3,1.6);t.cyl(M.iron,[0,3.85,0],[2,5.4,0],.04,.04,5);t.geo(M.bulb,new THREE.SphereGeometry(.18,8,6),5.3,3,0);t.build(g);
+  /* Vanicular lettering on both sides, a headlamp beam and a brass bell */
+  const c=document.createElement('canvas');c.width=512;c.height=96;const q=c.getContext('2d');q.fillStyle='#f3e3b4';q.fillRect(0,0,512,96);q.fillStyle='#6b1e14';q.font='700 56px "Pirata One",Georgia,serif';q.textAlign='center';q.textBaseline='middle';q.fillText('✦ THE VANICULAR ✦',256,50);
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;const sm=new THREE.MeshStandardMaterial({map:tx,roughness:.7});
+  for(const sgn of[-1,1]){const pl=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.05),sm);pl.position.set(0,1.75,sgn*1.26);pl.rotation.y=sgn>0?0:Math.PI;g.add(pl)}
+  const lamp=new THREE.Group();const beam=new THREE.Mesh(new THREE.ConeGeometry(1.4,7,12,1,true),new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:.14,depthWrite:false,side:THREE.DoubleSide}));beam.rotation.z=-Math.PI/2;beam.position.set(9,1.9,0);lamp.add(beam);
+  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.22,8,6),new THREE.MeshBasicMaterial({color:0xfff6c8}));bulb.position.set(5.5,1.9,0);lamp.add(bulb);g.add(lamp);g.userData.lamp=lamp;
+  const bellG=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0xe8b84a,metalness:.9,roughness:.3}));bellG.rotation.x=Math.PI;bellG.position.set(0,4.2,0);g.add(bellG);
+  return g};
  k.build(root);
 }
 /* ---------- ships ---------- */

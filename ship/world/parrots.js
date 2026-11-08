@@ -45,8 +45,10 @@ export function initParrots({P,pirates,audio,root}){
 
  /* speaking: a squeaky voice when the device has one, plus a squawk */
  let sayT=0,voiceOK=!!window.speechSynthesis;
- function speak(text){if(!voiceOK||audio.muted)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/Squawk!?/gi,''));u.pitch=1.95;u.rate=1.18;u.volume=.9;speechSynthesis.speak(u)}catch(e){voiceOK=false}}
- function talk(bird,who,text,voice=true){say.innerHTML=`<b>🦜 ${who}</b><span>${text}</span>`;say.classList.add('show');clearTimeout(sayT);sayT=setTimeout(()=>say.classList.remove('show'),3400);bird.talk=1.6;audio.parrot();if(voice)setTimeout(()=>speak(text),180)}
+ let esVoice=null;function pickVoices(){try{const vs=speechSynthesis.getVoices();esVoice=vs.find(v=>/^es/i.test(v.lang))||null}catch(e){}}
+ if(voiceOK){pickVoices();speechSynthesis.onvoiceschanged=pickVoices}
+ function speak(text,lang){if(!voiceOK||audio.muted)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/Squawk!?|¡Cuac!/gi,''));u.pitch=lang==='es'?1.7:1.95;u.rate=lang==='es'?1.1:1.18;u.volume=.9;if(lang==='es'){u.lang='es-ES';if(esVoice)u.voice=esVoice}speechSynthesis.speak(u)}catch(e){voiceOK=false}}
+ function talk(bird,who,text,voice=true,lang){say.innerHTML=`<b>🦜 ${who}</b><span>${text}</span>`;say.classList.add('show');clearTimeout(sayT);sayT=setTimeout(()=>say.classList.remove('show'),3400);if(bird)bird.talk=1.6;audio.parrot();if(voice)setTimeout(()=>speak(text,lang),180)}
 
  /* your shoulder parrot, Squawk */
  const mine=makeParrot(LOOKS[0],1.5);mine.G.position.set(-.215,.53,-.02);mine.G.rotation.y=-.3;P.body.add(mine.G);
@@ -90,22 +92,43 @@ export const SPECIES=[
  {n:'Peach-faced Lovebird',look:{body:0x5ac85a,wing:0x4ab84a,tail:0x2a6fd0,head:0xff9a7a},o:{},s:.85},
  {n:'Budgie',look:{body:0x7ad83a,wing:0x5ab02a,tail:0x2a6fd0,head:0xf6e03a},o:{},s:.8},
  {n:'Galah',look:{body:0xe86a8a,wing:0x9aa0a8,tail:0x9aa0a8,head:0xf4b8c8},o:{crest:0xf4c8d8},s:1.3},
- {n:'Military Macaw',look:{body:0x5aa83a,wing:0x2f8a3a,tail:0xc0502a,head:0x5aa83a},o:{longTail:true},s:1.8}];
+ {n:'Military Macaw',look:{body:0x5aa83a,wing:0x2f8a3a,tail:0xc0502a,head:0x5aa83a},o:{longTail:true},s:1.8},
+ {n:'Monk Parakeet',look:{body:0x4fb04a,wing:0x3a8fd0,tail:0x4fb04a,head:0x9aa6a8},o:{belly:0xd8dcd6},s:1.0},
+ {n:'Nanday Conure',look:{body:0x4faa3a,wing:0x2a5fd0,tail:0x2a5fd0,head:0x1a1a1a},o:{belly:0x3a9a3a},s:1.05},
+ {n:'Cockatiel',look:{body:0x9a9a92,wing:0xf4f4ee,tail:0x8a8a82,head:0xf6e03a},o:{crest:0xf6e03a},s:1.0},
+ {n:'Senegal Parrot',look:{body:0x3a9a3a,wing:0x2f8a3a,tail:0x3a9a3a,head:0x5a5a5a},o:{belly:0xf6a020},s:1.0},
+ {n:'Red-lored Amazon',look:{body:0x3a9a3a,wing:0x2f8a3a,tail:0x3a9a3a,head:0x4aa84a},o:{belly:0x3a9a3a,crest:0xd8202b},s:1.3}];
+/* Pirate phrases with their Spanish, for the call-and-answer flock */
+export const PHRASES=[
+ ['Pieces of eight!','¡Piezas de ocho!'],['Ahoy, matey!','¡Ahoy, marinero!'],['Land ho! Land ho!','¡Tierra a la vista!'],['Shiver me timbers!','¡Rayos y centellas!'],
+ ['Walk the plank!','¡Camina por la tabla!'],['Yo ho ho!','¡Yo jo jo!'],['Dead men tell no tales!','¡Los muertos no cuentan cuentos!'],['Where be the treasure?','¿Dónde está el tesoro?'],
+ ['Welcome to Ybor Cay!','¡Bienvenidos a Cayo Ybor!'],['Pops is the boss!','¡Pops es el jefe!'],['Pippy! Good dog!','¡Pippy! ¡Buena perrita!'],['Seventh Avenue!','¡La Séptima!'],
+ ['Ride the Vanicular!','¡Súbete al Vanicular!'],['Kraken off the point!','¡Kraken frente a la punta!'],['Gaspar\'s Grotto tonight!','¡Esta noche en Gaspar\'s Grotto!'],['Pretty bird! Pretty bird!','¡Pájaro bonito! ¡Pájaro bonito!'],
+ ['Doubloons! Doubloons!','¡Doblones! ¡Doblones!'],['Batten down the hatches!','¡Cierren las escotillas!'],['All hands on deck!','¡Todos a cubierta!'],['Cuban sandwich! Squawk!','¡Sándwich cubano! ¡Cuac!'],
+ ['Café con leche, por favor!','Coffee with milk, please!'],['Hoist the colors!','¡Icen la bandera!'],['Chickens run this street!','¡Las gallinas mandan en esta calle!'],['Fair winds, Captain!','¡Buenos vientos, Capitán!']];
 export function initFlock({root,groundAt,places,audio,talk,count=26}){
  const birds=[];
  const pickPlace=(not)=>{const L=places();if(!L||!L.length)return null;let p;for(let k=0;k<6;k++){p=L[Math.random()*L.length|0];if(p!==not)break}return p};
  const perchAt=(pl)=>{const a=Math.random()*6.283,r=2+Math.random()*7,x=pl.x+Math.cos(a)*r,z=pl.z+Math.sin(a)*r;return{x,z,y:Math.max(groundAt(x,z,60),-.5)+.05,pl}};
  for(let i=0;i<count;i++){const sp=SPECIES[i%SPECIES.length],b=makeParrot(sp.look,sp.s,sp.o);const pl=pickPlace();const pos=pl?perchAt(pl):{x:0,z:0,y:5};
   b.G.position.set(pos.x,pos.y,pos.z);root.add(b.G);birds.push({b,sp,state:'perch',t:4+Math.random()*12,from:null,to:pos,k:0,said:0})}
- return{birds,update(dt,t,pp){for(const B of birds){const g=B.b.G;
+ let lastCall=-99;const pending=[];
+ /* one bird calls out in English (or Spanish), and the nearest other bird answers with the translation */
+ function callAndAnswer(B,t){lastCall=t;const ph=PHRASES[Math.random()*PHRASES.length|0];const esFirst=Math.random()<.3;const first=esFirst?ph[1]:ph[0],second=esFirst?ph[0]:ph[1];
+  talk(B.b,B.sp.n,first,true,esFirst?'es':'en');
+  let other=null,bd=1e9;for(const O of birds){if(O===B)continue;const d=Math.hypot(O.b.G.position.x-B.b.G.position.x,O.b.G.position.z-B.b.G.position.z);if(d<bd){bd=d;other=O}}
+  if(other)pending.push({at:t+1.9,O:other,text:second,lang:esFirst?'en':'es'})}
+ return{birds,phrases:PHRASES,update(dt,t,pp){while(pending.length&&pending[0].at<=t){const q=pending.shift();q.O.said=t;talk(q.O.b,q.O.sp.n+' answers',q.text,true,q.lang)}
+  for(const B of birds){const g=B.b.G;
    if(B.state==='perch'){B.t-=dt;B.b.wings[0].rotation.z=-.05;B.b.wings[1].rotation.z=.05;B.b.head.rotation.y=Math.sin(t*1.3+B.b.ph)*.6;
     const d=Math.hypot(pp.x-g.position.x,pp.z-g.position.z);
-    if(d<5&&t-B.said>14&&talk){B.said=t;talk(B.b,B.sp.n,['Pieces of eight!','Ahoy, matey!','Squawk! Doubloons!','Pretty bird! Pretty bird!','Pops is the boss!','Welcome to Ybor Cay!','Land of the free! Squawk!','God bless America! Squawk!'][Math.random()*8|0])}
+    if(d<5&&t-B.said>14&&talk){B.said=t;callAndAnswer(B,t)}
     if(d<2.2&&B.t>1)B.t=.2;// startled when you walk right up
     if(B.t<=0){const pl=pickPlace(B.to&&B.to.pl);if(!pl){B.t=5;continue}B.from={x:g.position.x,y:g.position.y,z:g.position.z};B.to=perchAt(pl);B.k=0;B.dur=Math.max(6,Math.hypot(B.to.x-B.from.x,B.to.z-B.from.z)/14);B.state='fly';if(d<30&&audio)audio.flap(.4)}}
    else{B.k+=dt/B.dur;const k=Math.min(1,B.k),e=k*k*(3-2*k),x=B.from.x+(B.to.x-B.from.x)*e,z=B.from.z+(B.to.z-B.from.z)*e,arc=Math.sin(k*Math.PI)*(14+B.dur*.8),y=B.from.y+(B.to.y-B.from.y)*e+arc;
     const dx=x-g.position.x,dz=z-g.position.z;if(Math.abs(dx)+Math.abs(dz)>1e-4)g.rotation.y=Math.atan2(dx,dz);g.position.set(x,y,z);
     const fl=Math.sin(t*(16+B.sp.s*-2)+B.b.ph)*1.1;B.b.wings[0].rotation.z=-fl;B.b.wings[1].rotation.z=fl;g.rotation.x=k<.15?-.4:k>.85?.35:0;
+    const dd=Math.hypot(pp.x-x,pp.z-z);if(dd<38&&t-lastCall>9&&t-B.said>20&&Math.random()<dt*.35&&talk){B.said=t;callAndAnswer(B,t)}
     if(k>=1){B.state='perch';B.t=8+Math.random()*16;g.rotation.x=0}}}}};
 }
 /* American flags on the island */
