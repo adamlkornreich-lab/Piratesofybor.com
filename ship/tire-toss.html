@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ashlee Rae's Tire Toss</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.cg{--ink:#fbf1da;--panel:#21174e;--line:#463a80;--mute:#c3bbdc;--gold:#ffc94d;--rum:#f76f3e;--sea:#4fd1c0;--dark:#1b1305;--ui:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+.cg .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-height:440px}
+.cg .stage h2{font:400 2.1rem var(--display);color:var(--gold);line-height:1.05;margin-bottom:6px}
+.cg button{font:inherit;cursor:pointer;min-height:44px;border:0;border-radius:10px;padding:10px 16px;touch-action:manipulation}
+.cg .go{background:var(--rum);color:#fff;font-weight:700;font-size:1.05rem}
+.cg .ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.cg .hud{display:flex;justify-content:space-between;gap:10px;font:700 .95rem var(--ui);margin:0 0 10px;font-variant-numeric:tabular-nums}
+.cg .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.cg .tag{font:400 2rem var(--display);color:var(--sea)}
+.cg .fine{font:500 .82rem/1.4 var(--ui);color:var(--mute);margin:8px 0 0}
+.cg .picks{display:grid;gap:8px;margin-top:12px}.cg .picks button{background:#160f38;color:var(--ink);border:1px solid var(--line);text-align:left}.cg .picks b{color:var(--gold)}
+.cg canvas{display:block;width:100%;max-width:420px;margin:0 auto;border-radius:10px;background:#0e2a44;touch-action:none}
+.cg .gal{background:#160f38 url(assets/waldo-painting.jpg) center/cover;border-radius:10px;padding:10px;box-shadow:inset 0 0 0 4px #7a5a26,0 8px 24px #0007}
+.cg .galin{background:#120b2ed9;border-radius:8px;padding:16px}
+.cg .xw{display:grid;gap:1px;max-width:560px;margin:0 auto}.cg .xw .blank{aspect-ratio:1}
+.cg .cell{position:relative;aspect-ratio:1;background:#fff8e6f2;box-shadow:0 0 0 1px #2b1d0e}
+.cg .cell input{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;text-align:center;font:700 clamp(.8rem,3.6vw,1.2rem) var(--ui);color:#1b1305;padding:6% 0 0;text-transform:uppercase;caret-color:transparent;border-radius:0;outline:none}
+.cg .cell small{position:absolute;left:2px;top:0;font:700 8px/1.2 var(--ui);color:#5a3720;z-index:1;pointer-events:none}
+.cg .cell.on{background:#ffe29a}.cg .cell.cur{background:#ffc94d}.cg .cell.bad{background:#f7a6a0}.cg .cell.good input{color:#0c6b5c}
+.cg .xw.solved .cell{background:#fff8e6b0}
+.cg .now{min-height:2.8em;font:700 1rem/1.35 var(--ui);margin:10px 0 0;color:var(--gold)}
+.cg .clues{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}.cg .clues h3{font:400 1.4rem var(--display);color:var(--gold);margin:0 0 4px}
+.cg .clues ol{margin:0;padding-left:24px;font:500 .9rem/1.35 var(--ui)}.cg .clues li{padding:4px 2px;cursor:pointer;border-radius:4px}.cg .clues li.on{background:#ffc94d33}
+.cg .mc{font:700 1rem/1.35 var(--ui);color:var(--sea);margin:0 0 12px;min-height:1.4em}
+@media (max-width:520px){.cg .clues{grid-template-columns:minmax(0,1fr)}}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="hero" style="padding-bottom:8px"><h1>Ashlee Rae's Tire Toss</h1><p class="lead">Ten footballs, one swinging tire. Ashlee Rae is on the sideline, and a big SOCOM soldier is standing guard in the background.</p></section>
+  <div class="cg">
+    <p class="mc">🎤 Ashlee Rae threw a football through a tire so hard the tire apologized.</p>
+    <div class="stage" id="stage"></div>
+    <div class="row"><button class="ghost" id="snd" type="button" aria-pressed="true">🔊 Sound on</button><a class="btn ghost" href="arcade.html">⚔ Back to the Arcade</a></div>
+  </div>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},stage=$("stage"),run=0,timers=[];
+function later(f,ms){var r=run,t=setTimeout(function(){if(r===run)f()},ms);timers.push(t);return t}
+function stop(){run++;timers.forEach(clearTimeout);timers=[];document.onkeydown=null}
+function best(k,v){try{var o=+localStorage.getItem(k)||0;if(v>o){localStorage.setItem(k,v);return v}return o}catch(e){return v}}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+
+/* ---------- sound, all synthesized ---------- */
+var ac=null,on=true;
+function ctx(){if(!on)return null;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();return ac}catch(e){return null}}
+function noise(dur,freq,vol,type,rise){var c=ctx();if(!c)return;var n=c.sampleRate*dur|0,b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;
+var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),t=c.currentTime;s.buffer=b;f.type=type||"lowpass";f.frequency.value=freq;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+(rise||.02));g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(c.destination);s.start()}
+function tone(f1,f2,dur,vol,type,at){var c=ctx();if(!c)return;var o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(at||0);o.type=type||"sine";o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur)}
+/* ---------- original synthesized beats ---------- */
+function kick(){tone(120,40,.22,.55)}
+function snare(){noise(.16,2600,.26,"highpass",.005)}
+function clap(){noise(.12,1800,.3,"bandpass",.005);tone(190,150,.08,.08,"triangle")}
+function hat(v){noise(.05,7000,v||.07,"highpass",.003)}
+var BEATS={
+ west:{bpm:92,name:"West Coast",step:function(s){var i=s%16,bar=Math.floor(s/16)%4;
+  if(i===0||i===7||i===10)kick();if(i===4||i===12)clap();if(i%2===0)hat(.06);
+  var bass={0:55,3:55,6:65.4,8:49,11:49,14:58.3};if(bass[i])tone(bass[i]*(bar===3?.89:1),bass[i]*(bar===3?.89:1),.28,.3,"sine");
+  var lead={0:880,6:988,8:1047,12:880};if(bar%2===1&&lead[i]){tone(lead[i],lead[i]*1.06,.5,.035,"sine");tone(lead[i]*1.01,lead[i]*1.05,.45,.02,"sine")}}},
+ east:{bpm:88,name:"East Coast",step:function(s){var i=s%16,bar=Math.floor(s/16)%2;
+  if(i===0||i===5||i===10||(bar&&i===15))kick();if(i===4||i===12)snare();if(i%2===0||i===7)hat(i===6?.1:.05);
+  if(i===0||i===3||(bar&&i===8)){[220,261.6,329.6].forEach(function(f){tone(f,f*.995,.3,.05,"triangle")})}
+  if(i===0||i===10)tone(55,52,.3,.3,"sine")}}};
+var beatRun=-1;function playBeat(st){if(beatRun===run)return;beatRun=run;var r=run,b=BEATS[st],dur=60/b.bpm/4*1000,s=0,t0=performance.now();
+ (function tick(){if(r!==run)return;b.step(s);s++;later(tick,Math.max(0,t0+s*dur-performance.now()))})()}
+function rev(){tone(55,120,.5,.2,"sawtooth");tone(58,125,.5,.14,"square");noise(.5,500,.2,"lowpass",.05)}
+
+/* ---------- Ashlee Rae's Tire Toss ---------- */
+function tire(){
+ function intro(){stage.innerHTML='<h2>Ashlee Rae\'s Tire Toss</h2><p>Ashlee Rae has the arm. Ten footballs, one swinging tire. Pull back on the screen to aim at the crosshair, let go to throw, and lead the tire because the ball takes a moment to get there. Thread the center for 3 points, anywhere through the hole for 2. Five in a row earns a bonus.</p><p class="fine">Keyboard: arrows to aim, space to throw.</p><button class="go" id="b" type="button">Grab a football</button>';$("b").onclick=function(){ctx();play()}}
+ function play(){playBeat("west");var r=run,W=420,H=520,PX=210,L=170,START=[210,462],TF=.62,t=0,last=performance.now(),left=10,score=0,streak=0,bestS=0,ball=null,aim={x:210,y:170},drag=null,msg="",mt=0,hits=0;
+  stage.innerHTML='<div class="hud"><span>Footballs <b id="lf"></b></span><span id="st"></span><span>Score <b id="sc"></b></span></div><canvas id="cv" width="'+W+'" height="'+H+'" aria-label="A tire swinging on a rope. Pull back to aim, release to throw."></canvas>';
+  var cv=$("cv"),g=cv.getContext("2d");
+  function hud(){$("lf").textContent=left;$("sc").textContent=score;$("st").textContent=streak>1?"🔥 "+streak+" in a row":""}
+  function lvl(){return 10-left}
+  function tp(tt){var n=Math.min(lvl(),9),w=1.5+n*.2,a=.32+n*.015;var th=a*Math.sin(tt*w);return{x:PX+L*Math.sin(th),y:L*Math.cos(th)+10+(n>5?Math.sin(tt*w*2)*10:0)}}
+  function radii(){var n=lvl();return{i:Math.max(21,32-n*1.1),o:Math.max(36,48-n*1.1)}}
+  function say(x){msg=x;mt=performance.now()}
+  function pt(e){var b=cv.getBoundingClientRect();return{x:(e.clientX-b.left)*W/b.width,y:(e.clientY-b.top)*H/b.height}}
+  function clampAim(){aim.x=Math.max(30,Math.min(W-30,aim.x));aim.y=Math.max(60,Math.min(300,aim.y))}
+  function pull(e){var p=pt(e),d=drag;aim.x=d.ax+(d.x-p.x)*1.6;aim.y=d.ay+(d.y-p.y)*1.6;clampAim()}
+  function throwIt(){if(ball||left<=0)return;left--;hud();ball={t:0,tx:aim.x,ty:aim.y,r:null};noise(.25,1400,.14,"bandpass",.04);tone(500,250,.22,.04,"sine")}
+  cv.addEventListener("pointerdown",function(e){if(ball)return;e.preventDefault();var p=pt(e);drag={x:p.x,y:p.y,ax:aim.x,ay:aim.y,moved:false};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+  cv.addEventListener("pointermove",function(e){if(drag){pull(e);drag.moved=true}});
+  cv.addEventListener("pointerup",function(e){if(drag){var m=drag.moved;drag=null;if(m)throwIt()}});
+  cv.addEventListener("pointercancel",function(){drag=null});
+  document.onkeydown=function(e){var k=e.key;if(k==="ArrowLeft")aim.x-=14;else if(k==="ArrowRight")aim.x+=14;else if(k==="ArrowUp")aim.y-=14;else if(k==="ArrowDown")aim.y+=14;else if(k===" "){throwIt()}else return;e.preventDefault();clampAim()};
+  function resolve(){var T=tp(t),R=radii(),d=Math.hypot(ball.tx-T.x,ball.ty-T.y);
+   if(d<R.i){var pts=d<R.i*.42?3:2;streak++;hits++;bestS=Math.max(bestS,streak);if(streak%5===0){pts+=5;say("FIVE IN A ROW! +5")}else say(pts===3?"Dead center!":"Right through!");score+=pts;ball.r="in";[659,880,1047].forEach(function(f,i){tone(f,f,.14,.07,"triangle",i*.08)});noise(.2,700,.2,"lowpass",.01)}
+   else if(d<R.o){streak=0;ball.r="rim";say("Off the rubber!");tone(120,60,.3,.3,"sine");noise(.12,400,.25,"lowpass",.01);ball.dx=(ball.tx-T.x)*5;ball.dy=-60}
+   else{streak=0;ball.r="miss";say(pick(["Wide right.","Not even close, Ashlee's laughing.","Short and sweet. Mostly short."]))}hud()}
+  hud();
+  (function loop(n){if(r!==run||!$("cv"))return;var dt=Math.min(.05,(n-last)/1000);last=n;t+=dt;var T=tp(t),R=radii();
+   cv.dataset.s=Math.round(T.x)+":"+Math.round(T.y)+":"+(ball?1:0)+":"+left;
+   var sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#2c1458");sky.addColorStop(.5,"#c92f6a");sky.addColorStop(.72,"#fb9633");g.fillStyle=sky;g.fillRect(0,0,W,H);
+   g.fillStyle="#fff06a";g.beginPath();g.arc(340,290,44,0,7);g.fill();g.fillStyle="#1b3d2a";g.fillRect(0,330,W,H-330);g.strokeStyle="#ffffff55";g.lineWidth=3;[370,410,455].forEach(function(y){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()});
+   (function(){var y=334,bob=Math.sin(t*2.2);g.save();g.globalAlpha=.94;
+ /* Ashlee Rae on the sideline */
+ var ax=52;g.fillStyle="#00000044";g.beginPath();g.ellipse(ax,y+2,26,6,0,0,7);g.fill();g.fillStyle="#22354f";g.fillRect(ax-11,y-44,9,44);g.fillRect(ax+2,y-44,9,44);g.fillStyle="#d92f6a";g.beginPath();g.roundRect(ax-16,y-92,32,52,8);g.fill();g.fillStyle="#fff";g.font="800 18px Pirata One,Georgia,serif";g.textAlign="center";g.fillText("7",ax,y-60);g.strokeStyle="#e4b28a";g.lineWidth=8;g.lineCap="round";g.beginPath();g.moveTo(ax+15,y-84);g.lineTo(ax+27,y-112-bob*6);g.moveTo(ax-15,y-84);g.lineTo(ax-27,y-112+bob*6);g.stroke();g.fillStyle="#e4b28a";g.beginPath();g.arc(ax,y-106,14,0,7);g.fill();g.fillStyle="#6a3b1e";g.beginPath();g.arc(ax,y-111,15,3.14,0);g.fill();g.beginPath();g.ellipse(ax-14,y-98,5,15,.15,0,7);g.ellipse(ax+14,y-98,5,15,-.15,0,7);g.fill();g.fillStyle="#7a3f1a";g.beginPath();g.ellipse(ax+29,y-120-bob*6,11,7,.7,0,7);g.fill();g.fillStyle="#fff";g.font="700 12px Pirata One,Georgia,serif";g.fillText("Ashlee Rae",ax,y-134);
+ /* big special-ops soldier standing guard */
+ var sx=366;g.fillStyle="#00000044";g.beginPath();g.ellipse(sx,y+3,44,9,0,0,7);g.fill();function cm(a,b,c,d){g.fillStyle="#56603f";g.fillRect(a,b,c,d);g.fillStyle="#3b442c";for(var i=0;i<c;i+=11)for(var j=(i%2)*7;j<d;j+=13)g.fillRect(a+i,b+j,6,5);}cm(sx-25,y-82,21,74);cm(sx+4,y-82,21,74);g.fillStyle="#1d1a16";g.fillRect(sx-28,y-12,27,13);g.fillRect(sx+2,y-12,27,13);cm(sx-37,y-170,74,92);g.fillStyle="#2b2f22";g.beginPath();g.roundRect(sx-25,y-163,50,64,6);g.fill();g.fillStyle="#3f4632";[-17,-1,14].forEach(function(o){g.fillRect(sx+o,y-126,12,18)});cm(sx-55,y-168,19,74);cm(sx+36,y-168,19,74);g.fillStyle="#c49070";g.beginPath();g.arc(sx-45,y-90,10,0,7);g.arc(sx+45,y-90,10,0,7);g.fill();g.fillRect(sx-11,y-186,22,20);g.beginPath();g.arc(sx,y-196,21,0,7);g.fill();g.fillStyle="#17331f";g.beginPath();g.ellipse(sx-3,y-212,27,10,-.18,0,7);g.fill();g.fillStyle="#141414";g.beginPath();g.roundRect(sx-17,y-202,34,9,3);g.fill();g.restore()})();
+   g.fillStyle="#2a170c";g.fillRect(0,0,W,12);g.strokeStyle="#d9c9a3";g.lineWidth=4;g.beginPath();g.moveTo(PX,10);g.lineTo(T.x,T.y-R.o);g.stroke();
+   function tireDraw(){g.strokeStyle="#15110f";g.lineWidth=R.o-R.i;g.beginPath();g.arc(T.x,T.y,(R.o+R.i)/2,0,7);g.stroke();g.strokeStyle="#4a423c";g.lineWidth=2;g.beginPath();g.arc(T.x,T.y,R.i+3,0,7);g.stroke();g.beginPath();g.arc(T.x,T.y,R.o-3,0,7);g.stroke()}
+   function fb(x,y,s,rot){g.save();g.translate(x,y);g.rotate(rot);g.scale(s,s);g.fillStyle="#7a3f1a";g.beginPath();g.ellipse(0,0,24,14,0,0,7);g.fill();g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.moveTo(-8,0);g.lineTo(8,0);[-5,0,5].forEach(function(v){g.moveTo(v,-3);g.lineTo(v,3)});g.stroke();g.restore()}
+   if(ball&&ball.r==="in"){var e0=(ball.t-TF)/.4;fb(ball.tx,ball.ty-e0*8,Math.max(.1,.5-e0*.4),ball.t*9)}
+   tireDraw();
+   if(!ball&&left>0){g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.arc(aim.x,aim.y,10,0,7);g.moveTo(aim.x-16,aim.y);g.lineTo(aim.x+16,aim.y);g.moveTo(aim.x,aim.y-16);g.lineTo(aim.x,aim.y+16);g.stroke();if(drag){g.setLineDash([6,8]);g.beginPath();g.moveTo(START[0],START[1]);g.lineTo(aim.x,aim.y);g.stroke();g.setLineDash([])}fb(START[0],START[1],1,-.5)}
+   if(ball){ball.t+=dt;if(!ball.r&&ball.t>=TF)resolve();
+    if(!ball.r){var e=ball.t/TF;fb(START[0]+(ball.tx-START[0])*e,START[1]+(ball.ty-START[1])*e-Math.sin(e*3.14)*50,1-.55*e,ball.t*12)}
+    else if(ball.r==="rim"){var q=ball.t-TF;fb(ball.tx+ball.dx*q,ball.ty+ball.dy*q+300*q*q,.5,ball.t*8)}
+    else if(ball.r==="miss"){var m=(ball.t-TF);fb(ball.tx,ball.ty-m*30,Math.max(.1,.45-m*.5),ball.t*9)}
+    if(ball.t>TF+.75){ball=null;if(left<=0)return end(score,hits,bestS)}}
+   if(n-mt<1100){g.fillStyle="#fff";g.font="700 22px Pirata One,Georgia,serif";g.textAlign="center";g.fillText(msg,W/2,44)}
+   requestAnimationFrame(loop)})(last)}
+ function end(s,h,b0){document.onkeydown=null;var b=best("poy-tire",s),ti=s>=30?"Hall of Fame Arm":s>=18?"Team Captain":s>=8?"Weekend Quarterback":"Stick to the Tailgate";
+  stage.innerHTML='<h2>Final whistle</h2><p class="tag">'+ti+'</p><p>'+h+' of 10 through the tire, for '+s+' points. Longest streak: '+b0+'. Your best: '+b+'.</p><button class="go" id="b" type="button">Throw again</button>';$("b").onclick=function(){stop();tire()}}
+ intro()}
+
+$("snd").onclick=function(){on=!on;stop();this.textContent=on?"🔊 Sound on":"🔇 Sound off";this.setAttribute("aria-pressed",String(on));tire()};
+tire();
+})();
+</script>
+</body></html>

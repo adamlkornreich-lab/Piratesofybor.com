@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Danny Alonso Island</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.dh{padding:22px 0 6px;text-align:center}.dh h1{margin:0;color:var(--gold2);font-size:clamp(2rem,8vw,3.2rem);line-height:1.05;text-wrap:balance}
+.dh p{margin:8px auto 0;color:var(--fog);max-width:62ch;font-size:1.05rem}
+.dh .where{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sea)}
+.villas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin:16px 0}
+.villa{background:linear-gradient(180deg,var(--panel),var(--deep));border:1px solid rgba(232,184,74,.22);border-radius:var(--radius);overflow:hidden;min-width:0}
+.villa .art{height:110px;display:grid;place-items:center;font-size:44px}
+.villa .body{padding:12px 14px}
+.villa h3{margin:0;color:var(--gold2);font-family:var(--display);font-weight:400;font-size:1.4rem;line-height:1.1}
+.villa p{margin:6px 0 0;color:var(--mute);font-size:.93rem}
+.villa ul{margin:8px 0 0;padding-left:18px;color:var(--fog);font-size:.9rem}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.tabs button{flex:1 1 150px;padding:12px 14px;border-radius:12px;border:1px solid rgba(232,184,74,.35);background:var(--panel2);color:var(--fog);font:inherit;font-weight:bold;cursor:pointer;min-width:0}
+.tabs button[aria-selected="true"]{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d05;border-color:var(--gold)}
+.tabs button:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.guide{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:700px){.guide{grid-template-columns:minmax(0,1fr)}}
+.gbox{background:rgba(26,34,52,.85);border:1px solid rgba(232,184,74,.22);border-radius:var(--radius);padding:16px 18px;min-width:0}
+.gbox h3{margin:0 0 6px;color:var(--gold2);font-family:var(--display);font-weight:400;font-size:1.45rem}
+.gbox ul{margin:0;padding-left:18px}.gbox li{margin:5px 0}
+.gbox.wide{grid-column:1/-1}
+.lede{font-size:1.05rem;color:var(--fog);max-width:70ch;margin:0 0 12px}
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.day{background:var(--panel2);border-radius:10px;padding:10px 12px}.day b{color:var(--sea);display:block}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.fine{color:var(--mute);font-size:.85rem}
+.fine a{margin:0}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="dh">
+    <div class="where">Open World · east of Cross St, over the bridge</div>
+    <h1>Danny Alonso Island</h1>
+    <p>A palm-ringed island in the lagoon, named for Danny Alonso. It's home to the Pirate Pool &amp; Bingo Hall, Pippy's Surf &amp; Skate Shack and its skate park, the island resort's vacation villas, and the travel dock with ships bound for Rincón, Valparaíso and Santiago.</p>
+    <div class="row" style="justify-content:center;margin-top:16px">
+      <a class="btn" href="world.html#danny">🏝 Walk the island</a>
+      <a class="btn ghost" href="pool.html">🎱 Pirate Pool</a>
+      <a class="btn ghost" href="bingo.html">🔔 Pirate Bingo</a>
+      <a class="btn ghost" href="surfshop.html">🏄 Surf &amp; Skate Shack</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>The Resort: Vacation Villas</h2>
+    <p class="lede">Four villas on the island, each themed after a port on the travel dock. You can tour them in the open world now. Real bookings aren't open yet, so use the button below to ask about stays and events.</p>
+    <div class="villas">
+      <div class="villa"><div class="art" style="background:linear-gradient(160deg,#2aa3a8,#f3d34a)">🏄</div><div class="body"><h3>Casa Rincón</h3><p>Surf shack on the sand. Boards by the door, hammock out front.</p><ul><li>Sleeps 4 · ocean deck</li><li>Sunset view to the west</li></ul></div></div>
+      <div class="villa"><div class="art" style="background:linear-gradient(160deg,#c0412a,#e8b84a 55%,#2459c7)">🎨</div><div class="body"><h3>Valpo Loft</h3><p>Painted like a Valparaíso hillside: every wall a different color.</p><ul><li>Sleeps 2 · rooftop terrace</li><li>Mural by the stairs</li></ul></div></div>
+      <div class="villa"><div class="art" style="background:linear-gradient(160deg,#4f6b8a,#e9eef5)">🏔</div><div class="body"><h3>Andes Lodge</h3><p>Stone and timber, a fireplace and a view of the snowy peaks painted on the lagoon horizon.</p><ul><li>Sleeps 6 · fire pit</li><li>Wine cellar for the crew</li></ul></div></div>
+      <div class="villa"><div class="art" style="background:linear-gradient(160deg,#1f5a3a,#b5532a)">🏴‍☠️</div><div class="body"><h3>The Captain's Quarters</h3><p>The big house, steps from the Pool &amp; Bingo Hall. Room for the whole crew.</p><ul><li>Sleeps 10 · private dock</li><li>Event space for parties</li></ul></div></div>
+    </div>
+    <div class="row"><a class="btn rum" href="mailto:adamlkornreich@gmail.com?subject=Danny%20Alonso%20Island%20stay%20inquiry">✉ Ask about a stay or event</a></div>
+  </section>
+
+  <section>
+    <h2>Travel Guide</h2>
+    <p class="lede">Three real ports worth the trip, with what to see, when to go and how to get there.</p>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-rincon" aria-selected="true" aria-controls="g-rincon">🇵🇷 Rincón, Puerto Rico</button>
+      <button role="tab" id="t-valpo" aria-selected="false" aria-controls="g-valpo">🇨🇱 Valparaíso, Chile</button>
+      <button role="tab" id="t-santiago" aria-selected="false" aria-controls="g-santiago">🇨🇱 Santiago, Chile</button>
+    </div>
+
+    <div role="tabpanel" id="g-rincon" class="guide">
+      <div class="gbox wide"><h3>Rincón: surf town on the west coast</h3><p style="margin:0">A laid-back corner of Puerto Rico known for big winter waves, humpback whales offshore and some of the best sunsets in the Caribbean.</p></div>
+      <div class="gbox"><h3>See and do</h3><ul>
+        <li><b>Surf</b> Domes, Maria's and Steps beaches. Local surf schools teach beginners.</li>
+        <li><b>Punta Higüera Lighthouse Park</b>: gazebos, viewing binoculars and the sunset spot in town.</li>
+        <li><b>Tres Palmas Marine Reserve</b>: elkhorn coral and reef fish when the sea is calm.</li>
+        <li><b>Thursday Art Walk</b> at the main plaza, with music, crafts and bomba dancing.</li>
+        <li><b>Bosque Comunitario La Armonía</b>: boardwalks through a community forest.</li></ul></div>
+      <div class="gbox"><h3>When to go</h3><ul>
+        <li><b>Surf season:</b> October to February, when the northwest swells arrive.</li>
+        <li><b>Whales:</b> humpbacks from about November to April. January to March is the best stretch.</li>
+        <li><b>Calm water:</b> late spring and summer are better for snorkeling and swimming.</li>
+        <li>Check tides and conditions. Beaches that look calm can turn dangerous in the winter swell season.</li></ul></div>
+      <div class="gbox"><h3>Getting there</h3><ul>
+        <li>Fly into <b>Aguadilla (BQN)</b>, about an hour's drive, or San Juan (SJU), about 2.5–3 hours.</li>
+        <li>Rent a car. Most beaches need one.</li>
+        <li>U.S. dollars, and no passport needed for U.S. citizens.</li></ul></div>
+      <div class="gbox"><h3>Three days in Rincón</h3><div class="days">
+        <div class="day"><b>Day 1</b>Surf lesson in the morning, lighthouse at sunset.</div>
+        <div class="day"><b>Day 2</b>Snorkel Tres Palmas if it's calm, then a whale-watch boat in season.</div>
+        <div class="day"><b>Day 3</b>Forest boardwalk, beach-hopping, Art Walk if it's Thursday.</div></div>
+        <div class="links"><a class="btn ghost" href="https://www.airbnb.com/s/Rincon--Puerto-Rico/homes" target="_blank" rel="noopener">Search stays on Airbnb ↗</a></div></div>
+    </div>
+
+    <div role="tabpanel" id="g-valpo" class="guide" hidden>
+      <div class="gbox wide"><h3>Valparaíso: the painted port</h3><p style="margin:0">A UNESCO World Heritage port city built across steep hills, with colorful houses, street art and old funiculars climbing above the bay.</p></div>
+      <div class="gbox"><h3>See and do</h3><ul>
+        <li><b>Cerro Alegre and Cerro Concepción</b>: cobbled streets, murals, galleries and cafés.</li>
+        <li><b>Ride the ascensores</b>: the Reina Victoria and El Peral funiculars give big views of the bay.</li>
+        <li><b>La Sebastiana</b>: poet Pablo Neruda's house museum, high on the hill.</li>
+        <li><b>Plaza Sotomayor</b> and the port down below.</li>
+        <li>Next door, <b>Viña del Mar</b> has beaches and a seaside promenade.</li></ul></div>
+      <div class="gbox"><h3>When to go</h3><ul>
+        <li>Good all year. Summer, <b>December to March</b>, has the best weather. Chile's seasons are the reverse of the U.S.</li>
+        <li>New Year's Eve fireworks over the bay are famous.</li>
+        <li>At night, stick to well-lit, busy streets or take a taxi between the hills and downtown.</li></ul></div>
+      <div class="gbox"><h3>Getting there</h3><ul>
+        <li>About 120 km from Santiago: roughly 1.5 hours by car on Ruta 68, or about 2 hours by bus.</li>
+        <li>Fly into Santiago (SCL), the nearest airport.</li>
+        <li>U.S. citizens don't need a visa for stays of up to 90 days (see the Santiago tab).</li></ul></div>
+      <div class="gbox"><h3>Two days in Valpo</h3><div class="days">
+        <div class="day"><b>Day 1</b>Ascensores, Cerro Alegre and Concepción, and sunset over the bay.</div>
+        <div class="day"><b>Day 2</b>La Sebastiana in the morning, then Viña del Mar's beaches.</div></div>
+        <div class="links"><a class="btn ghost" href="https://www.airbnb.com/s/Valparaiso--Chile/homes" target="_blank" rel="noopener">Search stays on Airbnb ↗</a></div></div>
+    </div>
+
+    <div role="tabpanel" id="g-santiago" class="guide" hidden>
+      <div class="gbox wide"><h3>Santiago: the capital under the Andes</h3><p style="margin:0">Chile's big city, with snow-capped mountains on the horizon, hilltop parks, lively neighborhoods and wine country an hour away.</p></div>
+      <div class="gbox"><h3>See and do</h3><ul>
+        <li><b>Cerro San Cristóbal</b>: ride the funicular up for the view over the city and the Andes.</li>
+        <li><b>Cerro Santa Lucía</b>: a small hill garden right downtown.</li>
+        <li><b>Plaza de Armas, La Moneda Palace and Mercado Central</b> for history and seafood.</li>
+        <li><b>Lastarria and Bellavista</b> neighborhoods, including <b>La Chascona</b>, another Neruda house.</li>
+        <li>Day trips to the <b>Maipo and Casablanca</b> wine valleys, or skiing in the Andes in winter.</li></ul></div>
+      <div class="gbox"><h3>When to go</h3><ul>
+        <li><b>Spring (September to November)</b> and <b>fall (March to May)</b> are mild.</li>
+        <li><b>Winter (June to September)</b> brings ski season in the nearby Andes.</li>
+        <li>Summer, December to February, is hot and dry.</li></ul></div>
+      <div class="gbox"><h3>Getting there</h3><ul>
+        <li>Fly into <b>Santiago (SCL)</b>.</li>
+        <li><b>U.S. citizens:</b> no visa for tourist stays of up to 90 days, and no entry fee. Keep the entry slip you get on arrival, since hotels use it for the tax exemption on lodging.</li>
+        <li>Declare any food, plant or animal products on the customs form.</li>
+        <li>Currency is the Chilean peso.</li></ul></div>
+      <div class="gbox"><h3>Three days in Santiago</h3><div class="days">
+        <div class="day"><b>Day 1</b>Plaza de Armas, La Moneda, lunch at Mercado Central.</div>
+        <div class="day"><b>Day 2</b>Cerro San Cristóbal, then Bellavista and La Chascona.</div>
+        <div class="day"><b>Day 3</b>Wine valley day trip, or head to Valparaíso.</div></div>
+        <div class="links"><a class="btn ghost" href="https://www.airbnb.com/s/Santiago--Chile/homes" target="_blank" rel="noopener">Search stays on Airbnb ↗</a></div></div>
+    </div>
+    <p class="fine" style="margin-top:14px">Travel rules change, so check with official sources before you go. Sources: <a href="https://www.lonelyplanet.com/articles/guide-to-rincon" target="_blank" rel="noopener">Lonely Planet: Rincón</a> · <a href="https://chile.travel/donde-ir/destino/valparaiso/" target="_blank" rel="noopener">Chile Travel: Valparaíso</a> · <a href="https://www.expat.cl/visas/chile-visa-requirements-us-citizens/" target="_blank" rel="noopener">Expat Chile: visa rules</a> · <a href="https://travel.state.gov" target="_blank" rel="noopener">U.S. State Department</a>. Danny Alonso Island and its villas are part of the game. Airbnb links go to Airbnb's own site, which isn't affiliated with this one.</p>
+  </section>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+const ids=["rincon","valpo","santiago"];
+function show(k){ids.forEach(i=>{document.getElementById("t-"+i).setAttribute("aria-selected",String(i===k));document.getElementById("g-"+i).hidden=i!==k;});try{history.replaceState(null,"","#"+k)}catch(e){}}
+ids.forEach(i=>document.getElementById("t-"+i).onclick=()=>show(i));
+const h=location.hash.slice(1);if(ids.includes(h))show(h);
+})();
+</script>
+</body></html>

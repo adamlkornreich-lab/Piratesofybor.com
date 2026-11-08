@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Pirates of Ybor: The Movie</title><link rel="stylesheet" href="assets/site.css">
+<style>
+html,body{background:#05030d}
+.mv{position:relative;width:100%;max-width:1200px;margin:10px auto 0;aspect-ratio:16/9;max-height:calc(100vh - 150px);border-radius:16px;overflow:hidden;background:#05030d;box-shadow:var(--shadow)}
+@media (max-width:700px){.mv{aspect-ratio:auto;height:min(78vh,640px)}}
+.mv canvas{display:block;width:100%;height:100%}
+.mv:fullscreen{max-width:none;max-height:none;border-radius:0}
+.ov{position:absolute;inset:0;pointer-events:none}
+.chap{position:absolute;left:16px;top:14px;color:#ffe6b0;font-size:clamp(.9rem,2.6vw,1.1rem);text-shadow:0 2px 8px #000;opacity:.9}
+.title{position:absolute;left:0;right:0;top:16%;text-align:center;padding:0 16px;transition:opacity 1.2s}
+.title h2{margin:0;font-size:clamp(2.2rem,8vw,4.6rem);line-height:1;color:#f6d67a;text-shadow:0 0 18px rgba(246,214,122,.55),0 4px 0 #6b2a10,0 8px 26px #000}
+.title p{margin:10px auto 0;max-width:40ch;font-size:clamp(1rem,3.4vw,1.5rem);color:#fff3d6;text-shadow:0 2px 10px #000}
+.narr{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);width:min(92%,760px);text-align:center;font-size:clamp(1.05rem,3.6vw,1.55rem);color:#fff;background:rgba(5,3,13,.55);border-radius:12px;padding:8px 14px;text-shadow:0 2px 6px #000;transition:opacity .6s}
+.bar{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:10px 12px;background:linear-gradient(transparent,rgba(5,3,13,.9));pointer-events:auto;flex-wrap:wrap}
+.bar button,.bar select{min-height:40px;border-radius:10px;border:1px solid rgba(232,184,74,.5);background:rgba(20,12,36,.7);color:#fff3d6;padding:0 12px;cursor:pointer;width:auto}
+.bar input[type=range]{flex:1 1 200px;accent-color:#e8b84a;padding:0;border:0;background:transparent;min-width:120px}
+.bar .tm{color:#ffe6b0;font-variant-numeric:tabular-nums;min-width:110px;text-align:center}
+.start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;background:radial-gradient(circle at 50% 40%,rgba(40,14,60,.55),rgba(5,3,13,.92));pointer-events:auto}
+.start[hidden]{display:none}
+.start h1{margin:0;font-size:clamp(2.4rem,9vw,5rem);color:#f6d67a;text-shadow:0 0 20px rgba(246,214,122,.5)}
+.start p{margin:0;color:#fff3d6;max-width:46ch}
+.big{font-size:1.3rem;padding:14px 34px}
+.note{color:var(--mute);font-size:.95rem;max-width:1200px;margin:10px auto 0}
+</style></head>
+<body>
+<main class="wrap">
+  <div class="mv" id="mv">
+    <div class="ov">
+      <div class="chap" id="chap"></div>
+      <div class="title" id="title"><h2 id="tH"></h2><p id="tP"></p></div>
+      <div class="narr" id="narr"></div>
+    </div>
+    <div class="bar">
+      <button id="pp" type="button" aria-label="Play or pause">▶</button>
+      <span class="tm" id="tm">0:00 / 60:00</span>
+      <input type="range" id="seek" min="0" max="3600" step="1" value="0" aria-label="Movie position">
+      <select id="chs" aria-label="Jump to a chapter"></select>
+      <button id="mus" type="button" aria-pressed="true">🎻 Score on</button>
+      <button id="fs" type="button" aria-label="Full screen">⛶</button>
+    </div>
+    <div class="start" id="start">
+      <h1>The Pirates of Ybor</h1>
+      <p>The Movie. Sixty minutes of CGI across Ybor City and beyond: Pops &amp; Pippy, Gaspar's Grotto, Waldo's paintings, the crew, the merch store, every game, Ybor Cay and Danny Alonso Island.</p>
+      <button class="btn big" id="go" type="button">▶ Play the movie</button>
+      <p id="resume" style="font-size:.95rem;color:var(--mute)"></p>
+    </div>
+  </div>
+  <p class="note">The movie is rendered live in 3D on your device, so it starts instantly with no huge download. Use the chapter list to jump around. It remembers where you stopped.</p>
+</main>
+<script src="assets/site.js"></script>
+<script type="module">
+import * as THREE from "./world/three.js";
+const $=i=>document.getElementById(i);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- the chapters (sixty minutes in all) ---------- */
+const STORE=[["🧢","Gaspar's Grotto Tricorn Cap","$28"],["👕","Pirates of Ybor Crew Tee","$25"],["🍺","Gaspar's Branded Pint Glass","$14"],["🥃","Gaspar's Rocks Glass, set of two","$22"],["🧥","Ybor City Pirate Hoodie","$48"],["🏴‍☠️","Pops & Pippy Flag","$30"],["🎲","Pirate Chess Travel Set","$35"],["🔑","Doubloon Keychain","$9"]];
+const C=[
+ {t:"The Pirates of Ybor",s:"A Gaspar's Grotto picture",img:"assets/pops-pippy-official.jpg",th:"sunset",d:120,n:["Somewhere off the Gulf coast of Florida, the lanterns come on in Ybor City.","This is the story of a bar cat, a pirate chihuahua, and the crew who sail with them.","Crowned by Atara, blessed by Pippy.","Pour something cold. Pull up a stool. The tide is turning."]},
+ {t:"Pops & Pippy",s:"The bar cat and the pirate chihuahua",img:"assets/brand-watermark.png",th:"sunset",d:90,n:["Pops runs the Grotto, carrying on the legend of the world-famous bar cat Tanker Ray.","Pippy is a she-pirate chihuahua, first mate, in full pirate clothes.","Where Pops goes, Pippy follows. Where Pippy goes, trouble follows.","Together, they're the watermark on every page of this adventure."]},
+ {t:"Gaspar's Grotto",s:"Home port on Seventh Avenue",img:"assets/gaspars-logo.jpg",th:"neon",d:90,n:["Seventh Avenue, Ybor City. The door is open and the music is up.","Gaspar's Grotto is where every voyage starts and every story ends.","Pirates, regulars, and anyone brave enough to order the house grog.","Modern pirate, through and through."]},
+ {t:"Seventh Avenue",s:"Ybor City after dark",img:"gallery/street.jpg",th:"neon",d:90,n:["Brick streets, iron balconies, and neon on every corner.","The cigar factories made it famous. The people keep it alive.","Walk it slow. Everybody you know is out tonight.","Every block has a story, and most of them end at the Grotto."]},
+ {t:"The Lane",s:"A painting by Waldo Nahuel",img:"gallery/lane.jpg",th:"day",d:75,n:["A quiet lane, painted in light and color.","Waldo Nahuel, painter and musician, sees the city the way the sun does.","Look closer. There's always one more detail.","This one hangs in the gallery on the beach."]},
+ {t:"Waldo Nahuel's Gallery",s:"Impressionist light from Chile to Ybor",img:"assets/waldo-painting.jpg",th:"sunset",d:90,n:["The gallery stands on the beach, beside the broken ship.","Signed and unsigned prints, for the crew and the VIPs.","Waldo's collection lives at waldonuhel.com.","And next door, The Melissa: a virtual restaurant with his art on every wall."]},
+ {t:"The Crew",s:"Every name sails with permission",e:"🏴‍☠️",th:"day",d:90,n:["No ship sails alone.","Captains, navigators, artists, partners, family and friends.","Each of them has a seat at the table and a place on the island.","This movie is for all of them."]},
+ {t:"Captain Eric Schiller & Co-Navigator Shere",s:"Command of the ship",e:"🧭",th:"sunset",d:75,n:["Captain Eric Schiller keeps the ship on course.","Co-Navigator Shere reads the stars and the reef.","Shere's Revenge, the sword game, carries her name.","Together they keep the whole crew sailing in one direction."]},
+ {t:"Jen Runs the Ship",s:"The owners are out of town",img:"assets/jen.jpg",th:"day",d:90,n:["The owners left town. Jen didn't blink.","Deliveries at noon, payroll at two, and a fridge nobody talks about.","Five days, every manager job, and the bar never misses a beat.","Play it in the Arcade and see if you could do it."]},
+ {t:"The Merch Store",s:"Gaspar's Grotto and Ybor City gear",e:"🛍️",th:"neon",d:60,n:["Every good voyage ends with a souvenir.","Here's what's on the shelves at the Grotto.","Tap any item in the store to reserve it.","Checkout opens with the app store release."]},
+ ...STORE.map(([e,name,price])=>({t:name,s:price+" at the Merch Store",e,th:"neon",d:45,store:true,n:[`${name}. ${price}.`,"Pirate made, Ybor approved.","Pops checked it twice. Pippy chewed it once."]})),
+ {t:"Pirate Trivia",s:"Tampa, Ybor, Florida, the USA and the movies",e:"🧠",th:"day",d:75,n:["How well do you know Tampa Bay?","Ybor City, Gasparilla, the movies, and the whole USA.","Fresh questions every round.","Play solo or challenge a mate beside you."]},
+ {t:"Treasure Hunt",s:"Dig for Gaspar's lost chest",e:"💰",th:"sunset",d:75,n:["X never marks the spot. That would be too easy.","Dig the island grid, follow the sonar, and save your shovels.","Gaspar's chest is out there.","Somewhere."]},
+ {t:"Pirate Chess",s:"Dedicated to the next chess master",e:"♞",th:"night",d:75,n:["Full legal-move chess against the ship's AI or a friend.","Dedicated to Evan Schiller's little one, the future chess master.","And to Henry, a future leader and grandmaster.","Your move, Captain."]},
+ {t:"Andy Golf Club",s:"Nine pirate holes",e:"⛳",th:"day",d:75,n:["Sand traps, water hazards and the wind off the Gulf.","Drive, chip and putt across nine pirate holes.","Andy designed the course. Andy also designed the water hazards.","Mind the parrots on the fairway."]},
+ {t:"Shere's Revenge",s:"Swashbuckling sword duels",e:"⚔️",th:"sunset",d:75,n:["Steel on steel, on the deck of a rolling ship.","Parry the cue, strike on the beat.","Shere never loses. Not on purpose, anyway.","Claim the deck and take the flag."]},
+ {t:"Laura & Dom's Crossword",s:"Endless voyages and a daily puzzle",e:"✒️",th:"night",d:75,n:["Seven letters for brave. Pirate.","A daily puzzle, endless voyages, stamps and crowns to collect.","Laura and Dom are stuck on fourteen across again.","Bring a pen. A real pirate never uses pencil."]},
+ {t:"The Schiller Ledger",s:"Learn accounting the pirate way",e:"📒",th:"day",d:75,n:["Every doubloon counted, every barrel logged.","Learn real accounting by keeping a pirate tavern's books.","From deckhand to Master of the Ledger.","Dedicated to the Schiller family."]},
+ {t:"Rene's Guitar School",s:"A tribute to Rene",e:"🎸",th:"sunset",d:75,n:["Rene. My brother, and the one who always helps in a crisis.","Learn the strings and seven chords.","Then play your first song.","Everybody starts with G."]},
+ {t:"The Dragon Table at Acropolis",s:"Seventh Avenue, downstairs",e:"🐉",th:"night",d:75,n:["Down the back stairs at Acropolis, a candlelit table waits.","Landon, Steph and Roger roll the dice.","Tunnels, a cigar wraith, a kraken with reading glasses, and a dragon.","Roll high."]},
+ {t:"Tavern Games",s:"Cup Pong, Flip Cup, Shuffleboard and Darts",e:"🍺",th:"neon",d:90,n:["The tables are set and the crowd is loud.","Cup Pong on the clock. Flip Cup to fifteen.","Shuffleboard pucks that knock, and darts on a swaying board.","Play the AI or a friend on the same screen."]},
+ {t:"The Mixology Duel",s:"Pour it into a Gaspar's glass",e:"🍹",th:"neon",d:75,n:["Read the ticket. Hold the bottle. Let go on the line.","Landon versus Stephania, behind the bar at the Grotto.","Fast, clean and perfectly measured.","A game of skill. In real life, be twenty-one and drink responsibly."]},
+ {t:"Ashlee Rae",s:"Crosswords and the Tire Toss",e:"🏈",th:"sunset",d:90,n:["Ashlee Rae writes the crosswords and throws the football.","Ten footballs, one swinging tire, and a big soldier standing guard.","Thread the center for three.","Five in a row and the tire apologizes."]},
+ {t:"Pirate Pool & Bingo",s:"The hall on Danny Alonso Island",e:"🎱",th:"night",d:90,n:["Eight-ball on Gaspar's table.","Sink your group, then call the eight.","Next door, the bingo caller pulls the balls.","Beat Pops, Pippy and Landon to the bell."]},
+ {t:"Skate the Grotto",s:"Quarter pipes, rails and big combos",e:"🛹",th:"sunset",d:90,n:["Gaspar's Docks at sunset. The Ybor Night Run after dark.","Ollie, kickflip, grab and spin.","Grind the rope rails. Land it clean.","Spend your doubloons at Pippy's Surf and Skate Shack."]},
+ {t:"Ronnie & Joe's Arm Wrestling",s:"Seventh Avenue, next to Acropolis",e:"💪",th:"neon",d:75,n:["Ronnie and Joe pack Seventh Avenue every night.","Beat them both and stamp your Ybor Night Pass.","Then head down to Gaspar's Grotto.","And tell the whole street where the party is."]},
+ {t:"Ybor Cay",s:"The island where every game is a place",e:"🏝️",th:"sunset",d:120,n:["Walk the beach with Pops and Pippy at your heels.","Your parrot rides on your shoulder and repeats every word.","Sail the Pippy out to the outer keys. Watch the reef.","Day turns to night, the Gulf rain rolls in, and the neon comes up."]},
+ {t:"Police Station & Hospital",s:"Captain College and Rani",e:"🚓",th:"day",d:90,n:["Captain College keeps Ybor Cay safe.","Wanted: the Giant Reef Crab, the Sea Serpent, the Great Kraken and the Leviathan.","Next door, Rani runs the hospital.","Rough fight? Rani will patch you up."]},
+ {t:"Danny Alonso Island",s:"Resort villas and the travel dock",e:"🌴",th:"sunset",d:90,n:["Out past the reef, an island named for Danny Alonso.","Villas on the sand, a skate park on the hill, and a dock to the world.","Casa Rincón, the Valpo Loft, the Andes Lodge, the Captain's Quarters.","Pick a villa. Stay a while."]},
+ {t:"Rincón, Puerto Rico",s:"The surf town on the west coast",e:"🏄",th:"sunset",d:90,n:["Big winter waves from October to February.","Humpback whales off the lighthouse from about November to April.","The best sunsets in the Caribbean.","Fly into Aguadilla and rent a car."]},
+ {t:"Valparaíso, Chile",s:"The painted port",e:"🎨",th:"day",d:90,n:["A UNESCO World Heritage port built across steep hills.","Ride the old funiculars above the bay.","Visit La Sebastiana, Pablo Neruda's house.","About an hour and a half from Santiago."]},
+ {t:"Santiago, Chile",s:"The capital under the Andes",e:"🏔️",th:"night",d:90,n:["Snow-capped mountains on the horizon.","Ride up Cerro San Cristóbal for the view.","Mercado Central, Bellavista and the wine valleys.","Ski the Andes in winter."]},
+ {t:"Camp Akiba",s:"Where best friends meet",e:"🔥",th:"night",d:120,n:["Bunks, a lake, and a fire that never really goes out.","The best friends in your life are already saving you a seat.","Friendship bracelets. Camp letters. Marshmallows, golden or charcoal.","Best friends for life. That's the rule."]},
+ {t:"Riviera Schools",s:"Everyone is welcome",e:"🎓",th:"day",d:75,n:["History, science, math, English and Spanish.","The USA and the Pledge of Allegiance.","Neutral, accepting, and open to everyone.","Class is always in session on the island."]},
+ {t:"For Ruben & Rene",s:"My brothers",e:"❤️",th:"sunset",d:90,n:["Ruben is my brother. I wouldn't have made it without his help.","His cliff in Chile, and the hospital that saved his life, are on the island.","Rene, my brother, who always helps us in a crisis.","Thank you."]},
+ {t:"Book the Plank Bar",s:"VIP nights and your own event",e:"🍸",th:"neon",d:75,n:["A VIP experience at the Plank Bar.","Or build your own event with famous artists and DJs.","Entertainment for the whole crew.","Ask at the Grotto."]},
+ {t:"All Access",s:"One dollar a year",e:"⚓",th:"neon",d:60,n:["Everything is free to try.","All Access unlocks tournaments, matchmaking, VIP gallery downloads and seasonal loot.","One dollar a year, plus tax and processing fees.","Coming with the app store release."]}
+];
+const used=C.reduce((a,c)=>a+c.d,0);
+C.push({t:"Fair Winds",s:"Credits",img:"assets/pops-pippy-official.jpg",th:"sunset",d:3600-used,credits:true,n:["Created by Adam Kornreich, R.A. Consulting.","Starring Pops and Pippy.","With Captain Eric Schiller, Co-Navigator Shere, and the whole crew.","Gaspar's Grotto, Seventh Avenue, Ybor City, Tampa.","Thank you to everyone who sails with us.","© 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy. All rights reserved.","Fair winds, and come back soon.","The lanterns stay on all night."]});
+let acc=0;C.forEach(c=>{c.at=acc;acc+=c.d});
+const TOTAL=acc; // 3600
+$("chs").innerHTML=C.map((c,i)=>`<option value="${i}">${i+1}. ${c.t}</option>`).join("");
+
+/* ---------- 3D scene ---------- */
+const host=$("mv");
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+host.prepend(renderer.domElement);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(55,16/9,.1,900);
+function resize(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w/h<1?70:55;camera.updateProjectionMatrix();}
+addEventListener("resize",resize);document.addEventListener("fullscreenchange",()=>setTimeout(resize,50));
+const THEMES={sunset:{top:[.18,.06,.35],mid:[.95,.38,.42],bot:[1,.72,.4],sun:[1,.7,.45],hemi:.75,fog:[.8,.4,.42]},night:{top:[.01,.01,.05],mid:[.07,.05,.2],bot:[.25,.12,.3],sun:[.55,.6,1],hemi:.35,fog:[.06,.04,.14]},day:{top:[.12,.42,.78],mid:[.55,.8,.92],bot:[.95,.92,.82],sun:[1,.96,.86],hemi:1,fog:[.62,.8,.88]},neon:{top:[.05,.01,.12],mid:[.45,.06,.4],bot:[.1,.7,.75],sun:[1,.4,.75],hemi:.55,fog:[.25,.06,.3]}};
+const skyU={top:{value:new THREE.Color()},mid:{value:new THREE.Color()},bot:{value:new THREE.Color()},time:{value:0}};
+const sky=new THREE.Mesh(new THREE.SphereGeometry(500,32,16),new THREE.ShaderMaterial({uniforms:skyU,side:THREE.BackSide,depthWrite:false,
+ vertexShader:"varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+ fragmentShader:"uniform vec3 top,mid,bot;uniform float time;varying vec3 vP;float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}void main(){float y=normalize(vP).y;vec3 c=y>0.?mix(mid,top,pow(y,.6)):mix(mid,bot,pow(-y,.5));vec2 g=floor(normalize(vP).xz/(y+.3)*220.);float s=step(.998,h(g))*smoothstep(.05,.4,y)*(1.-length(mid));c+=vec3(s)*(.6+.4*sin(time*2.+h(g)*40.));gl_FragColor=vec4(c,1.);}"}));
+scene.add(sky);
+scene.fog=new THREE.Fog(0x000000,70,480);
+const hemi=new THREE.HemisphereLight(0xffffff,0x332244,.8);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffffff,1.6);sun.position.set(60,80,-40);scene.add(sun);
+/* ocean */
+const seaU={time:{value:0},deep:{value:new THREE.Color(0x0a2a40)},shal:{value:new THREE.Color(0x1f8fa0)},glow:{value:new THREE.Color(0xffa070)}};
+const sea=new THREE.Mesh(new THREE.PlaneGeometry(900,900,160,160),new THREE.ShaderMaterial({uniforms:seaU,fog:false,
+ vertexShader:"uniform float time;varying float vH;varying vec3 vW;void main(){vec3 p=position;float h=.6*sin(p.x*.06+time*.9)+.4*sin(p.y*.09+time*1.2)+.2*sin((p.x+p.y)*.2+time*2.);p.z+=h;vH=h;vec4 w=modelMatrix*vec4(p,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}",
+ fragmentShader:"uniform vec3 deep,shal,glow;varying float vH;varying vec3 vW;void main(){float d=length(vW.xz)/450.;vec3 c=mix(shal,deep,clamp(d+.2,0.,1.));c+=glow*smoothstep(.5,1.2,vH)*.35;c=mix(c,glow*.5,smoothstep(.6,1.,d)*.6);gl_FragColor=vec4(c,1.);}"}));
+sea.rotation.x=-Math.PI/2;sea.position.y=-2;scene.add(sea);
+/* coins and sparkles */
+const coinGeo=new THREE.CylinderGeometry(.5,.5,.1,20),coinMat=new THREE.MeshStandardMaterial({color:0xf6d67a,metalness:1,roughness:.25,emissive:0x5a3a08,emissiveIntensity:.5});
+const NC=140,coins=new THREE.InstancedMesh(coinGeo,coinMat,NC);scene.add(coins);
+const coinD=[...Array(NC)].map(()=>({x:(Math.random()-.5)*160,y:Math.random()*30,z:(Math.random()-.5)*160,s:.5+Math.random(),r:Math.random()*6,v:.3+Math.random()*.8}));
+const spG=new THREE.BufferGeometry(),spP=new Float32Array(900*3);for(let i=0;i<900;i++){spP[i*3]=(Math.random()-.5)*200;spP[i*3+1]=Math.random()*50;spP[i*3+2]=(Math.random()-.5)*200}spG.setAttribute("position",new THREE.BufferAttribute(spP,3));
+const sparkles=new THREE.Points(spG,new THREE.PointsMaterial({color:0xfff0c0,size:.35,transparent:true,opacity:.8,depthWrite:false,blending:THREE.AdditiveBlending}));scene.add(sparkles);
+/* the pirate ship */
+const ship=new THREE.Group();{const wood=new THREE.MeshStandardMaterial({color:0x4a2a14,roughness:.8}),sail=new THREE.MeshStandardMaterial({color:0xf4ead6,roughness:.9,side:THREE.DoubleSide}),blk=new THREE.MeshStandardMaterial({color:0x111111,side:THREE.DoubleSide});
+ const hull=new THREE.Mesh(new THREE.BoxGeometry(5,2.2,14),wood);hull.position.y=.6;ship.add(hull);const deck=new THREE.Mesh(new THREE.BoxGeometry(4.4,.3,13),new THREE.MeshStandardMaterial({color:0x8a5a2c}));deck.position.y=1.8;ship.add(deck);
+ for(const [z,h] of [[-3,11],[2.5,13]]){const m=new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,h,8),wood);m.position.set(0,h/2+1.8,z);ship.add(m);const s=new THREE.Mesh(new THREE.PlaneGeometry(5.5,4.5,8,4),sail);s.position.set(0,h*.62+1.8,z+.2);s.rotation.y=Math.PI/2;ship.add(s);ship.userData.sails=(ship.userData.sails||[]).concat(s)}
+ const flag=new THREE.Mesh(new THREE.PlaneGeometry(1.8,1.1),blk);flag.position.set(0,15.6,2.5);ship.add(flag);}
+scene.add(ship);
+
+/* framed panels: one per chapter, spiraling around the bay */
+const loader=new THREE.TextureLoader(),frameMat=new THREE.MeshStandardMaterial({color:0xc9a14a,metalness:.9,roughness:.3});
+function card(c){const W=1024,H=640,cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");
+ const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,c.store?"#2a0f3a":"#1b2340");gr.addColorStop(1,c.store?"#5a1a4a":"#0b0e18");g.fillStyle=gr;g.fillRect(0,0,W,H);
+ g.strokeStyle="#e8b84a";g.lineWidth=10;g.strokeRect(24,24,W-48,H-48);g.textAlign="center";g.textBaseline="middle";
+ g.font="230px serif";g.fillText(c.e||"⚓",W/2,H*.4);g.fillStyle="#f6d67a";g.font="64px 'Pirata One',Georgia,serif";g.fillText(c.t.length>30?c.t.slice(0,29)+"…":c.t,W/2,H*.76);g.fillStyle="#fff3d6";g.font="40px 'Pirata One',Georgia,serif";g.fillText(c.s.slice(0,44),W/2,H*.87);
+ const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t}
+const panels=[];
+const RING=165;function placeOf(i){const a=i/C.length*Math.PI*2;return new THREE.Vector3(Math.cos(a)*RING,9+Math.sin(i*1.7)*1.5,Math.sin(a)*RING)}
+function buildPanels(){C.forEach((c,i)=>{const g=new THREE.Group(),p=placeOf(i);g.position.copy(p);g.lookAt(0,p.y,0);
+ const mat=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false,side:THREE.DoubleSide});const pic=new THREE.Mesh(new THREE.PlaneGeometry(16,10),mat);g.add(pic);
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(17,11,.4),frameMat);fr.position.z=-.25;g.add(fr);
+ if(c.img){loader.load(c.img,t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.needsUpdate=true;const ar=t.image.width/t.image.height;pic.scale.x=Math.min(1.6,ar/1.6);});}else{mat.map=card(c);mat.needsUpdate=true}
+ scene.add(g);panels.push(g)});}
+
+/* ---------- time → camera (so jumping anywhere is instant) ---------- */
+const sstep=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
+function chapterAt(t){let i=C.length-1;for(let k=0;k<C.length;k++){if(t<C[k].at+C[k].d){i=k;break}}return i}
+function camFor(i,u,d){const p=placeOf(i),inward=new THREE.Vector3(-p.x,0,-p.z).normalize(),side=new THREE.Vector3(-inward.z,0,inward.x);const k=u/d,ang=Math.sin(k*Math.PI*2)*.35,dist=22-k*7;
+ const pos=p.clone().addScaledVector(inward,dist*Math.cos(ang)).addScaledVector(side,dist*Math.sin(ang));pos.y=p.y+2+Math.sin(k*Math.PI)*3;return {pos,look:p.clone()}}
+function cameraAt(t){const i=chapterAt(t),c=C[i],u=t-c.at;let A=camFor(i,u,c.d);if(i>0&&u<4){const pc=C[i-1],B=camFor(i-1,pc.d,pc.d),k=sstep(0,4,u);const mid=B.pos.clone().lerp(A.pos,k);mid.y+=Math.sin(k*Math.PI)*14;A={pos:mid,look:B.look.clone().lerp(A.look,k)}}return {...A,i,u}}
+function themeAt(t){const i=chapterAt(t),u=t-C[i].at,cur=THEMES[C[i].th],prev=i>0?THEMES[C[i-1].th]:cur,k=sstep(0,5,u);const mix=(a,b)=>a.map((v,j)=>v+(b[j]-v)*k);return {top:mix(prev.top,cur.top),mid:mix(prev.mid,cur.mid),bot:mix(prev.bot,cur.bot),sun:mix(prev.sun,cur.sun),hemi:prev.hemi+(cur.hemi-prev.hemi)*k,fog:mix(prev.fog,cur.fog)}}
+
+/* ---------- overlays ---------- */
+let lastI=-1,lastLine=-1;
+function fmt(s){s=Math.max(0,Math.floor(s));return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
+function overlays(t,i,u){const c=C[i];
+ if(i!==lastI){lastI=i;lastLine=-1;$("chap").textContent=`Chapter ${i+1} of ${C.length} · ${c.t}`;$("tH").textContent=c.t;$("tP").textContent=c.s;$("chs").value=String(i);if(playing&&i>0)sfx.whoosh();if(playing&&c.store)setTimeout(()=>sfx.coin(),900)}
+ $("title").style.opacity=u<7?1:0;
+ const per=c.credits?9:Math.max(9,c.d/c.n.length),li=Math.floor(Math.max(0,u-2)/per)%c.n.length;
+ if(li!==lastLine){lastLine=li;const el=$("narr");el.style.opacity=0;setTimeout(()=>{el.textContent=c.n[li];el.style.opacity=1},300)}
+ $("tm").textContent=`${fmt(t)} / ${fmt(TOTAL)}`;if(!seeking)$("seek").value=String(Math.floor(t));}
+
+/* ---------- score and sound effects (all synthesized) ---------- */
+let ac=null,master=null,musicOn=true,seaN=null,scoreT=null,nextBeat=0,beat=0;
+function ensureAudio(){if(ac)return;try{ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.8;master.connect(ac.destination);
+ const nb=ac.createBuffer(1,ac.sampleRate*3,ac.sampleRate),d=nb.getChannelData(0);let l=0;for(let i=0;i<d.length;i++){l=l*.98+(Math.random()*2-1)*.05;d[i]=l*2.2}
+ const s=ac.createBufferSource();s.buffer=nb;s.loop=true;const f=ac.createBiquadFilter();f.type="lowpass";f.frequency.value=700;seaN=ac.createGain();seaN.gain.value=0;s.connect(f);f.connect(seaN);seaN.connect(master);s.start()}catch(e){}}
+const sndOff=()=>{const b=document.getElementById("soundBtn");return b&&/off/.test(b.textContent)};
+function note(f,t,d,v,type="triangle",det=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);o.detune.value=det;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+Math.min(.4,d*.3));g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05)}
+const mt=m=>440*Math.pow(2,(m-69)/12);
+const PROG={sunset:[[50,53,57],[46,50,53],[53,57,60],[48,52,55]],night:[[45,48,52],[41,45,48],[43,47,50],[40,43,47]],day:[[48,52,55],[53,57,60],[55,59,62],[48,52,55]],neon:[[45,49,52],[50,53,57],[47,50,54],[52,56,59]]};
+function scoreTick(){if(!ac||!playing||!musicOn||sndOff())return;const spb=60/76;while(nextBeat<ac.currentTime+.4){const th=C[chapterAt(T)].th,pr=PROG[th],ch=pr[Math.floor(beat/8)%4];
+ if(beat%8===0)ch.forEach((m,j)=>{note(mt(m),nextBeat,spb*8,.035,"sawtooth",j*4-4);note(mt(m+12),nextBeat,spb*8,.018,"sine")});
+ if(beat%2===0)note(mt(ch[0]-12),nextBeat,spb*1.6,.07,"triangle");
+ const arp=[0,1,2,1,2,0,1,2];if(th!=="night"||beat%2===0)note(mt(ch[arp[beat%8]]+12),nextBeat+spb*.5,spb*.9,.03,"triangle");
+ nextBeat+=spb;beat++}}
+const sfx={whoosh(){if(!ac||sndOff())return;const t=ac.currentTime,b=ac.createBuffer(1,ac.sampleRate*1.4,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=b;f.type="bandpass";f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(2400,t+.7);f.frequency.exponentialRampToValueAtTime(500,t+1.3);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.5);g.gain.exponentialRampToValueAtTime(.0001,t+1.35);s.connect(f);f.connect(g);g.connect(master);s.start(t);note(mt(81),t+.6,1.6,.03,"sine");note(mt(88),t+.75,1.4,.02,"sine")},
+ coin(){if(!ac||sndOff())return;const t=ac.currentTime;for(let i=0;i<6;i++){note(1300+Math.random()*700,t+i*.09,.18,.04,"triangle")}}};
+
+/* ---------- playback ---------- */
+let T=Math.min(store.get("py_movie_t",0),TOTAL-5),playing=false,seeking=false,last=performance.now(),saveT=0;
+if(T>30)$("resume").textContent=`You stopped at ${fmt(T)}. Press play to pick up there.`;
+function setPlaying(p){playing=p;$("pp").textContent=p?"❚❚":"▶";if(p){ensureAudio();if(ac&&ac.state!=="running")ac.resume();if(ac){nextBeat=ac.currentTime+.1;seaN&&seaN.gain.setTargetAtTime(sndOff()?0:.12,ac.currentTime,.5)}}else if(ac&&seaN)seaN.gain.setTargetAtTime(0,ac.currentTime,.3);}
+$("go").onclick=()=>{$("start").hidden=true;setPlaying(true)};
+$("pp").onclick=()=>setPlaying(!playing);
+$("seek").addEventListener("input",e=>{seeking=true;T=+e.target.value;});$("seek").addEventListener("change",()=>{seeking=false;lastI=-1});
+$("chs").onchange=e=>{T=C[+e.target.value].at+.01;lastI=-1;$("start").hidden=true;if(!playing)setPlaying(true)};
+$("mus").onclick=()=>{musicOn=!musicOn;$("mus").setAttribute("aria-pressed",String(musicOn));$("mus").textContent=musicOn?"🎻 Score on":"🎻 Score off";if(musicOn&&ac)nextBeat=ac.currentTime+.1};
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():host.requestFullscreen()}catch(e){}};
+addEventListener("keydown",e=>{if(e.code==="Space"&&e.target===document.body){e.preventDefault();if($("start").hidden)setPlaying(!playing);else $("go").click()}if(e.code==="ArrowRight"){T=Math.min(TOTAL-1,T+30);lastI=-1}if(e.code==="ArrowLeft"){T=Math.max(0,T-30);lastI=-1}});
+setInterval(scoreTick,80);
+
+const m4=new THREE.Matrix4(),q4=new THREE.Quaternion(),v3=new THREE.Vector3(),s3=new THREE.Vector3(),e3=new THREE.Euler();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(playing&&!seeking){T+=dt;if(T>=TOTAL){T=TOTAL;setPlaying(false)}}
+ const cam=cameraAt(T),th=themeAt(T),wall=now/1000;
+ camera.position.copy(cam.pos);camera.lookAt(cam.look);
+ skyU.top.value.setRGB(...th.top);skyU.mid.value.setRGB(...th.mid);skyU.bot.value.setRGB(...th.bot);skyU.time.value=wall;scene.fog.color.setRGB(...th.fog);
+ sun.color.setRGB(...th.sun);hemi.intensity=th.hemi;seaU.time.value=wall;seaU.glow.value.setRGB(...th.sun);
+ const deepK=th.hemi;seaU.deep.value.setRGB(.02*deepK+.01,.1*deepK+.02,.18*deepK+.05);seaU.shal.value.setRGB(.08*deepK,.45*deepK+.05,.5*deepK+.08);
+ coinD.forEach((c,k)=>{c.y+=c.v*dt*.6;if(c.y>34)c.y=0;e3.set(Math.PI/2,0,wall*2*c.v+c.r);q4.setFromEuler(e3);v3.set(c.x+cam.look.x*.8,c.y,c.z+cam.look.z*.8);s3.setScalar(c.s);m4.compose(v3,q4,s3);coins.setMatrixAt(k,m4)});coins.instanceMatrix.needsUpdate=true;
+ sparkles.rotation.y=wall*.01;sparkles.material.opacity=.5+.3*Math.sin(wall*1.3);
+ const sa=wall*.03;ship.position.set(Math.cos(sa)*120,-1.6+Math.sin(wall*.8)*.25,Math.sin(sa)*70);ship.rotation.y=-sa;ship.rotation.z=Math.sin(wall*.7)*.04;
+ (ship.userData.sails||[]).forEach(s=>{const p=s.geometry.attributes.position;for(let j=0;j<p.count;j++){const x=p.getX(j);p.setZ(j,Math.sin(x*.8+wall*3)*.25+.3)}p.needsUpdate=true});
+ panels.forEach((g,k)=>{g.position.y=placeOf(k).y+Math.sin(wall*.6+k)*.3});
+ overlays(T,cam.i,cam.u);
+ saveT+=dt;if(saveT>5){saveT=0;store.set("py_movie_t",T)}
+ renderer.render(scene,camera);requestAnimationFrame(frame);}
+const ready=document.fonts&&document.fonts.load?Promise.race([document.fonts.load("64px 'Pirata One'"),new Promise(r=>setTimeout(r,2500))]):Promise.resolve();
+ready.then(()=>{buildPanels();resize();lastI=-1;requestAnimationFrame(frame)});
+window.__movie={get T(){return T},set T(v){T=v;lastI=-1},C,TOTAL};
+</script>
+</body></html>

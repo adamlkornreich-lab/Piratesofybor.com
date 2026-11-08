@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pirate Bingo</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.ph{padding:18px 0 4px}.ph h1{margin:0;color:var(--gold2);font-size:clamp(1.9rem,7vw,2.8rem)}.ph p{margin:4px 0 0;color:var(--mute);max-width:65ch}
+.ph .where{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sea)}
+.bg{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:760px){.bg{grid-template-columns:minmax(0,1fr)}}
+.caller{display:flex;align-items:center;gap:14px;background:var(--panel2);border:1px solid rgba(232,184,74,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px;min-width:0}
+.ball{width:76px;height:76px;flex:none;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#f6d67a 19% 60%,#b5532a 61%);color:#2a1d05;font:400 1.7rem/1 var(--display);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.ball.pop{animation:pop .45s ease-out}@keyframes pop{0%{transform:scale(.4) rotate(-90deg)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.ball.pop{animation:none}}
+.callline{min-width:0}.callline b{display:block;color:var(--gold2);font-size:1.05rem}.callline span{color:var(--mute);font-size:.92rem}
+.card{background:#f3e6c4;border-radius:14px;padding:10px;box-shadow:var(--shadow);max-width:460px;margin:0 auto}
+.card:hover{transform:none}.card::after{display:none}
+.hdr,.grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.hdr div{text-align:center;font:400 clamp(1.6rem,7vw,2.2rem)/1.1 var(--display);color:#7a1f1f}
+.sq{aspect-ratio:1;border:0;border-radius:10px;background:#fff8e6;color:#2a1d05;font:700 clamp(1.1rem,5vw,1.5rem) Georgia,serif;cursor:pointer;position:relative;display:grid;place-items:center;box-shadow:inset 0 0 0 2px #d9c49a;padding:0;min-width:0}
+.sq:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.sq.called{box-shadow:inset 0 0 0 3px #e8b84a}
+.sq.d::after{content:"";position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,rgba(181,83,42,.85) 0 55%,rgba(181,83,42,.55) 56% 70%,transparent 71%);}
+.sq.free{background:#2a1d05;color:#f6d67a;font:400 .95rem/1 var(--display);box-shadow:none}
+.sq.free::after{display:none}
+.sq.win{background:#ffe29a}
+.under{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
+#bingo{font-size:1.3rem;padding:12px 28px;font-family:var(--display);letter-spacing:1px}
+.side{display:grid;gap:12px;min-width:0}
+.box{background:var(--panel2);border:1px solid rgba(232,184,74,.22);border-radius:12px;padding:12px 14px;min-width:0}
+.box h3{margin:0 0 8px;color:var(--gold2);font-family:var(--display);font-weight:400;font-size:1.3rem}
+.rv{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed rgba(232,184,74,.15);font-variant-numeric:tabular-nums}
+.rv:last-child{border:0}.rv span{color:var(--mute)}.rv.hot span{color:#ff8a6b;font-weight:bold}
+.board{display:grid;grid-template-columns:auto repeat(15,minmax(0,1fr));gap:2px;font:600 9px/1.9 system-ui,sans-serif;text-align:center;color:#56607a}
+.board b{color:var(--gold2);font:400 12px/1.6 var(--display);padding-right:3px}
+.board i{font-style:normal;border-radius:3px}.board i.on{background:var(--gold);color:#2a1d05}
+.opts{display:grid;gap:8px}.opts label{margin:0}
+.opts select{width:100%}
+.chk{display:flex;align-items:center;gap:8px;color:var(--fog);font-size:.92rem}.chk input{width:auto}
+.msg{min-height:1.6em;text-align:center;font-weight:bold;color:var(--gold2);margin:10px 0 0}
+.doub{font-variant-numeric:tabular-nums}
+</style></head>
+<body>
+<main class="wrap">
+  <div class="ph"><div class="where">Pirate Pool &amp; Bingo Hall · Cross St, across from Acropolis</div><h1>Pirate Bingo</h1><p>The caller pulls the balls, you daub your card. Shout BINGO first and the doubloons are yours. Pops, Pippy and Landon are playing too, and they don't miss.</p></div>
+  <div class="bg">
+    <div>
+      <div class="caller"><div class="ball" id="ball">⚓</div><div class="callline"><b id="callB">Pick a game and hit Start.</b><span id="callS">The caller is warming up the cage.</span></div></div>
+      <div class="card" id="card" aria-label="Your bingo card"></div>
+      <div class="under"><button class="btn rum" id="bingo" disabled>BINGO!</button><button class="btn" id="start">Start game</button></div>
+      <p class="msg" id="msg" aria-live="polite"></p>
+    </div>
+    <aside class="side">
+      <div class="box opts">
+        <h3>Game</h3>
+        <label for="pat">Pattern</label><select id="pat"><option value="line">Any line (row, column, diagonal)</option><option value="corners">Four corners</option><option value="x">The Crossbones (both diagonals)</option><option value="full">Blackout (whole card)</option></select>
+        <label for="spd">Caller speed</label><select id="spd"><option value="4600">Easy going</option><option value="3300" selected>Tavern pace</option><option value="2100">Gasparilla rush</option></select>
+        <label class="chk"><input type="checkbox" id="auto"> Auto-daub my card</label>
+        <label class="chk"><input type="checkbox" id="voice" checked> Caller's voice</label>
+      </div>
+      <div class="box"><h3>At the table</h3><div id="rivals"></div><div class="rv" style="margin-top:6px"><span>Your doubloons</span><b class="doub" id="doub">0</b></div></div>
+      <div class="box"><h3>Called</h3><div class="board" id="board"></div></div>
+      <a class="btn ghost" href="world.html#poolhall">🏝 Back to the island</a>
+    </aside>
+  </div>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+const $=i=>document.getElementById(i),L="BINGO";
+const PATS={
+ line:{name:"any line",need:c=>{const ls=[];for(let i=0;i<5;i++){ls.push([0,1,2,3,4].map(j=>i*5+j));ls.push([0,1,2,3,4].map(j=>j*5+i));}ls.push([0,6,12,18,24],[4,8,12,16,20]);return ls;}},
+ corners:{name:"four corners",need:()=>[[0,4,20,24]]},
+ x:{name:"the crossbones",need:()=>[[0,6,12,18,24,4,8,16,20]]},
+ full:{name:"blackout",need:()=>[[...Array(25).keys()]]}};
+const NICK={1:"Kelly's eye",7:"Lucky seven, Pops' favorite",8:"One fat pirate",11:"Legs eleven",13:"Unlucky for some, lucky for the crew",21:"Key of the door",22:"Two little ducks",33:"All the threes",44:"Droopy drawers",45:"Halfway there",55:"Snakes alive",66:"Clickety click",69:"Either way up",75:"Last ball in the cage"};
+const FLAVOR=["Pippy wags her tail.","Pops knocks a glass off the bar.","Someone at the back yells 'Arrr!'","The parrot repeats it.","Landon pretends he already had it.","A doubloon rolls across the floor.","The bell over the bar rings once."];
+const CREW=[{n:"Pops",t:"the bar cat"},{n:"Pippy",t:"the pirate chihuahua"},{n:"Landon",t:"the tavern regular"}];
+let mine,daub,called,cage,timer,playing,rivals,pat,doub=0,falseCalls=0;
+try{doub=+localStorage.getItem("py_bingo_doub")||0;}catch(e){}
+$("doub").textContent=doub;
+
+function makeCard(){const c=[];for(let col=0;col<5;col++){const pool=[...Array(15)].map((_,i)=>col*15+i+1).sort(()=>Math.random()-.5).slice(0,5);for(let r=0;r<5;r++)c[r*5+col]=pool[r];}c[12]=0;return c;}
+function letter(n){return L[Math.floor((n-1)/15)];}
+
+function drawCard(){
+ $("card").innerHTML=`<div class="hdr">${[...L].map(x=>`<div>${x}</div>`).join("")}</div><div class="grid5">${mine.map((n,i)=>n===0?`<button class="sq free d" disabled aria-label="Free space">FREE<br>☠</button>`:`<button class="sq ${daub[i]?"d":""} ${called.has(n)&&!daub[i]?"called":""}" data-i="${i}" aria-pressed="${!!daub[i]}" aria-label="${letter(n)} ${n}${daub[i]?", daubed":""}">${n}</button>`).join("")}</div>`;
+}
+function drawBoard(){let h="";for(let r=0;r<5;r++){h+=`<b>${L[r]}</b>`;for(let k=1;k<=15;k++){const n=r*15+k;h+=`<i class="${called.has(n)?"on":""}">${n}</i>`;}}$("board").innerHTML=h;}
+function drawRivals(){$("rivals").innerHTML=rivals.map(r=>{const need=toGo(r.card,r.d);return `<div class="rv ${need===1?"hot":""}"><b>${r.n}</b><span>${need===0?"BINGO!":need===1?"needs 1!":"needs "+need}</span></div>`;}).join("");}
+
+function lines(){return PATS[pat].need();}
+function toGo(card,d){return Math.min(...lines().map(l=>l.filter(i=>!d[i]).length));}
+function winLine(d){return lines().find(l=>l.every(i=>d[i]));}
+
+function start(){
+ clearTimeout(timer);pat=$("pat").value;mine=makeCard();daub=Array(25).fill(false);daub[12]=true;called=new Set();
+ cage=[...Array(75)].map((_,i)=>i+1).sort(()=>Math.random()-.5);
+ rivals=CREW.map(c=>{const card=makeCard(),d=Array(25).fill(false);d[12]=true;return{...c,card,d};});
+ playing=true;falseCalls=0;$("bingo").disabled=false;$("start").textContent="Restart";
+ $("msg").textContent=`Playing ${PATS[pat].name}. Daub each number the caller pulls, then shout BINGO.`;
+ $("ball").textContent="⚓";$("callB").textContent="Eyes down…";$("callS").textContent="First ball coming up.";
+ drawCard();drawBoard();drawRivals();timer=setTimeout(next,1400);
+}
+
+function speak(t){if(!$("voice").checked||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=1.02;u.pitch=.82;speechSynthesis.speak(u);}catch(e){}}
+let ac=null;function tone(f,d,v,at){const sb=document.getElementById("soundBtn");if(sb&&/off/.test(sb.textContent))return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+(at||0);o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(v||.05,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+d);}catch(e){}}
+
+function next(){
+ if(!playing)return;
+ if(!cage.length){end(null,"The cage is empty and nobody called it. A draw at the hall.");return;}
+ const n=cage.pop();called.add(n);
+ const b=$("ball");b.textContent=letter(n)+n;b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");
+ const nick=NICK[n];$("callB").textContent=`${letter(n)} ${n}${nick?" · "+nick:""}`;$("callS").textContent=Math.random()<.35?FLAVOR[Math.floor(Math.random()*FLAVOR.length)]:`${called.size} of 75 called`;
+ speak(`${letter(n)}, ${n}${nick?". "+nick:""}`);tone(660,.12,.04);
+ if($("auto").checked){const i=mine.indexOf(n);if(i>=0)daub[i]=true;}
+ // rivals daub with a short, human delay; one may react slower
+ rivals.forEach(r=>{const i=r.card.indexOf(n);if(i>=0){r.d[i]=true;}});
+ drawCard();drawBoard();drawRivals();
+ const winner=rivals.find(r=>winLine(r.d));
+ if(winner){timer=setTimeout(()=>{if(!playing)return;if(myBingo()){$("msg").textContent=`${winner.n} is reaching for the bell… you have it too. Shout now!`;timer=setTimeout(()=>{if(playing)end(winner,`${winner.n} rang the bell first and takes the pot.`);},1600);}else end(winner,`BINGO! ${winner.n}, ${winner.t}, wins this one.`);},900+Math.random()*900);return;}
+ timer=setTimeout(next,+$("spd").value);
+}
+
+function myBingo(){return !!winLine(daub.map((d,i)=>d&&(i===12||called.has(mine[i]))));}
+
+$("card").addEventListener("click",e=>{const s=e.target.closest(".sq");if(!s||!playing||s.disabled)return;const i=+s.dataset.i,n=mine[i];
+ if(!called.has(n)){$("msg").textContent=`${letter(n)} ${n} hasn't been called yet.`;tone(150,.2,.05);return;}
+ daub[i]=!daub[i];tone(daub[i]?880:440,.08,.04);drawCard();
+ const left=toGo(mine,daub);$("msg").textContent=left===0?"That's a bingo on your card. Shout it!":left===1?"One away…":"";});
+
+$("bingo").onclick=()=>{if(!playing)return;
+ if(myBingo())return end("me","BINGO! You rang the bell first. +"+prize()+" doubloons.");
+ falseCalls++;tone(110,.4,.08);$("msg").textContent=falseCalls>=3?"Three false calls. The caller sits you out for this game.":"Not a bingo yet. The whole hall heard that. Check your card.";
+ if(falseCalls>=3){playing=false;$("bingo").disabled=true;timer=setTimeout(()=>{const w=rivals.slice().sort((a,b)=>toGo(a.card,a.d)-toGo(b.card,b.d))[0];$("msg").textContent+=` ${w.n} eventually wins.`;},1200);}};
+
+function prize(){return {line:10,corners:15,x:25,full:60}[pat];}
+function end(w,text){
+ playing=false;clearTimeout(timer);$("bingo").disabled=true;$("msg").textContent=text;$("callS").textContent="Game over. Hit Restart for a new card.";
+ const wl=w==="me"?winLine(daub):w&&w!=="me"?winLine(w.d):null;
+ if(w==="me"){doub+=prize();try{localStorage.setItem("py_bingo_doub",doub)}catch(e){}$("doub").textContent=doub;window.PY&&PY.celebrate&&PY.celebrate();speak("Bingo! We have a winner.");
+  drawCard();wl&&wl.forEach(i=>{const el=$("card").querySelectorAll(".sq")[i];el&&el.classList.add("win");});}
+ else{speak(text);tone(330,.4,.05);tone(262,.5,.05,.25);}
+}
+
+$("start").onclick=start;$("pat").onchange=()=>{if(playing)start();};
+// idle state
+mine=makeCard();daub=Array(25).fill(false);daub[12]=true;called=new Set();rivals=CREW.map(c=>({...c,card:makeCard(),d:Object.assign(Array(25).fill(false),{12:true})}));pat="line";
+drawCard();drawBoard();drawRivals();
+})();
+</script>
+</body></html>

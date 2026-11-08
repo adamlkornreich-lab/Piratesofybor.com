@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mixology Duel</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.mx{min-height:440px;scroll-margin-top:72px}
+body.playing .pp-watermark{opacity:.22}
+.mx h2{font-family:var(--display);font-weight:400;font-size:clamp(1.7rem,6vw,2.3rem);margin:0 0 6px}
+.mx p{max-width:65ch}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+@media (max-width:560px){.modes{grid-template-columns:1fr}}
+.mode{text-align:left;padding:14px;border-radius:12px;border:1px solid rgba(232,184,74,.35);background:var(--panel2);color:var(--fog);font:inherit;cursor:pointer;min-width:0}
+.mode:hover{border-color:var(--gold)}.mode:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.mode b{display:block;color:var(--gold2);font-family:var(--display);font-weight:400;font-size:1.4rem;line-height:1.1}
+.mode span{color:var(--mute);font-size:.92rem}
+.mhud{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;font-weight:bold;font-variant-numeric:tabular-nums;margin-bottom:10px}
+.mhud .who{color:var(--gold2)}.mhud .low{color:#ff8a6b}
+.rival{font-size:.9rem;color:var(--mute);margin:-4px 0 10px;font-variant-numeric:tabular-nums;min-height:1.4em}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:14px;align-items:start}
+@media (max-width:560px){.bar{grid-template-columns:minmax(0,1fr) 120px}}
+.ticket{background:#f3e6c4;color:#2a1d05;border-radius:6px;padding:12px 14px;box-shadow:0 6px 18px rgba(0,0,0,.4);font-family:Georgia,serif;min-width:0;position:relative}
+.ticket::before{content:"";position:absolute;left:0;right:0;top:-6px;height:6px;background:radial-gradient(circle at 6px 0,transparent 5px,#f3e6c4 5px) 0 0/12px 6px repeat-x}
+.ticket h3{margin:0;font-family:var(--display);font-weight:400;font-size:1.5rem;color:#7a1f1f;line-height:1.1}
+.ticket small{color:#6b5530}
+.ticket ol{margin:8px 0 0;padding-left:20px}
+.ticket li{padding:3px 0;font-variant-numeric:tabular-nums}
+.ticket li.cur{font-weight:bold;background:rgba(232,184,74,.45);border-radius:4px;margin-left:-4px;padding-left:4px}
+.ticket li .g{float:right;font-size:.82rem;font-weight:bold}
+.g.perfect{color:#0c6b3c}.g.great{color:#1f5f8a}.g.good{color:#8a6a10}.g.sloppy{color:#a3261f}
+.glasswrap{text-align:center}
+.glasswrap svg{width:100%;height:auto;display:block}
+.callout{min-height:1.6em;text-align:center;font-weight:bold;color:var(--gold2);margin:8px 0 2px}
+.bottles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+@media (min-width:700px){.bottles{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.bottle{min-height:96px;border-radius:12px;border:2px solid rgba(232,184,74,.3);background:#0f1522;color:var(--fog);font:inherit;font-size:.85rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:8px 4px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-width:0}
+.bottle i{display:block;width:22px;height:46px;border-radius:6px 6px 4px 4px;position:relative;box-shadow:inset -4px 0 0 rgba(0,0,0,.18)}
+.bottle i::before{content:"";position:absolute;left:7px;top:-12px;width:8px;height:14px;border-radius:2px;background:inherit;filter:brightness(.8)}
+.bottle.pouring{border-color:var(--gold);background:#2a2412;transform:rotate(-14deg)}
+.bottle:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.bottle.wrong{border-color:#d65f5f;animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){.bottle.wrong{animation:none}.bottle.pouring{transform:none}}
+.hint{color:var(--mute);font-size:.85rem;margin:10px 0 0}
+.score-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.sc{background:var(--panel2);border-radius:12px;padding:14px;text-align:center;border:1px solid rgba(232,184,74,.22)}
+.sc.win{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,184,74,.35)}
+.sc b{display:block;font-family:var(--display);font-weight:400;color:var(--gold2);font-size:1.5rem}
+.sc strong{display:block;font-size:2rem;font-variant-numeric:tabular-nums}
+.sc span{color:var(--mute);font-size:.9rem}
+.fine21{color:var(--mute);font-size:.82rem;margin-top:12px}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="hero" style="padding-bottom:8px"><h1>Mixology Duel</h1><p class="lead">Behind the bar at Gaspar's Grotto. Read the ticket, hold a bottle to pour, and let go right on the line. Every drink goes into a Gaspar's glass. Make as many good drinks as you can before last call.</p></section>
+  <section class="panel mx" id="mx" aria-live="polite"></section>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+const $=i=>document.getElementById(i),R=n=>Math.floor(Math.random()*n),pick=a=>a[R(a.length)];
+const SHIFT=75,CAP=8,RATE=1.25;
+const ING={
+ rum:["Light rum","#d9a24a"],dark:["Dark rum","#6b3a17"],vodka:["Vodka","#dbe7f0"],tequila:["Tequila","#efe2b4"],bourbon:["Bourbon","#a2551c"],
+ lime:["Lime","#b8d86b"],honey:["Honey syrup","#e8b84a"],simple:["Simple syrup","#f2ecd8"],ginger:["Ginger beer","#e2c98a"],pine:["Pineapple","#f3d34a"],
+ orange:["Orange","#f39a2a"],gren:["Grenadine","#c0283a"],grape:["Grapefruit soda","#f4a6a0"],soda:["Soda water","#cfe8f2"],cola:["Cola","#3b1a0c"],coconut:["Coconut cream","#f7f2e6"]};
+const RECIPES=[
+ {n:"Gaspar's Grog",d:"The house pour",s:[["rum",2],["lime",1],["honey",.75],["ginger",3]]},
+ {n:"Ybor Mule",d:"Cold and spicy",s:[["vodka",2],["lime",.5],["ginger",4]]},
+ {n:"Pirate Punch",d:"For the whole crew",s:[["dark",1.5],["pine",2],["orange",1],["gren",.5]]},
+ {n:"Pippy's Paloma",d:"Small dog, big flavor",s:[["tequila",2],["lime",.5],["grape",4]]},
+ {n:"7th Ave Daiquiri",d:"Shaken, no fuss",s:[["rum",2],["lime",1],["simple",.75]]},
+ {n:"Gasparilla Mojito",d:"Mint on the house",s:[["rum",2],["lime",1],["simple",.75],["soda",2]]},
+ {n:"Pops' Highball",d:"The bar cat's usual",s:[["bourbon",2],["soda",4]]},
+ {n:"Tanker Ray Colada",d:"In memory of a legend",s:[["rum",2],["coconut",1.5],["pine",3]]},
+ {n:"Cuba Libre",d:"Ybor classic",s:[["rum",2],["lime",.5],["cola",4]]},
+ {n:"Plank Walker",d:"Dark and stormy",s:[["dark",2],["lime",.5],["ginger",3.5]]}];
+const AIS={landon:{name:"Landon",lines:["Landon slides a Grog down the bar.","Landon flips a bottle. Mostly catches it.","Landon's ticket rail is filling up."],skill:[58,82],pace:[6.2,8.4]},
+ stephania:{name:"Stephania",lines:["Stephania garnishes like it's an art show.","Stephania serves another one, perfectly balanced.","Stephania doesn't spill. Ever."],skill:[62,86],pace:[6.8,8.8]}};
+let ac=null;function tone(f,d,v,t,at){if(document.getElementById("soundBtn")&&/off/.test(document.getElementById("soundBtn").textContent))return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+(at||0);o.type=t||"triangle";o.frequency.value=f;g.gain.setValueAtTime(v||.05,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+d)}catch(e){}}
+let pourOsc=null;function pourSound(on){try{if(on){if(/off/.test(($("soundBtn")||{}).textContent||""))return;ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.sampleRate*2,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=b;s.loop=true;f.type="bandpass";f.frequency.value=900;g.gain.value=.05;s.connect(f);f.connect(g);g.connect(ac.destination);s.start();pourOsc=s}else if(pourOsc){pourOsc.stop();pourOsc=null}}catch(e){}}
+
+let G=null; // game state
+const box=$("mx");
+
+function setup(){
+ stopAll();
+ box.innerHTML=`<h2>Pick your shift</h2><p>Each shift lasts ${SHIFT} seconds. Pour every ingredient in order: hold its bottle, let go on the dashed line. Perfect pours, clean drinks and fast service all score.</p>
+ <div class="modes">
+  <button class="mode" data-m="solo"><b>Solo shift</b><span>Just you, the rail and the clock. Beat your best.</span></button>
+  <button class="mode" data-m="landon"><b>Vs Landon</b><span>Landon works the other end of the bar. Out-pour him.</span></button>
+  <button class="mode" data-m="stephania"><b>Vs Stephania</b><span>Stephania is fast and clean. Bring your best hands.</span></button>
+  <button class="mode" data-m="2p"><b>Landon vs Stephania</b><span>Two players, one device. Take turns behind the bar.</span></button>
+ </div>
+ <p class="hint">On a keyboard: Tab to a bottle, then hold Space to pour.</p>
+ <p class="fine21">A game of skill for fun. In real life, be 21 or older to drink, and please drink responsibly.</p>`;
+ box.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{const m=b.dataset.m;
+  if(m==="2p"){G={mode:"2p",turns:[{name:"Landon"},{name:"Stephania"}],ti:0};handoff();}
+  else{G={mode:m,turns:[{name:"You"}],ti:0,ai:m==="solo"?null:AIS[m]};shift();}});
+}
+
+function handoff(){
+ const p=G.turns[G.ti];
+ box.innerHTML=`<h2>${G.ti?"Pass the shaker to":"First up:"} ${p.name}</h2><p>${G.ti?`Landon served <b>${G.turns[0].drinks}</b> drinks for <b>${G.turns[0].score}</b> points. Stephania, the bar is yours.`:"Landon opens the bar. Stephania, look away from the ticket rail."}</p>
+ <p class="row"><button class="btn" id="go">Start ${p.name}'s shift</button><button class="btn ghost" id="bk">Change mode</button></p>`;
+ $("go").onclick=shift;$("bk").onclick=setup;
+}
+
+function newDrink(){
+ const T=G.cur;T.recipe=pick(RECIPES.filter(r=>!T.recipe||r.n!==T.recipe.n));T.step=0;T.poured=[];T.grades=[];T.started=performance.now();
+ const need=T.recipe.s.map(x=>x[0]);const decoys=Object.keys(ING).filter(k=>!need.includes(k)).sort(()=>Math.random()-.5).slice(0,6-new Set(need).size);
+ T.shelf=[...new Set(need),...decoys].sort(()=>Math.random()-.5);
+ drawBar();
+}
+
+function shift(){
+ stopAll();
+ const p=G.turns[G.ti];G.cur={name:p.name,score:0,drinks:0,perfects:0,spills:0,left:SHIFT,last:performance.now(),pouring:null,amt:0,ai:{score:0,drinks:0,next:3+Math.random()*3,line:""}};
+ box.innerHTML=`<div class="mhud"><span class="who">🍸 ${p.name}</span><span id="tm"></span><span id="dk"></span><span id="sc"></span></div>
+ <div class="rival" id="rv"></div>
+ <div class="bar"><div class="ticket" id="tk"></div><div class="glasswrap" id="gl"></div></div>
+ <div class="callout" id="co"></div>
+ <div class="bottles" id="bt"></div>`;
+ newDrink();hud();
+ document.body.classList.add("playing");try{box.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}catch(e){}
+ G.raf=requestAnimationFrame(loop);
+}
+
+function hud(){const T=G.cur;$("tm").textContent=`⏱ ${Math.ceil(T.left)}s`;$("tm").className=T.left<10?"low":"";$("dk").textContent=`🥃 ${T.drinks} served`;$("sc").textContent=`⭐ ${T.score}`;
+ if(G.ai)$("rv").textContent=`${G.ai.name}: ${T.ai.drinks} served · ⭐ ${T.ai.score}${T.ai.line?" — "+T.ai.line:""}`;}
+
+function drawBar(){
+ const T=G.cur,r=T.recipe;
+ $("tk").innerHTML=`<h3>${r.n}</h3><small>${r.d} · Gaspar's glass</small><ol>${r.s.map((x,i)=>{const g=T.grades[i];return `<li class="${i===T.step?"cur":""}">${ING[x[0]][0]} — ${x[1]} oz${g?`<span class="g ${g.k}">${g.t}</span>`:""}</li>`}).join("")}</ol>`;
+ $("bt").innerHTML=T.shelf.map(k=>`<button class="bottle" data-k="${k}" aria-label="Hold to pour ${ING[k][0]}"><i style="background:${ING[k][1]}"></i>${ING[k][0]}</button>`).join("");
+ bindBottles();drawGlass();
+}
+
+function drawGlass(){
+ const T=G.cur,r=T.recipe,top=34,bot=206,h=bot-top,px=oz=>oz/CAP*h;
+ let y=bot,layers="";
+ const amts=T.poured.map((a,i)=>[r.s[i][0],a]);if(T.pouring&&T.pouring===r.s[T.step]?.[0])amts.push([T.pouring,T.amt]);
+ amts.forEach(([k,a])=>{const hh=px(a);y-=hh;layers+=`<rect x="0" y="${y}" width="160" height="${hh+.5}" fill="${ING[k][1]}"/>`;});
+ const done=T.poured.reduce((s,a)=>s+a,0),cur=r.s[T.step];let line="";
+ if(cur){const ly=bot-px(done+cur[1]);line=`<line x1="22" x2="138" y1="${ly}" y2="${ly}" stroke="#fff" stroke-width="2" stroke-dasharray="6 5"/><text x="142" y="${ly+4}" font-size="11" fill="#f6d67a" font-family="Georgia">${cur[1]}</text>`;}
+ const stream=T.pouring?`<rect x="76" y="0" width="8" height="${y}" fill="${ING[T.pouring][1]}" opacity=".9"/>`:"";
+ $("gl").innerHTML=`<svg viewBox="0 0 160 230" role="img" aria-label="Gaspar's glass, ${done.toFixed(1)} of ${CAP} ounces poured">
+  <defs><clipPath id="gc"><path d="M24 30 L136 30 L124 208 Q80 216 36 208 Z"/></clipPath></defs>
+  ${stream}
+  <g clip-path="url(#gc)"><rect x="0" y="0" width="160" height="230" fill="rgba(255,255,255,.06)"/>${layers}</g>
+  ${line}
+  <path d="M24 30 L136 30 L124 208 Q80 216 36 208 Z" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="3"/>
+  <path d="M32 40 L40 196" stroke="rgba(255,255,255,.25)" stroke-width="4" stroke-linecap="round"/>
+  <text x="80" y="128" text-anchor="middle" font-family="Pirata One,Georgia" font-size="22" fill="rgba(255,243,214,.55)">GASPAR'S</text>
+  <text x="80" y="146" text-anchor="middle" font-family="Georgia" font-size="9" letter-spacing="2" fill="rgba(255,243,214,.45)">GROTTO · YBOR</text>
+  <rect x="58" y="214" width="44" height="8" rx="3" fill="rgba(255,255,255,.55)"/></svg>`;
+}
+
+function bindBottles(){
+ $("bt").querySelectorAll(".bottle").forEach(b=>{
+  const k=b.dataset.k;
+  const down=e=>{e.preventDefault();start(k,b)},up=e=>{e&&e.preventDefault();if(G.cur.pouring===k)finish();b.classList.remove("pouring")};
+  b.addEventListener("pointerdown",e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});
+  b.addEventListener("pointerup",up);b.addEventListener("pointercancel",up);b.addEventListener("lostpointercapture",()=>{if(G.cur.pouring===k)up()});
+  b.addEventListener("keydown",e=>{if((e.key===" "||e.key==="Enter")&&!e.repeat)down(e);});
+  b.addEventListener("keyup",e=>{if(e.key===" "||e.key==="Enter")up(e);});
+  b.addEventListener("contextmenu",e=>e.preventDefault());
+ });
+}
+
+function say(t){$("co").textContent=t;}
+
+function start(k,b){
+ const T=G.cur;if(!T||T.left<=0||T.pouring||T.lock)return;
+ const want=T.recipe.s[T.step][0];
+ if(k!==want){T.score=Math.max(0,T.score-5);say(`Wrong bottle! The ticket wants ${ING[want][0]}. −5`);tone(140,.25,.08,"square");b.classList.remove("wrong");void b.offsetWidth;b.classList.add("wrong");hud();return;}
+ T.pouring=k;T.amt=0;b.classList.add("pouring");pourSound(true);say(`Pouring ${ING[k][0]}…`);
+}
+
+function grade(err){return err<=.12?{k:"perfect",t:"Perfect",p:25}:err<=.3?{k:"great",t:"Great",p:18}:err<=.6?{k:"good",t:"Good",p:10}:{k:"sloppy",t:"Sloppy",p:2};}
+
+function finish(){
+ const T=G.cur;if(!T.pouring)return;pourSound(false);
+ const tgt=T.recipe.s[T.step][1],a=T.amt;T.pouring=null;
+ const total=T.poured.reduce((s,x)=>s+x,0)+a;
+ if(total>CAP){T.spills++;say("Overflow! That one's on the floor. New ticket.");tone(110,.5,.1,"sawtooth");T.lock=true;setTimeout(()=>{T.lock=false;if(T.left>0)newDrink()},900);return;}
+ const g=grade(Math.abs(a-tgt));T.poured.push(a);T.grades.push(g);T.score+=g.p;if(g.k==="perfect"){T.perfects++;tone(988,.12,.05);tone(1319,.15,.05,"triangle",.08);}else tone(660,.1,.04);
+ say(`${g.t}: ${a.toFixed(2)} oz of ${tgt} oz. +${g.p}`);
+ T.step++;
+ if(T.step>=T.recipe.s.length){
+  const secs=(performance.now()-T.started)/1000,speed=Math.max(0,Math.round(12-secs)),clean=T.grades.every(x=>x.k==="perfect"||x.k==="great")?15:0;
+  T.score+=speed+clean;T.drinks++;
+  say(`Served ${T.recipe.n}! ${clean?"Top shelf +15. ":""}${speed?`Fast service +${speed}.`:""}`);
+  [523,659,784].forEach((f,i)=>tone(f,.2,.05,"triangle",i*.09));
+  T.lock=true;drawBar();setTimeout(()=>{T.lock=false;if(T.left>0)newDrink()},800);
+ } else drawBar();
+ hud();
+}
+
+function loop(now){
+ const T=G.cur;if(!T)return;const dt=Math.min(.05,(now-T.last)/1000);T.last=now;T.left-=dt;
+ if(T.pouring){T.amt+=RATE*dt;const total=T.poured.reduce((s,x)=>s+x,0)+T.amt;drawGlass();if(total>CAP){finish();}}
+ if(G.ai){T.ai.next-=dt;if(T.ai.next<=0){const s=G.ai.skill;T.ai.score+=s[0]+R(s[1]-s[0]+1);T.ai.drinks++;T.ai.line=pick(G.ai.lines);T.ai.next=G.ai.pace[0]+Math.random()*(G.ai.pace[1]-G.ai.pace[0]);}}
+ hud();
+ if(T.left<=0){T.left=0;if(T.pouring)finish();hud();return endShift();}
+ G.raf=requestAnimationFrame(loop);
+}
+
+function endShift(){
+ cancelAnimationFrame(G.raf);pourSound(false);document.body.classList.remove("playing");const T=G.cur,p=G.turns[G.ti];Object.assign(p,{score:T.score,drinks:T.drinks,perfects:T.perfects,spills:T.spills});G.cur=null;
+ tone(392,.4,.06,"triangle");tone(330,.5,.06,"triangle",.25);
+ if(G.mode==="2p"&&G.ti===0){G.ti=1;return handoff();}
+ results(T);
+}
+
+function card(name,s,d,extra,win){return `<div class="sc ${win?"win":""}"><b>${name}${win?" 👑":""}</b><strong>${s}</strong><span>${d} drinks served${extra?" · "+extra:""}</span></div>`;}
+
+function results(T){
+ let title,body,me=G.turns[0];
+ if(G.mode==="2p"){const [a,b]=G.turns,w=a.score===b.score?null:(a.score>b.score?a:b);
+  title=w?`${w.name} wins the duel 🍹`:"Dead even. Pour-off rematch?";
+  body=`<div class="score-row">${card(a.name,a.score,a.drinks,`${a.perfects} perfect`,w===a)}${card(b.name,b.score,b.drinks,`${b.perfects} perfect`,w===b)}</div>`;if(w)window.PY&&PY.celebrate();}
+ else if(G.ai){const ai={name:G.ai.name,score:T.ai.score,drinks:T.ai.drinks},won=me.score>ai.score;
+  title=won?`You out-poured ${ai.name} 🍹`:me.score===ai.score?"A tie at the bar":`${ai.name} takes this round`;
+  body=`<div class="score-row">${card("You",me.score,me.drinks,`${me.perfects} perfect`,won)}${card(ai.name,ai.score,ai.drinks,"",!won&&me.score!==ai.score)}</div>`;if(won)window.PY&&PY.celebrate();}
+ else{const best=window.PY?PY.best("mixology",me.score):me.score;title=me.score>=best&&me.score>0?"New personal best 🍹":"Last call";
+  body=`<div class="score-row">${card("Your shift",me.score,me.drinks,`${me.perfects} perfect`,me.score>=best&&me.score>0)}<div class="sc"><b>Best shift</b><strong>${best}</strong><span>on this device</span></div></div>`;if(me.score>=best&&me.score>0)window.PY&&PY.celebrate();}
+ const rank=s=>s>=500?"Master of the Rail":s>=320?"Head Bartender":s>=160?"Barback with Promise":"Still Learning the Wells";
+ const s0=G.mode==="2p"?Math.max(G.turns[0].score,G.turns[1].score):me.score;
+ box.innerHTML=`<h2>${title}</h2><p class="tag" style="font-size:.85rem">${rank(s0)}</p>${body}
+ <p class="row"><button class="btn" id="ag">Run it back</button><button class="btn ghost" id="md">Change mode</button><a class="btn ghost" href="arcade.html">⚔ Arcade</a></p>
+ <p class="fine21">A game of skill for fun. In real life, be 21 or older to drink, and please drink responsibly.</p>`;
+ $("ag").onclick=()=>{G.ti=0;G.turns.forEach(t=>{delete t.score});G.mode==="2p"?handoff():shift();};$("md").onclick=setup;
+}
+
+function stopAll(){document.body.classList.remove("playing");if(G&&G.raf)cancelAnimationFrame(G.raf);pourSound(false);}
+setup();
+})();
+</script>
+</body></html>
