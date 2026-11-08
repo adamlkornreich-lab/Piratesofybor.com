@@ -303,6 +303,13 @@ footer .wrap{display:grid;gap:6px}
     <div class="sea-grid" id="th-grid" aria-label="Treasure map"></div>
     <div class="row"><span id="th-msg" aria-live="polite" class="muted">Tap a square to dig.</span><button class="btn-ghost" id="th-reset" type="button">New map</button></div>
   </div>
+  <div class="panel" id="lm-panel">
+    <div class="row" style="justify-content:space-between">
+      <div style="display:grid;gap:4px"><h3>Ybor City Landmark Hunt</h3><p class="muted">Real plaques on real corners along La Séptima. Walk the strip, find each marker, answer the trivia and the pirate clue points you to the next stop.</p></div>
+      <span class="stat" id="lm-count"></span>
+    </div>
+    <div class="grid" id="lm-list"></div>
+  </div>
   <div class="grid" id="arcade-list"></div>
 </section>
 
@@ -475,7 +482,11 @@ florida:[
 ["Ybor City is named after its founder, Vicente Martinez…",["Ybor","Gaspar","Cuesta","Ferlita"],0,"He moved his cigar factory here in the 1880s."],
 ["Which birds roam Ybor's streets freely and are protected?",["Chickens","Peacocks","Flamingos","Parrots"],0,"The Ybor chickens are local celebrities."],
 ["Apollo Beach is a famous spot for viewing which animal in winter?",["Manatees","Dolphins","Alligators","Sea turtles"],0,"They gather in the warm water by the power station."],
-["Channelside sits on which waterway?",["Garrison Channel","St. Johns River","Indian River","Caloosahatchee"],0,"Next to the Port of Tampa."]]
+["Channelside sits on which waterway?",["Garrison Channel","St. Johns River","Indian River","Caloosahatchee"],0,"Next to the Port of Tampa."],
+["Tampa's first cigar was rolled in 1886 at which factory, on 7th Ave and 15th St?",["Sanchez y Haya","Ybor-Manrara","Regensberg","Cuesta-Rey"],0,"The state licensed it as Factory No. 1. A plaque marks the corner today."],
+["In what year was Tampa's first 'Clear Havana' cigar rolled?",["1886","1865","1901","1920"],0,"April 13, 1886, at the Sanchez y Haya factory."],
+["Before the streets got numbers, Ybor's 7th Avenue was called…",["Georgia Avenue","Havana Boulevard","Lesley Street","Broadway Road"],0,"The original plat used state names; 15th St was California St."],
+["Vicente Martinez Ybor bought the first tract of Ybor City land in 1885 from…",["John T. Lesley","Henry Plant","Ignacio Haya","José Gaspar"],0,"40 acres for $9,000 cash, with Tampa citizens pledging $4,000 of it."]]
 };
 BANK.mix=[...BANK.movies,...BANK.pirates,...BANK.florida];
 const CAT_DESC={movies:'film history and well-known movies (pirate films welcome)',pirates:'the Golden Age of Piracy and nautical terms',florida:'Tampa, Ybor City, the Gasparilla festival and Florida Gulf coast history',mix:'a mix of film history, pirate history, and Tampa/Ybor City history'};
@@ -535,8 +546,32 @@ $('#crew-add').onclick=()=>{const n=$('#crew-name').value.trim();if(!n){toast('G
   const crews=getCrews();const code=n.replace(/[^a-z]/gi,'').slice(0,4).toUpperCase().padEnd(4,'X')+'-'+Math.random().toString(36).slice(2,4).toUpperCase();
   crews.push({id:'c'+Date.now(),name:n,type:pickType,code,rounds:0,score:0});store.set('poy-crews',crews);$('#crew-name').value='';renderCrews();toast('Crew created. Invite code '+code)};
 
+/* ---------- landmark hunt (real Ybor City plaques) ---------- */
+const LANDMARKS=[
+{id:'cigar',title:"Tampa's First Cigar Factory",where:'7th Ave & 15th St, southwest corner',lat:27.9602,lng:-82.4431,
+ blurb:'On April 13, 1886, the first Tampa cigars rolled with "Clear Havana" tobacco came out of the Sanchez y Haya factory right here, licensed by the state as Factory No. 1. The industry that built this neighborhood started on this corner.',
+ trivia:[['What year was Tampa\'s first cigar rolled?','1886'],['What was the factory\'s state license number?','Factory No. 1']],
+ clue:'"Where the first smoke rose in \'86, find the plaque on Séptima\'s corner, then turn around, for Ybor\'s birth is but a few paces away."',
+ next:'The Birth of Ybor City, same corner, a few paces north on 15th St.'},
+{id:'birth',title:'The Birth of Ybor City',where:'15th St just off 7th Ave, same corner, a few paces north',lat:27.9605,lng:-82.4430,
+ blurb:'In October 1885, Tampa rancher John T. Lesley sold V. Martinez Ybor & Co. the first 40 acres of what became Ybor City: $9,000 cash, with Tampa citizens pledging $4,000 of it to lure the cigar makers from Key West. The original plat ran from 15th St west to 11th, and the streets had names back then: 7th Ave was "Georgia Avenue." This 1963 marker stands where the old Hotel de la Havana once stood.',
+ trivia:[['What year did Ybor buy the land?','1885'],['What was 7th Avenue originally called?','Georgia Avenue'],['How many acres in the first purchase?','40']],
+ clue:'"Forty acres for nine thousand pieces of eight. Find the stone where a hotel once stood, and ye\'ll know where this whole city was born."',
+ next:'Hotel De La Havana marker sits right beside this one; Dueling in Ybor City is a few steps away.'}
+];
+function mapUrl(l){return 'https://www.google.com/maps/search/?api=1&query='+l.lat+','+l.lng}
+function streetUrl(l){return 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+l.lat+','+l.lng}
+(function renderLandmarks(){const box=$('#lm-list');if(!box)return;$('#lm-count').textContent=LANDMARKS.length+' stops';
+  LANDMARKS.forEach((l,i)=>{const c=document.createElement('div');c.className='card';
+    c.innerHTML='<span class="tag live">Stop '+(i+1)+'</span><h3></h3><p class="muted lm-where"></p><p class="lm-blurb"></p><details><summary>Trivia hook</summary><ul class="lm-trivia"></ul></details><details><summary>Pirate clue</summary><p class="lm-clue"></p></details><p class="muted lm-next"></p><div class="row"><a class="btn btn-ghost" target="_blank" rel="noopener">Google Maps</a><a class="btn btn-ghost" target="_blank" rel="noopener">Street View</a></div>';
+    c.querySelector('h3').textContent=l.title;c.querySelector('.lm-where').textContent='📍 '+l.where+' · '+l.lat+', '+l.lng;c.querySelector('.lm-blurb').textContent=l.blurb;
+    const ul=c.querySelector('.lm-trivia');l.trivia.forEach(([q,a])=>{const li=document.createElement('li');li.innerHTML='<span></span> <details style="display:inline"><summary style="display:inline;cursor:pointer">answer</summary> <b></b></details>';li.querySelector('span').textContent=q;li.querySelector('b').textContent=a;ul.appendChild(li)});
+    c.querySelector('.lm-clue').textContent=l.clue;c.querySelector('.lm-next').textContent='Next stop: '+l.next;
+    const [m,s]=c.querySelectorAll('a');m.href=mapUrl(l);s.href=streetUrl(l);
+    box.appendChild(c)})})();
+
 /* ---------- arcade ---------- */
-const GAMES=[["Treasure Hunt","Find the chest with a compass","live",""],["Trivia","Film, pirate lore, Florida, fresh AI rounds","live","#trivia"],["Reel Maker","Photos into a pirate movie","live","#reels"],["Andy Golf Club","Drive, chip and putt past sand traps and water hazards","build",""],["Shere's Revenge","Swashbuckling sword duels, 1P vs AI or 2P","build",""],["Pirate Chess","Chess with a pirate crew and a smarter AI","build",""],["Checkers","Classic board, Gaspar's Grotto theme","build",""],["Pirate Darts","Throw at the tavern board","plan",""],["Ping Pong","Table tennis on the quarterdeck","plan",""],["Pirate Pool","Eight-ball in the captain's cabin","plan",""],["Flip Cup & Down the Hatch","Party games, root-beer rules","plan",""],["Shuffleboard & Bowling","Tavern classics","plan",""],["Jousting","Medieval lances with a pirate edge","plan",""],["Pirate Bingo","Crew-wide bingo nights","plan",""],["Crosswords & Puzzles","Daily Tampa and Ybor puzzles","plan",""],["Find Waldo's Treasure","Seek-and-find scenes","plan",""]];
+const GAMES=[["Treasure Hunt","Find the chest with a compass, then walk the real Ybor City Landmark Hunt","live",""],["Trivia","Film, pirate lore, Florida, fresh AI rounds","live","#trivia"],["Reel Maker","Photos into a pirate movie","live","#reels"],["Andy Golf Club","Drive, chip and putt past sand traps and water hazards","build",""],["Shere's Revenge","Swashbuckling sword duels, 1P vs AI or 2P","build",""],["Pirate Chess","Chess with a pirate crew and a smarter AI","build",""],["Checkers","Classic board, Gaspar's Grotto theme","build",""],["Pirate Darts","Throw at the tavern board","plan",""],["Ping Pong","Table tennis on the quarterdeck","plan",""],["Pirate Pool","Eight-ball in the captain's cabin","plan",""],["Flip Cup & Down the Hatch","Party games, root-beer rules","plan",""],["Shuffleboard & Bowling","Tavern classics","plan",""],["Jousting","Medieval lances with a pirate edge","plan",""],["Pirate Bingo","Crew-wide bingo nights","plan",""],["Crosswords & Puzzles","Daily Tampa and Ybor puzzles","plan",""],["Find Waldo's Treasure","Seek-and-find scenes","plan",""]];
 const TAG={live:['live','Playable'],build:['build','In build'],plan:['plan','Planned']};
 const al=$('#arcade-list');GAMES.forEach(([n,d,s,link])=>{const c=document.createElement('div');c.className='card';
   c.innerHTML='<span class="tag '+TAG[s][0]+'">'+TAG[s][1]+'</span><h3></h3><p class="muted"></p>';c.querySelector('h3').textContent=n;c.querySelector('p').textContent=d;
