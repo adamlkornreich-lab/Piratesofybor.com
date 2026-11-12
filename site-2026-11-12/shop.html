@@ -49,6 +49,19 @@ h2{margin-top:30px}
     else{var s=b.dataset.slot,id=b.dataset.equip;PY.equip(s,PY.equipped(s)===id?"":id);}
     draw();});
   draw();
+  /* Back from Stripe: ask the claim server to confirm the payment, then pay the doubloons in once. */
+  (function(){var q=new URLSearchParams(location.search),sid=q.get("session_id"),cfg=window.POY_STORE||{};if(!sid||!cfg.claimUrl)return;
+    try{history.replaceState(null,"",location.pathname);}catch(e){}
+    var done=[];try{done=JSON.parse(localStorage.getItem("py_claimed")||"[]");}catch(e){}
+    var note=$("payNote");if(done.indexOf(sid)>=0){note.textContent="That purchase is already in your purse.";return;}
+    note.textContent="Checking your payment with Stripe…";
+    fetch(cfg.claimUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:sid})})
+      .then(function(r){return r.json().then(function(j){return j;});})
+      .then(function(j){
+        if(j.ok){done.push(sid);try{localStorage.setItem("py_claimed",JSON.stringify(done));}catch(e){}PY.celebrate(j.doubloons);draw();note.textContent="Payment confirmed: "+j.doubloons+" doubloons added to your purse. Thank you!";}
+        else{note.textContent={already_claimed:"That purchase was already added to a purse.",not_paid:"Stripe hasn't confirmed this payment yet. Refresh in a minute.",payments_not_configured:"Card payments aren't switched on yet, so nothing was charged here."}[j.error]||"We couldn't confirm that payment. Email adamlkornreich@gmail.com with your Stripe receipt and we'll sort it out.";}
+      }).catch(function(){note.textContent="We couldn't reach the payment server. Refresh this page to try again.";});
+  })();
 })();
 </script>
 </body></html>
