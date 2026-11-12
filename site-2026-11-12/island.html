@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Island Games — The Pirates of Ybor</title><link rel="stylesheet" href="assets/site.css">
+<style>
+/* One game made for each island. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+#stage{max-width:560px;margin:0 auto;text-align:center}
+#cv{width:100%;max-width:520px;aspect-ratio:4/3;background:linear-gradient(180deg,#123a52,#0b1a26);border:2px solid var(--gold);border-radius:12px;touch-action:none;display:none}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:420px;margin:0 auto}
+.cards button{aspect-ratio:1;font-size:clamp(24px,8vw,40px);border-radius:12px;border:2px solid var(--gold);background:#0e1524;color:#fff;cursor:pointer}
+.cards button.up{background:#f4e6c6}.cards button.done{background:#2aa3a8;border-color:#2aa3a8}
+.pads{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:340px;margin:0 auto}
+.pads button{aspect-ratio:1;border-radius:18px;border:3px solid #0006;font-size:2rem;cursor:pointer;opacity:.6}
+.pads button.lit{opacity:1;transform:scale(1.04);box-shadow:0 0 26px #fff8}
+.big{font-size:clamp(1.6rem,7vw,2.6rem);letter-spacing:.22em;color:var(--gold2);margin:14px 0;font-weight:bold}
+.letters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.letters button{min-width:46px;min-height:46px;font-size:1.3rem;font-weight:bold;border-radius:10px;border:2px solid var(--gold);background:#0e1524;color:#f4e6c6;cursor:pointer}
+.letters button:disabled{opacity:.25}
+#draw{width:min(300px,80vw);aspect-ratio:1;border-radius:50%;border:4px solid var(--gold);font-size:1.3rem;font-weight:bold;cursor:pointer;background:#5a1616;color:#fff;margin:10px auto;display:none}
+#draw.go{background:#1f8a4c}
+#msg{min-height:1.6em;color:var(--fog);margin:10px 0}
+.also{margin-top:16px}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="hero"><h1 id="title">Island Games</h1><p class="lead" id="lead"></p></section>
+  <section class="panel"><div id="stage">
+    <div class="hud"><span class="stat" id="score">Score 0</span><span class="stat" id="best">Best 0</span><span class="stat" id="time"></span><button class="btn" id="start" type="button">Start</button></div>
+    <p id="msg"></p>
+    <canvas id="cv" width="520" height="390" aria-label="Game board"></canvas>
+    <div id="dom"></div>
+    <button id="draw" type="button">Wait…</button>
+    <p class="also" id="also"></p>
+  </div></section>
+  <section id="all" style="display:none"><h2>Every island's game</h2><div class="grid" id="grid"></div></section>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var I={
+ ruben:{n:"Ruben Alvarez Island",t:"Ruben's Rhythm",k:"simon",lead:"Watch the drums light up, then play the beat back. It grows by one each round.",e:["🥁","🎺","🎸","🪘"],also:["Pirate Pool","pool.html"]},
+ adamashlee:{n:"Adam and Ashlee Island",t:"Adam & Ashlee's Match Deck",k:"match",lead:"Flip two cards at a time and find all eight pairs in as few turns as you can.",e:["⚓","🧩","🏈","🌴","🦜","🗺","💎","🐚"],also:["Ashlee Rae's Crosswords","ashlee-crossword.html"]},
+ ericshere:{n:"Eric and Shere Island",t:"Eric & Shere's Quick Draw",k:"quick",lead:"Wait for green, then tap as fast as you can. Five rounds. Tap early and you lose the round.",also:["Shere's Revenge","swashbuckle.html"]},
+ landonshere:{n:"Landon and Shere Island",t:"Landon & Shere's Garnish Catch",k:"catch",lead:"Slide the tray to catch the fruit. Dodge the anchors. Forty seconds on the clock.",e:["🍋","🍊","🍒","🍍"],bad:"⚓",also:["Mixology Duel","mixology.html"]},
+ seavey:{n:"Andy Seavey Golf Club",t:"Andy Seavey's Driving Range",k:"shoot",lead:"Tap the targets as they cross the range. Small ones score more. Thirty seconds.",e:["🎯","⛳","🏌"],also:["Andy Golf Club","golf.html"]},
+ evanelise:{n:"Evan and Elise Island",t:"Evan & Elise's Ledger Scramble",k:"scramble",lead:"Unscramble the accounting words before the clock runs out.",w:[["LEDGER","The book of accounts"],["DEBIT","Left side of an entry"],["CREDIT","Right side of an entry"],["ASSET","Something the ship owns"],["AUDIT","A check of the books"],["INVOICE","A bill sent to a customer"],["BUDGET","A plan for spending"]],also:["The Schiller Ledger","ledger.html"]},
+ ambervick:{n:"Amber and Vick Island",t:"Amber & Vick's Star Match",k:"match",lead:"Flip two cards at a time and find all eight pairs in as few turns as you can.",e:["⭐","🌙","☀","🔭","🧠","📚","🪐","✨"],also:["Pirate Trivia","trivia.html"]},
+ gerald:{n:"Gerald I. Kornreich Island",t:"Gerald's Word Vault",k:"scramble",lead:"Unscramble the chess words before the clock runs out.",w:[["KNIGHT","It jumps in an L"],["BISHOP","It moves on diagonals"],["CASTLE","King and rook trade places"],["GAMBIT","Give a pawn for position"],["CHECKMATE","The game is over"],["QUEEN","The strongest piece"],["ENDGAME","The last stage"]],also:["Pirate Chess","chess.html"]},
+ kevincraig:{n:"Kevin and Craig Island",t:"Kevin & Craig's Bullseye Reflex",k:"quick",lead:"Wait for green, then tap as fast as you can. Five rounds. Tap early and you lose the round.",also:["Pirate Darts","darts.html"]},
+ lorilarry:{n:"Aunt Lori and Uncle Larry Island",t:"Aunt Lori & Uncle Larry's Cookie Catch",k:"catch",lead:"Slide the plate to catch the cookies. Dodge the crabs. Forty seconds on the clock.",e:["🍪","🧁","🥧","🍩"],bad:"🦀",also:["Pirate Bingo","bingo.html"]},
+ sadie:{n:"Sadie Island",t:"Sadie's Bubble Pop",k:"shoot",lead:"Pop the bubbles as they float across. Small ones score more. Thirty seconds.",e:["🫧","🐠","🐡"],also:["Treasure Hunt","treasure.html"]},
+ megan:{n:"Megan Massok Island",t:"Megan's Lantern Lights",k:"simon",lead:"Watch the lanterns light up, then repeat the pattern. It grows by one each round.",e:["🏮","💡","🔦","🕯"],also:["The Crossword","crossword.html"]},
+ greg:{n:"Greg Biggerstaff Island",t:"Greg's Target Run",k:"shoot",lead:"Tap the targets as they cross. Small ones score more. Thirty seconds.",e:["🎯","🪙","🏴‍☠️"],also:["Shuffleboard","shuffleboard.html"]},
+ brenner:{n:"Mark Brenner Island",t:"Mark Brenner's Sailor Scramble",k:"scramble",lead:"Unscramble the sailing words before the clock runs out.",w:[["ANCHOR","It holds the ship in place"],["COMPASS","It points north"],["HARBOR","A safe place to dock"],["VOYAGE","A long trip by sea"],["CAPTAIN","Runs the ship"],["RUDDER","It steers"],["GALLEON","A big sailing ship"]],also:["Cup Pong","cuppong.html"]},
+ lafferty:{n:"Ed Lafferty Island",t:"Ed Lafferty's Serve Return",k:"quick",lead:"Ed serves when the light turns green. Tap to return it as fast as you can. Five serves.",also:["7th Ave Arm Wrestling","armwrestle.html"]},
+ nakamura:{n:"Daisuke Nakamura and Family Island",t:"The Nakamura Family Melody",k:"simon",lead:"Listen to the melody, then play it back. It grows by one note each round.",e:["🎵","🎶","🎹","🎻"],also:["Rene's Guitar School","guitar.html"]},
+ chile:{n:"Chile Island",t:"Chile Island Palabras",k:"scramble",lead:"Unscramble the Spanish word. The clue is in English.",w:[["HOLA","Hello"],["AMIGO","Friend"],["BARCO","Ship"],["TESORO","Treasure"],["PIRATA","Pirate"],["ISLA","Island"],["PLAYA","Beach"],["MAR","Sea"]],also:["Capitán Loro's Parrot Trivia","parrot.html"]}
+};
+var id=new URLSearchParams(location.search).get("i"),G=I[id];
+var grid=$("grid");Object.keys(I).forEach(function(k){var a=document.createElement("a");a.className="card";a.href="island.html?i="+k;var h=document.createElement("h3");h.textContent=I[k].t;var p=document.createElement("p");p.textContent=I[k].n;a.appendChild(h);a.appendChild(p);grid.appendChild(a)});
+if(!G){$("title").textContent="Island Games";$("lead").textContent="Every island has a game of its own. Pick one.";$("stage").parentNode.style.display="none";$("all").style.display="block";return}
+document.title=G.t+" — The Pirates of Ybor";$("title").textContent=G.t;$("lead").textContent=G.n+". "+G.lead;
+var al=$("also"),a=document.createElement("a");a.className="btn ghost";a.href=G.also[1];a.textContent="Also on this island: "+G.also[0];al.appendChild(a);
+var b2=document.createElement("a");b2.className="btn ghost";b2.href="island.html";b2.textContent="All island games";b2.style.marginLeft="8px";al.appendChild(b2);
+var score=0,key="isl_"+id,timer=null,raf=0,live=false;
+function setScore(v){score=v;$("score").textContent="Score "+score}
+function best(){$("best").textContent="Best "+(window.PY?PY.best(key):0)}
+function msg(t){$("msg").textContent=t}
+function end(text){live=false;clearInterval(timer);cancelAnimationFrame(raf);var b=window.PY?PY.best(key):0;if(score>b&&window.PY){PY.best(key,score);PY.celebrate();text+=" New best!"}best();msg(text);$("start").textContent="Play again";$("time").textContent=""}
+function clock(sec,done){var t=sec;$("time").textContent="⏱ "+t;clearInterval(timer);timer=setInterval(function(){t--;$("time").textContent="⏱ "+Math.max(0,t);if(t<=0){clearInterval(timer);done()}},1000)}
+function beep(f){try{var A=beep.a=beep.a||new (window.AudioContext||window.webkitAudioContext)(),o=A.createOscillator(),g=A.createGain();if(localStorage.getItem("py_mute")==="1")return;o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.08,A.currentTime);g.gain.exponentialRampToValueAtTime(.0001,A.currentTime+.3);o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+.3)}catch(e){}}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+var dom=$("dom"),cv=$("cv"),x=cv.getContext("2d");
+var GAMES={
+ match:function(){dom.innerHTML="";var d=document.createElement("div");d.className="cards";dom.appendChild(d);var deck=shuffle(G.e.concat(G.e)),open=[],found=0,turns=0,lock=false;setScore(0);msg("Find the pairs.");live=true;
+  deck.forEach(function(s,i){var b=document.createElement("button");b.type="button";b.setAttribute("aria-label","Card "+(i+1));b.onclick=function(){if(lock||!live||b.classList.contains("up")||b.classList.contains("done"))return;b.textContent=s;b.classList.add("up");open.push(b);if(open.length===2){turns++;lock=true;var p=open;open=[];if(p[0].textContent===p[1].textContent){p.forEach(function(q){q.classList.remove("up");q.classList.add("done")});found++;beep(880);lock=false;setScore(Math.max(10,200-turns*8)*found/8|0);if(found===8){setScore(Math.max(20,260-turns*8));end("All pairs in "+turns+" turns.")}}else setTimeout(function(){p.forEach(function(q){q.textContent="";q.classList.remove("up")});lock=false},700)}};d.appendChild(b)})},
+ simon:function(){dom.innerHTML="";var d=document.createElement("div");d.className="pads";dom.appendChild(d);var cols=["#c0392b","#2e86c1","#27ae60","#d4ac0d"],tones=[262,330,392,523],pads=[],seq=[],pos=0,show=false;setScore(0);live=true;
+  function flash(i,ms){pads[i].classList.add("lit");beep(tones[i]);setTimeout(function(){pads[i].classList.remove("lit")},ms||350)}
+  function next(){seq.push(Math.floor(Math.random()*4));pos=0;show=true;msg("Watch…");seq.forEach(function(v,k){setTimeout(function(){flash(v)},600+k*560)});setTimeout(function(){show=false;msg("Your turn.")},600+seq.length*560)}
+  for(var i=0;i<4;i++)(function(i){var b=document.createElement("button");b.type="button";b.style.background=cols[i];b.textContent=G.e[i];b.setAttribute("aria-label","Pad "+(i+1));b.onclick=function(){if(show||!live)return;flash(i,200);if(seq[pos]===i){pos++;if(pos===seq.length){setScore(seq.length);setTimeout(next,700)}}else end("That was round "+seq.length+".")};pads.push(b);d.appendChild(b)})(i);next()},
+ scramble:function(){dom.innerHTML="";var list=shuffle(G.w.slice()),n=0,ans="",word,tiles;setScore(0);live=true;
+  function round(){if(n>=list.length){end("Every word solved.");return}word=list[n][0];ans="";dom.innerHTML="";var clue=document.createElement("p");clue.textContent="Clue: "+list[n][1];var out=document.createElement("div");out.className="big";out.textContent="_ ".repeat(word.length).trim();var L=document.createElement("div");L.className="letters";var sc=shuffle(word.split(""));if(sc.join("")===word&&word.length>1)sc.reverse();
+   sc.forEach(function(ch){var b=document.createElement("button");b.type="button";b.textContent=ch;b.onclick=function(){if(!live)return;ans+=ch;b.disabled=true;out.textContent=(ans+"_".repeat(word.length-ans.length)).split("").join(" ");if(ans.length===word.length){if(ans===word){beep(880);setScore(score+word.length*10);n++;setTimeout(round,500)}else{beep(160);msg("Not quite. Try again.");setTimeout(round,600)}}};L.appendChild(b)});
+   var clr=document.createElement("button");clr.type="button";clr.className="btn ghost";clr.textContent="Clear";clr.onclick=round;dom.appendChild(clr);dom.insertBefore(L,clr);dom.insertBefore(out,L);dom.insertBefore(clue,out);msg("Word "+(n+1)+" of "+list.length)}
+  round();clock(90,function(){end("Time. You solved "+n+" of "+list.length+".")})},
+ quick:function(){dom.innerHTML="";var d=$("draw");d.style.display="block";var round=0,times=[],t0=0,armed=false,to=null;setScore(0);live=true;
+  function arm(){d.className="";d.textContent="Wait…";armed=false;to=setTimeout(function(){armed=true;t0=performance.now();d.className="go";d.textContent="TAP!";beep(660)},1100+Math.random()*2600)}
+  d.onclick=function(){if(!live)return;if(!armed){clearTimeout(to);msg("Too early. Round lost.");times.push(999);beep(150)}else{var ms=Math.round(performance.now()-t0);times.push(ms);msg(ms+" ms");setScore(score+Math.max(0,600-ms))}armed=false;round++;if(round>=5){d.style.display="none";var ok=times.filter(function(v){return v<999});end(ok.length?"Fastest: "+Math.min.apply(null,ok)+" ms.":"Every round was early.")}else arm()};
+  msg("Round 1 of 5");arm()},
+ catch:function(){dom.innerHTML="";cv.style.display="block";var W=520,H=390,px=W/2,items=[],last=performance.now(),spawn=0;setScore(0);live=true;
+  function move(e){var r=cv.getBoundingClientRect();px=Math.max(40,Math.min(W-40,(e.clientX-r.left)/r.width*W))}cv.onpointermove=move;cv.onpointerdown=move;
+  document.onkeydown=function(e){if(!live)return;if(e.key==="ArrowLeft")px=Math.max(40,px-30);if(e.key==="ArrowRight")px=Math.min(W-40,px+30)};
+  function frame(now){if(!live)return;var dt=Math.min(.05,(now-last)/1000);last=now;spawn-=dt;if(spawn<=0){spawn=.55;var bad=Math.random()<.25;items.push({x:30+Math.random()*(W-60),y:-20,v:120+Math.random()*120+score,s:bad?G.bad:G.e[Math.floor(Math.random()*G.e.length)],bad:bad})}
+   x.clearRect(0,0,W,H);x.font="34px serif";x.textAlign="center";for(var i=items.length-1;i>=0;i--){var o=items[i];o.y+=o.v*dt;x.fillText(o.s,o.x,o.y);if(o.y>H-52&&o.y<H-10&&Math.abs(o.x-px)<48){items.splice(i,1);if(o.bad){setScore(Math.max(0,score-3));beep(150)}else{setScore(score+1);beep(880)}}else if(o.y>H+30)items.splice(i,1)}
+   x.fillStyle="#e8b84a";x.fillRect(px-46,H-34,92,12);x.fillStyle="#f4e6c6";x.fillRect(px-52,H-38,104,5);raf=requestAnimationFrame(frame)}
+  raf=requestAnimationFrame(frame);clock(40,function(){end("You caught "+score+".")})},
+ shoot:function(){dom.innerHTML="";cv.style.display="block";var W=520,H=390,items=[],last=performance.now(),spawn=0;setScore(0);live=true;
+  cv.onpointerdown=function(e){if(!live)return;var r=cv.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*W,my=(e.clientY-r.top)/r.height*H;for(var i=items.length-1;i>=0;i--){var o=items[i];if(Math.hypot(o.x-mx,o.y-my)<o.r+8){items.splice(i,1);setScore(score+(o.r<22?3:o.r<30?2:1));beep(700+o.r*6);return}}beep(140)};
+  function frame(now){if(!live)return;var dt=Math.min(.05,(now-last)/1000);last=now;spawn-=dt;if(spawn<=0){spawn=.6;var dir=Math.random()<.5?1:-1,r=16+Math.random()*22;items.push({x:dir>0?-30:W+30,y:50+Math.random()*(H-110),v:dir*(90+Math.random()*150),r:r,s:G.e[Math.floor(Math.random()*G.e.length)]})}
+   x.clearRect(0,0,W,H);x.textAlign="center";x.textBaseline="middle";for(var i=items.length-1;i>=0;i--){var o=items[i];o.x+=o.v*dt;x.font=(o.r*1.8|0)+"px serif";x.fillText(o.s,o.x,o.y);if(o.x<-60||o.x>W+60)items.splice(i,1)}raf=requestAnimationFrame(frame)}
+  raf=requestAnimationFrame(frame);clock(30,function(){end("You scored "+score+".")})}
+};
+best();msg("Press Start when you're ready.");
+$("start").onclick=function(){clearInterval(timer);cancelAnimationFrame(raf);cv.style.display="none";$("draw").style.display="none";GAMES[G.k]()};
+})();
+</script>
+</body></html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ashlee Rae's Crosswords</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.cg{--ink:#fbf1da;--panel:#21174e;--line:#463a80;--mute:#c3bbdc;--gold:#ffc94d;--rum:#f76f3e;--sea:#4fd1c0;--dark:#1b1305;--ui:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+.cg .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-height:440px}
+.cg .stage h2{font:400 2.1rem var(--display);color:var(--gold);line-height:1.05;margin-bottom:6px}
+.cg button{font:inherit;cursor:pointer;min-height:44px;border:0;border-radius:10px;padding:10px 16px;touch-action:manipulation}
+.cg .go{background:var(--rum);color:#fff;font-weight:700;font-size:1.05rem}
+.cg .ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.cg .hud{display:flex;justify-content:space-between;gap:10px;font:700 .95rem var(--ui);margin:0 0 10px;font-variant-numeric:tabular-nums}
+.cg .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.cg .tag{font:400 2rem var(--display);color:var(--sea)}
+.cg .fine{font:500 .82rem/1.4 var(--ui);color:var(--mute);margin:8px 0 0}
+.cg .picks{display:grid;gap:8px;margin-top:12px}.cg .picks button{background:#160f38;color:var(--ink);border:1px solid var(--line);text-align:left}.cg .picks b{color:var(--gold)}
+.cg canvas{display:block;width:100%;max-width:420px;margin:0 auto;border-radius:10px;background:#0e2a44;touch-action:none}
+.cg .gal{background:#160f38 url(assets/waldo-painting.jpg) center/cover;border-radius:10px;padding:10px;box-shadow:inset 0 0 0 4px #7a5a26,0 8px 24px #0007}
+.cg .galin{background:#120b2ed9;border-radius:8px;padding:16px}
+.cg .xw{display:grid;gap:1px;max-width:560px;margin:0 auto}.cg .xw .blank{aspect-ratio:1}
+.cg .cell{position:relative;aspect-ratio:1;background:#fff8e6f2;box-shadow:0 0 0 1px #2b1d0e}
+.cg .cell input{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;text-align:center;font:700 clamp(.8rem,3.6vw,1.2rem) var(--ui);color:#1b1305;padding:6% 0 0;text-transform:uppercase;caret-color:transparent;border-radius:0;outline:none}
+.cg .cell small{position:absolute;left:2px;top:0;font:700 8px/1.2 var(--ui);color:#5a3720;z-index:1;pointer-events:none}
+.cg .cell.on{background:#ffe29a}.cg .cell.cur{background:#ffc94d}.cg .cell.bad{background:#f7a6a0}.cg .cell.good input{color:#0c6b5c}
+.cg .xw.solved .cell{background:#fff8e6b0}
+.cg .now{min-height:2.8em;font:700 1rem/1.35 var(--ui);margin:10px 0 0;color:var(--gold)}
+.cg .clues{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}.cg .clues h3{font:400 1.4rem var(--display);color:var(--gold);margin:0 0 4px}
+.cg .clues ol{margin:0;padding-left:24px;font:500 .9rem/1.35 var(--ui)}.cg .clues li{padding:4px 2px;cursor:pointer;border-radius:4px}.cg .clues li.on{background:#ffc94d33}
+.cg .mc{font:700 1rem/1.35 var(--ui);color:var(--sea);margin:0 0 12px;min-height:1.4em}
+@media (max-width:520px){.cg .clues{grid-template-columns:minmax(0,1fr)}}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="hero" style="padding-bottom:8px"><h1>Ashlee Rae's Crosswords</h1><p class="lead">Four puzzles by Ashlee Rae, hung in the gallery over a painting by Waldo Nahuel: Ybor Nights, High Seas, Silver Screen and The Gallery.</p></section>
+  <div class="cg">
+    <p class="mc">🎤 Seven letters for I don't know either. Just put something. Ashlee's not looking. Okay, she's looking.</p>
+    <div class="stage" id="stage"></div>
+    <div class="row"><button class="ghost" id="snd" type="button" aria-pressed="true">🔊 Sound on</button><a class="btn ghost" href="arcade.html">⚔ Back to the Arcade</a></div>
+  </div>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},stage=$("stage"),run=0,timers=[];
+function later(f,ms){var r=run,t=setTimeout(function(){if(r===run)f()},ms);timers.push(t);return t}
+function stop(){run++;timers.forEach(clearTimeout);timers=[];document.onkeydown=null}
+function best(k,v){try{var o=+localStorage.getItem(k)||0;if(v>o){localStorage.setItem(k,v);return v}return o}catch(e){return v}}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+
+/* ---------- sound, all synthesized ---------- */
+var ac=null,on=true;
+function ctx(){if(!on)return null;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();return ac}catch(e){return null}}
+function noise(dur,freq,vol,type,rise){var c=ctx();if(!c)return;var n=c.sampleRate*dur|0,b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;
+var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),t=c.currentTime;s.buffer=b;f.type=type||"lowpass";f.frequency.value=freq;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+(rise||.02));g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(c.destination);s.start()}
+function tone(f1,f2,dur,vol,type,at){var c=ctx();if(!c)return;var o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(at||0);o.type=type||"sine";o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur)}
+/* ---------- original synthesized beats ---------- */
+function kick(){tone(120,40,.22,.55)}
+function snare(){noise(.16,2600,.26,"highpass",.005)}
+function clap(){noise(.12,1800,.3,"bandpass",.005);tone(190,150,.08,.08,"triangle")}
+function hat(v){noise(.05,7000,v||.07,"highpass",.003)}
+var BEATS={
+ west:{bpm:92,name:"West Coast",step:function(s){var i=s%16,bar=Math.floor(s/16)%4;
+  if(i===0||i===7||i===10)kick();if(i===4||i===12)clap();if(i%2===0)hat(.06);
+  var bass={0:55,3:55,6:65.4,8:49,11:49,14:58.3};if(bass[i])tone(bass[i]*(bar===3?.89:1),bass[i]*(bar===3?.89:1),.28,.3,"sine");
+  var lead={0:880,6:988,8:1047,12:880};if(bar%2===1&&lead[i]){tone(lead[i],lead[i]*1.06,.5,.035,"sine");tone(lead[i]*1.01,lead[i]*1.05,.45,.02,"sine")}}},
+ east:{bpm:88,name:"East Coast",step:function(s){var i=s%16,bar=Math.floor(s/16)%2;
+  if(i===0||i===5||i===10||(bar&&i===15))kick();if(i===4||i===12)snare();if(i%2===0||i===7)hat(i===6?.1:.05);
+  if(i===0||i===3||(bar&&i===8)){[220,261.6,329.6].forEach(function(f){tone(f,f*.995,.3,.05,"triangle")})}
+  if(i===0||i===10)tone(55,52,.3,.3,"sine")}}};
+var beatRun=-1;function playBeat(st){if(beatRun===run)return;beatRun=run;var r=run,b=BEATS[st],dur=60/b.bpm/4*1000,s=0,t0=performance.now();
+ (function tick(){if(r!==run)return;b.step(s);s++;later(tick,Math.max(0,t0+s*dur-performance.now()))})()}
+function rev(){tone(55,120,.5,.2,"sawtooth");tone(58,125,.5,.14,"square");noise(.5,500,.2,"lowpass",.05)}
+
+/* ---------- Ashlee Rae's Crosswords ---------- */
+var XW=[{"name":"Ybor Nights","w":10,"h":11,"words":[{"a":"BAY","clue":"Tampa ___","x":1,"y":0,"d":"D","n":1},{"a":"STREETCAR","clue":"TECO Line ride to Channelside","x":4,"y":0,"d":"D","n":2},{"a":"TAMPA","clue":"Florida city on the bay","x":4,"y":1,"d":"A","n":3},{"a":"PIPPY","clue":"Our pirate chihuahua","x":7,"y":1,"d":"D","n":4},{"a":"YBOR","clue":"Tampa's historic cigar district","x":1,"y":2,"d":"A","n":5},{"a":"POPS","clue":"The bar cat of Gaspar's Grotto","x":2,"y":4,"d":"D","n":6},{"a":"CUBAN","clue":"Tampa's famous pressed sandwich","x":9,"y":4,"d":"D","n":7},{"a":"GROTTO","clue":"Gaspar's pirate bar","x":0,"y":5,"d":"A","n":8},{"a":"CIGAR","clue":"What Ybor City's factories made famous","x":6,"y":6,"d":"D","n":9},{"a":"GASPARILLA","clue":"Tampa's big pirate festival","x":0,"y":7,"d":"A","n":10},{"a":"ROOSTER","clue":"Wild bird strutting the streets of Ybor","x":0,"y":10,"d":"A","n":11}]},{"name":"High Seas","w":12,"h":11,"words":[{"a":"BLACKBEARD","clue":"Edward Teach's pirate name","x":0,"y":0,"d":"A","n":1},{"a":"CUTLASS","clue":"Short curved pirate sword","x":3,"y":0,"d":"D","n":2},{"a":"ANCHOR","clue":"Heavy thing dropped to stay put","x":7,"y":0,"d":"D","n":3},{"a":"MAST","clue":"Pole that holds the sails","x":0,"y":2,"d":"A","n":4},{"a":"TREASURE","clue":"What X marks","x":10,"y":3,"d":"D","n":5},{"a":"PLANK","clue":"Walk it at sword point","x":1,"y":4,"d":"A","n":6},{"a":"PARROT","clue":"Bird on a pirate's shoulder","x":1,"y":4,"d":"D","n":6},{"a":"KRAKEN","clue":"Giant sea monster","x":6,"y":5,"d":"A","n":7},{"a":"COMPASS","clue":"It points you north","x":0,"y":8,"d":"A","n":8},{"a":"RUM","clue":"Pirate's drink","x":9,"y":8,"d":"A","n":9},{"a":"JOLLYROGER","clue":"Skull and crossbones flag","x":2,"y":10,"d":"A","n":10}]},{"name":"Silver Screen","w":11,"h":12,"words":[{"a":"FLYNN","clue":"Errol, star of Captain Blood","x":1,"y":0,"d":"D","n":1},{"a":"SPARROW","clue":"Captain Jack","x":5,"y":0,"d":"D","n":2},{"a":"MUPPET","clue":"___ Treasure Island","x":3,"y":1,"d":"A","n":3},{"a":"NEVERLAND","clue":"Where Peter Pan lives","x":1,"y":3,"d":"A","n":4},{"a":"DAVYJONES","clue":"Bill Nighy's tentacled captain","x":9,"y":3,"d":"D","n":5},{"a":"HOOK","clue":"Peter Pan's enemy","x":3,"y":5,"d":"A","n":6},{"a":"TEAGUE","clue":"Jack Sparrow's father","x":1,"y":6,"d":"D","n":7},{"a":"PEARL","clue":"The Black ___","x":7,"y":6,"d":"D","n":8},{"a":"BARBOSSA","clue":"Geoffrey Rush's captain","x":0,"y":8,"d":"A","n":9},{"a":"SILVER","clue":"Long John","x":5,"y":10,"d":"A","n":10},{"a":"DEPP","clue":"Johnny, Oscar-nominated pirate","x":0,"y":11,"d":"A","n":11}]},{"name":"The Gallery","w":13,"h":11,"words":[{"a":"FRAME","clue":"It goes around a painting","x":10,"y":0,"d":"D","n":1},{"a":"CHILE","clue":"Waldo Nahuel's home country","x":6,"y":1,"d":"D","n":2},{"a":"COLOR","clue":"A master of light and ___","x":6,"y":1,"d":"A","n":2},{"a":"BRUSH","clue":"Painter's tool","x":2,"y":2,"d":"A","n":3},{"a":"CANVAS","clue":"What a painter paints on","x":1,"y":3,"d":"D","n":4},{"a":"PALETTE","clue":"Board for mixing paint","x":4,"y":4,"d":"D","n":5},{"a":"EASEL","clue":"Stand that holds a painting","x":3,"y":5,"d":"A","n":6},{"a":"WALDO","clue":"Painter of the picture behind this puzzle","x":8,"y":6,"d":"D","n":7},{"a":"MONET","clue":"French painter of water lilies","x":12,"y":6,"d":"D","n":8},{"a":"GALLERY","clue":"Room where art hangs","x":0,"y":7,"d":"A","n":9},{"a":"IMPRESSIONIST","clue":"Waldo Nahuel's style of painting","x":0,"y":10,"d":"A","n":10}]}];
+function ashley(){var pi=0;
+ function menu(){stage.innerHTML='<div class="gal"><div class="galin"><h2>Ashlee Rae\'s Crosswords</h2><p>Puzzles by Ashlee Rae, in the gallery. Pick a puzzle:</p><div class="picks" id="p"></div></div></div><p class="fine">Background: painting by Waldo Nahuel.</p>';
+  XW.forEach(function(z,i){var b=document.createElement("button");b.type="button";b.innerHTML="<b>"+z.name+"</b> · "+z.words.length+" clues";b.onclick=function(){pi=i;play()};$("p").appendChild(b)})}
+ function play(){playBeat("west");var z=XW[pi],cells={},dir="A",cur=null,done=false;
+  z.words.forEach(function(w,wi){for(var i=0;i<w.a.length;i++){var x=w.x+(w.d==="A"?i:0),y=w.y+(w.d==="D"?i:0),k=x+","+y,c=cells[k]||(cells[k]={x:x,y:y,ch:w.a[i],w:[]});c.w.push(wi);if(i===0)c.n=w.n}});
+  stage.innerHTML='<div class="hud"><span>'+z.name+'</span><span id="st"></span></div><div class="gal"><div class="xw" id="xw" style="grid-template-columns:repeat('+z.w+',minmax(0,1fr))"></div></div><p class="now" id="now" aria-live="polite">Tap a square to start.</p><div class="row"><button class="go" id="chk" type="button">Check</button><button class="ghost" id="rev" type="button">Reveal</button><button class="ghost" id="bk" type="button">All puzzles</button></div><div class="clues"><div><h3>Across</h3><ol id="ca"></ol></div><div><h3>Down</h3><ol id="cd"></ol></div></div><p class="fine">Background: painting by Waldo Nahuel. Puzzles by Ashlee Rae.</p>';
+  var box=$("xw");for(var y=0;y<z.h;y++)for(var x=0;x<z.w;x++){var c=cells[x+","+y],d=document.createElement("div");d.className=c?"cell":"blank";if(c){if(c.n)d.innerHTML="<small>"+c.n+"</small>";var inp=document.createElement("input");inp.maxLength=1;inp.autocomplete="off";inp.setAttribute("autocapitalize","characters");inp.setAttribute("aria-label","Row "+(y+1)+" column "+(x+1));c.el=inp;(function(c,inp){
+    inp.onfocus=function(){if(cur!==c&&c.w.every(function(i){return z.words[i].d!==dir}))dir=z.words[c.w[0]].d;cur=c;paint()};
+    inp.onclick=function(){if(c.w.length>1&&cur===c&&inp.dataset.f){dir=dir==="A"?"D":"A";paint()}inp.dataset.f="1"};inp.onblur=function(){inp.dataset.f=""};
+    inp.oninput=function(){var v=inp.value.toUpperCase().replace(/[^A-Z]/g,"");inp.value=v.slice(-1);c.el.parentNode.classList.remove("bad","good");if(v){tone(900,800,.03,.02,"triangle");mv(1);full()}};
+    inp.onkeydown=function(e){var K={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(K){e.preventDefault();var n=cells[(c.x+K[0])+","+(c.y+K[1])];if(n){dir=K[0]?"A":"D";n.el.focus()}}else if(e.key==="Backspace"&&!inp.value){e.preventDefault();mv(-1)}};
+   })(c,inp);d.appendChild(inp)}box.appendChild(d)}
+  function word(){if(!cur)return null;for(var i=0;i<cur.w.length;i++)if(z.words[cur.w[i]].d===dir)return cur.w[i];return cur.w[0]}
+  function mv(s){var dx=dir==="A"?s:0,dy=dir==="D"?s:0,n=cells[(cur.x+dx)+","+(cur.y+dy)];if(n)n.el.focus()}
+  function paint(){var wi=word();Object.keys(cells).forEach(function(k){var c=cells[k];c.el.parentNode.classList.toggle("on",c.w.indexOf(wi)>=0);c.el.parentNode.classList.toggle("cur",c===cur)});
+   var w=z.words[wi];$("now").textContent=w.n+(w.d==="A"?" Across: ":" Down: ")+w.clue;Array.prototype.forEach.call(stage.querySelectorAll(".clues li"),function(l){l.classList.toggle("on",+l.dataset.i===wi)})}
+  function all(fn){Object.keys(cells).forEach(function(k){fn(cells[k])})}
+  function full(){var ok=true;all(function(c){if(c.el.value!==c.ch)ok=false});if(ok&&!done)win()}
+  function win(){done=true;best("poy-ashley-"+pi,1);[523,659,784,1047].forEach(function(f,i){tone(f,f,.3,.08,"triangle",i*.13)});$("st").textContent="Solved!";$("now").textContent="Solved. Nice work, from Ashlee Rae.";box.classList.add("solved")}
+  z.words.forEach(function(w,i){var l=document.createElement("li");l.value=w.n;l.dataset.i=i;l.textContent=w.clue;l.onclick=function(){dir=w.d;cells[w.x+","+w.y].el.focus()};$(w.d==="A"?"ca":"cd").appendChild(l)});
+  $("chk").onclick=function(){var w=0,e=0;all(function(c){if(!c.el.value){e++;return}var ok=c.el.value===c.ch;c.el.parentNode.classList.toggle("bad",!ok);c.el.parentNode.classList.toggle("good",ok);if(!ok)w++});$("st").textContent=w?w+" to fix":e?e+" to go":"";full()};
+  $("rev").onclick=function(){all(function(c){c.el.value=c.ch});full()};$("bk").onclick=menu}
+ menu()}
+
+$("snd").onclick=function(){on=!on;stop();this.textContent=on?"🔊 Sound on":"🔇 Sound off";this.setAttribute("aria-pressed",String(on));ashley()};
+ashley();
+})();
+</script>
+</body></html>

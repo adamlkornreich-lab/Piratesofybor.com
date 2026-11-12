@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Message Island — The Pirates of Ybor</title><link rel="stylesheet" href="assets/site.css">
+<style>
+/* Message Island. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:0 0 16px}
+.tabs button{padding:12px 18px;border-radius:999px;border:1px solid var(--gold);background:transparent;color:var(--gold2);font:inherit;font-weight:bold;cursor:pointer;min-height:44px}
+.tabs button[aria-selected="true"]{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d05}
+.pane{display:none}.pane.on{display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.row input,.row select,.row textarea{flex:1 1 180px;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid rgba(232,184,74,.4);background:#0e1524;color:#f4e6c6;font:inherit}
+.row textarea{min-height:76px;flex-basis:100%}
+.feed{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.feed li{background:rgba(14,21,36,.8);border:1px solid rgba(232,184,74,.18);border-radius:12px;padding:12px 14px;overflow-wrap:anywhere}
+.feed b{color:var(--gold2)}.feed time{color:var(--mute);font-size:.8rem;margin-left:6px}
+.feed p{margin:6px 0 0;white-space:pre-wrap}
+.feed .mine{border-color:var(--sea)}
+.feed .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.note{color:var(--mute);font-size:.9rem;text-align:center;margin:14px auto 0;max-width:640px}
+.empty{color:var(--mute);text-align:center;padding:18px 0}
+.who{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin:0 0 14px}
+.who input{min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid rgba(232,184,74,.4);background:#0e1524;color:#f4e6c6;font:inherit;width:min(260px,70vw)}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="hero"><h1>✉ Message Island</h1><p class="lead">Post to the board, send a message to a crew mate, or challenge someone to a game.</p></section>
+  <section class="panel">
+    <div class="who"><label for="me">Your crew name</label><input id="me" maxlength="30" placeholder="Captain…" autocomplete="nickname"></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-board" aria-selected="true" aria-controls="p-board">📌 The Board</button>
+      <button role="tab" id="t-msg" aria-selected="false" aria-controls="p-msg">✉ Messages</button>
+      <button role="tab" id="t-ch" aria-selected="false" aria-controls="p-ch">⚔ Challenges</button>
+    </div>
+
+    <div class="pane on" id="p-board" role="tabpanel" aria-labelledby="t-board">
+      <div class="row"><textarea id="postText" maxlength="400" placeholder="Say something to the crew…" aria-label="Your post"></textarea></div>
+      <div class="row"><button class="btn" id="postBtn" type="button">Post to the board</button></div>
+      <ul class="feed" id="posts"></ul>
+    </div>
+
+    <div class="pane" id="p-msg" role="tabpanel" aria-labelledby="t-msg">
+      <div class="row"><select id="msgTo" aria-label="Send to"></select><input id="msgOther" maxlength="30" placeholder="Or type a name" aria-label="Or type a name"></div>
+      <div class="row"><textarea id="msgText" maxlength="400" placeholder="Write your message…" aria-label="Your message"></textarea></div>
+      <div class="row"><button class="btn" id="msgBtn" type="button">Save and send</button></div>
+      <ul class="feed" id="msgs"></ul>
+    </div>
+
+    <div class="pane" id="p-ch" role="tabpanel" aria-labelledby="t-ch">
+      <div class="row"><select id="chGame" aria-label="Game"></select><select id="chTo" aria-label="Who to challenge"></select><input id="chOther" maxlength="30" placeholder="Or type a name" aria-label="Or type a name"></div>
+      <div class="row"><input id="chNote" maxlength="120" placeholder="Add a taunt (optional)" aria-label="Taunt"></div>
+      <div class="row"><button class="btn rum" id="chBtn" type="button">Throw down the challenge</button></div>
+      <ul class="feed" id="chs"></ul>
+    </div>
+
+    <p class="note" id="note">Posts, messages and challenges are kept on this device for now. Use Send to pass one to a crew mate by text or email. They reach the whole crew on their own once crew accounts are switched on.</p>
+  </section>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var CREW=["Danny Alonso","Ruben Alvarez","Adam","Ashlee","Eric","Shere","Landon","Andy Seavey","Evan","Elise","Amber","Vick","Gerald I. Kornreich","Kevin","Craig","Aunt Lori","Uncle Larry","Sadie","Megan Massok","Greg Biggerstaff","Mark Brenner","Ed Lafferty","Daisuke Nakamura"];
+  var GAMES=[["chess.html","Pirate Chess"],["golf.html","Andy Golf Club"],["swashbuckle.html","Shere's Revenge"],["trivia.html","Pirate Trivia"],["darts.html","Pirate Darts"],["pool.html","Pirate Pool"],["cuppong.html","Cup Pong"],["flipcup.html","Flip Cup"],["shuffleboard.html","Shuffleboard"],["mixology.html","Mixology Duel"],["armwrestle.html","7th Ave Arm Wrestling"],["bingo.html","Pirate Bingo"],["crossword.html","The Crossword"],["treasure.html","Treasure Hunt"],["tire-toss.html","Ashlee Rae's Tire Toss"],["skate.html","Skate the Grotto"]];
+  var KEY="py_messages_v1",db={me:"",posts:[],msgs:[],chs:[]};
+  try{var s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object")db=Object.assign(db,s)}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+  function me(){return (db.me||"").trim()||"A pirate"}
+  function when(t){try{return new Date(t).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}catch(e){return ""}}
+  function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+  function opt(sel,list,first){sel.innerHTML="";sel.appendChild(new Option(first,""));list.forEach(function(v){sel.appendChild(Array.isArray(v)?new Option(v[1],v[0]):new Option(v,v))})}
+  function send(text,url){
+    var data={title:"The Pirates of Ybor",text:text};if(url)data.url=url;
+    if(navigator.share){navigator.share(data).catch(function(){});return}
+    var full=text+(url?" "+url:"");
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(function(){flash("Copied. Paste it into a text or email.")},function(){flash(full)})}else flash(full);
+  }
+  function flash(t){var n=$("note"),old=n.dataset.old||n.textContent;n.dataset.old=old;n.textContent=t;n.style.color="var(--gold2)";clearTimeout(flash.t);flash.t=setTimeout(function(){n.textContent=old;n.style.color=""},4200)}
+  function gameUrl(file){try{return new URL(file,location.href).href}catch(e){return file}}
+  function head(li,name,t){var b=el("b","",name);li.appendChild(b);li.appendChild(el("time","",when(t)))}
+  function btn(label,cls,fn){var b=el("button","btn "+(cls||"ghost"),label);b.type="button";b.onclick=fn;return b}
+  function drop(arr,i,draw){return btn("Remove","ghost",function(){arr.splice(i,1);save();draw()})}
+
+  function drawPosts(){var ul=$("posts");ul.innerHTML="";if(!db.posts.length){ul.appendChild(el("li","empty","Nothing on the board yet. Be the first to post."));return}
+    db.posts.forEach(function(p,i){var li=el("li","mine");head(li,p.from,p.t);li.appendChild(el("p","",p.text));var a=el("div","acts");a.appendChild(btn("Send","",function(){send(p.from+" posted on Message Island: "+p.text,gameUrl("messages.html"))}));a.appendChild(drop(db.posts,i,drawPosts));li.appendChild(a);ul.appendChild(li)})}
+  function drawMsgs(){var ul=$("msgs");ul.innerHTML="";if(!db.msgs.length){ul.appendChild(el("li","empty","No messages yet."));return}
+    db.msgs.forEach(function(m,i){var li=el("li","mine");head(li,m.from+" → "+m.to,m.t);li.appendChild(el("p","",m.text));var a=el("div","acts");a.appendChild(btn("Send to "+m.to,"",function(){send(m.to+", a message from "+m.from+": "+m.text)}));a.appendChild(drop(db.msgs,i,drawMsgs));li.appendChild(a);ul.appendChild(li)})}
+  function drawChs(){var ul=$("chs");ul.innerHTML="";if(!db.chs.length){ul.appendChild(el("li","empty","No challenges yet. Pick a game and call someone out."));return}
+    db.chs.forEach(function(c,i){var li=el("li","mine");head(li,c.from+" challenges "+c.to,c.t);li.appendChild(el("p","",c.game+(c.note?"\n“"+c.note+"”":"")));var a=el("div","acts");
+      var play=el("a","btn","Play "+c.game);play.href=c.file;a.appendChild(play);
+      a.appendChild(btn("Send to "+c.to,"",function(){send(c.to+", "+c.from+" challenges you to "+c.game+" on The Pirates of Ybor."+(c.note?" “"+c.note+"”":""),gameUrl(c.file))}));
+      a.appendChild(drop(db.chs,i,drawChs));li.appendChild(a);ul.appendChild(li)})}
+
+  opt($("msgTo"),CREW,"Choose a crew mate");opt($("chTo"),CREW,"Choose a crew mate");opt($("chGame"),GAMES,"Choose a game");
+  $("me").value=db.me||"";$("me").addEventListener("input",function(){db.me=this.value.slice(0,30);save()});
+  $("postBtn").onclick=function(){var t=$("postText").value.trim();if(!t){$("postText").focus();return}db.posts.unshift({from:me(),text:t,t:Date.now()});db.posts=db.posts.slice(0,60);save();$("postText").value="";drawPosts()};
+  $("msgBtn").onclick=function(){var to=($("msgOther").value.trim()||$("msgTo").value),t=$("msgText").value.trim();if(!to){flash("Choose who the message is for.");$("msgTo").focus();return}if(!t){$("msgText").focus();return}
+    var m={from:me(),to:to,text:t,t:Date.now()};db.msgs.unshift(m);db.msgs=db.msgs.slice(0,60);save();$("msgText").value="";drawMsgs();send(m.to+", a message from "+m.from+": "+m.text)};
+  $("chBtn").onclick=function(){var to=($("chOther").value.trim()||$("chTo").value),g=$("chGame");if(!g.value){flash("Choose a game first.");g.focus();return}if(!to){flash("Choose who to challenge.");$("chTo").focus();return}
+    var c={from:me(),to:to,file:g.value,game:g.options[g.selectedIndex].text,note:$("chNote").value.trim(),t:Date.now()};db.chs.unshift(c);db.chs=db.chs.slice(0,60);save();$("chNote").value="";drawChs();if(window.PY&&PY.coin)PY.coin()};
+  var tabs=[["t-board","p-board"],["t-msg","p-msg"],["t-ch","p-ch"]];
+  tabs.forEach(function(p){$(p[0]).onclick=function(){tabs.forEach(function(q){$(q[0]).setAttribute("aria-selected",String(q===p));$(q[1]).classList.toggle("on",q===p)})}});
+  if(location.hash==="#challenge")$("t-ch").click();
+  drawPosts();drawMsgs();drawChs();
+})();
+</script>
+</body></html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Police Station &amp; Hospital</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.dh{padding:22px 0 6px;text-align:center}.dh h1{margin:0;color:var(--gold2);font-size:clamp(2rem,8vw,3rem);line-height:1.05}
+.dh p{margin:8px auto 0;color:var(--fog);max-width:58ch}
+.dh .where{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sea)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:18px 0}
+@media (max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+.side{border-radius:var(--radius);padding:18px;border:1px solid rgba(232,184,74,.25);box-shadow:var(--shadow);min-width:0;scroll-margin-top:80px}
+.side.pd{background:linear-gradient(180deg,#14284a,#0e1a30)}.side.hs{background:linear-gradient(180deg,#123a2e,#0c2620)}
+.side h2{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(1.7rem,6vw,2.3rem)}
+.side .run{color:var(--mute);margin:2px 0 12px}
+.wanted{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.poster{background:#f3e6c4;color:#2a1d05;border-radius:6px;padding:10px;text-align:center;font-family:Georgia,serif;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.poster b{display:block;font:400 1.15rem 'Pirata One',Georgia,serif;color:#7a1f1f;letter-spacing:.5px}
+.poster .e{font-size:2rem;line-height:1.2}
+.poster small{display:block;font-weight:bold}
+.desk{display:grid;gap:8px;margin-top:12px}
+.desk button{text-align:left}
+.reply{min-height:1.6em;margin:10px 0 0;color:#fff3d6;font-style:italic}
+.meter{height:16px;border-radius:99px;background:#0b1712;overflow:hidden;border:1px solid rgba(125,255,176,.35);margin:10px 0 6px}
+.meter i{display:block;height:100%;width:35%;background:linear-gradient(90deg,#e05050,#f6d67a,#7dffb0);transition:width .6s}
+.tips{margin:12px 0 0;padding-left:20px;color:var(--fog)}.tips li{margin:4px 0}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="dh">
+    <div class="where">Ybor Cay · side by side, inland from Seventh Avenue</div>
+    <h1>Police Station &amp; Hospital</h1>
+    <p>Captain College keeps the cay safe, and Rani patches up every pirate who comes back from the reef the worse for wear.</p>
+    <div class="row" style="justify-content:center;margin-top:12px"><a class="btn" href="world/index.html#police">🏝 Walk there on the island</a></div>
+  </section>
+
+  <div class="two">
+    <section class="side pd" id="police">
+      <h2 style="color:#9ccaff">Police Station</h2>
+      <p class="run">Run by Captain College</p>
+      <div class="wanted">
+        <div class="poster"><b>WANTED</b><div class="e">🦀</div>Giant Reef Crab<small>Bounty: 25 doubloons</small></div>
+        <div class="poster"><b>WANTED</b><div class="e">🐍</div>Sea Serpent<small>Bounty: 60 doubloons</small></div>
+        <div class="poster"><b>WANTED</b><div class="e">🐙</div>The Great Kraken<small>Bounty: 150 doubloons</small></div>
+        <div class="poster"><b>WANTED</b><div class="e">🐋</div>The Leviathan<small>Bounty: 400 doubloons</small></div>
+      </div>
+      <div class="desk">
+        <button class="btn ghost" data-r="report">🚨 Report a sea monster</button>
+        <button class="btn ghost" data-r="lost">🧭 Lost something on the cay</button>
+        <button class="btn ghost" data-r="tip">🗝 Ask Captain College for a tip</button>
+      </div>
+      <p class="reply" id="pRep" aria-live="polite"></p>
+    </section>
+
+    <section class="side hs" id="hospital">
+      <h2 style="color:#9dffc4">Hospital</h2>
+      <p class="run">Run by Rani</p>
+      <p style="margin:0;color:var(--fog)">Back from a fight with the kraken? Rest on a cot and Rani will have you ready to sail again.</p>
+      <div class="meter" aria-hidden="true"><i id="hp"></i></div>
+      <div class="row"><button class="btn" id="heal">🩹 Get patched up</button><span class="stat" id="hpT">Health 35%</span></div>
+      <p class="reply" id="hRep" aria-live="polite"></p>
+      <ul class="tips">
+        <li>Drink water. Pirates always forget.</li>
+        <li>Fight beside your crew. They hit hard.</li>
+        <li>Stand back from the kraken's arms when they rise.</li>
+        <li>Out of breath? Health comes back on its own if you stay out of the fight.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+const $=i=>document.getElementById(i);
+const R={report:["Captain College: Logged. The crew is on the way, and so am I.","Captain College: A kraken off the outer keys? Take the Pippy and give it a broadside. We'll back you up."],
+ lost:["Captain College: Lost doubloons usually turn up near the beach. Look for the glint.","Captain College: Pops was napping on something shiny earlier. Check the Grotto."],
+ tip:["Captain College: The leviathan lives north of the keys. Bring the whole crew.","Captain College: Stay near the lanterns after dark.","Captain College: Three treasure chests on the outer islands. One is on Danny Alonso Island."]};
+document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const l=R[b.dataset.r];$("pRep").textContent=l[Math.floor(Math.random()*l.length)];});
+let hp=35;
+$("heal").onclick=()=>{if(hp>=100){$("hRep").textContent="Rani: You're good as new. Go get 'em.";return;}hp=Math.min(100,hp+35);$("hp").style.width=hp+"%";$("hpT").textContent=`Health ${hp}%`;
+ $("hRep").textContent=hp>=100?"Rani: All patched up. Back to the reef with you.":["Rani: Hold still. This will sting a little.","Rani: Bandage on. One more round of rest."][hp<70?0:1];
+ if(hp>=100)window.PY&&PY.celebrate&&PY.celebrate();};
+const h=location.hash.slice(1);if(h){const el=$(h);if(el)el.scrollIntoView({block:"start"});}
+})();
+</script>
+</body></html>
