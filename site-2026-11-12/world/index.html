@@ -77,6 +77,22 @@ h1{font:400 clamp(3.6rem,13vw,7rem)/.92 "Pirata One",Georgia,serif;color:#f1d58a
 /* Pirate lettering everywhere */
 body,body *:not(canvas){font-family:"Pirata One",Georgia,serif !important;letter-spacing:.02em}
 #loot,#keys,#wx span{font-size:.98rem}
+
+#hudrow{display:flex;gap:8px;align-items:stretch;pointer-events:auto}
+#wxSq{width:clamp(76px,11vw,96px);aspect-ratio:1;display:grid;place-items:center;align-content:center;gap:0;padding:6px;text-align:center;line-height:1.1;border-radius:12px}
+#wxSq i{font-style:normal;font-size:1.4rem}#wxSq b{font:400 1.35rem/1 "Pirata One",Georgia,serif;color:#ffd36b}#wxSq span{font-size:.66rem;color:var(--mute);white-space:nowrap}#wxSq em{font-style:normal;font-size:.6rem;color:#9fe1ff}
+#bNav{width:clamp(52px,7vw,64px);display:grid;place-items:center;align-content:center;gap:2px;font-size:1.4rem;cursor:pointer;border-radius:12px;color:var(--ink);min-height:44px}#bNav span{font-size:.7rem;color:#9fe1ff;font-weight:700}
+#gps{display:none;align-items:center;gap:9px;padding:7px 8px 7px 11px;max-width:min(78vw,300px);border-color:#4fc3ff99}
+#gps.show{display:flex}
+#gpsA{flex:none;width:30px;height:30px;border-radius:50%;background:#4fc3ff;color:#06202e;display:grid;place-items:center;font-size:1rem;transition:transform .12s linear}
+#gpsT{min-width:0;line-height:1.15;font-size:.9rem}
+#gpsT b{display:block;color:#bfe9ff;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gpsT span{color:var(--mute);font-size:.82rem;font-variant-numeric:tabular-nums}
+#gpsX{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;font-size:1.1rem;line-height:1;color:var(--ink)}
+#gpsQuick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+#gpsQuick b{color:#bfe9ff;margin-right:2px}
+#gpsQuick button{min-height:40px;padding:0 13px;border-radius:20px;border:1px solid #4fc3ff88;background:#0f2433cc;color:var(--ink);font-size:.92rem}
+#plist button[data-gps]{border-color:#4fc3ff88;color:#bfe9ff}
 </style></head>
 <body>
 <canvas id="c" tabindex="0" aria-label="A 3D pirate island you can walk around. Open the places list for links to every room."></canvas>
@@ -84,7 +100,7 @@ body,body *:not(canvas){font-family:"Pirata One",Georgia,serif !important;letter
  <div id="tl" class="pill"><div id="where" aria-live="polite">Ybor Cay</div><div id="loot"></div><div id="hpW"><span id="hpL">Health</span><div class="bar"><i id="hpB"></i></div></div></div>
  <a id="home" class="ic" href="../index.html" aria-label="Back to the site home">⌂</a><div id="wx" class="pill" aria-live="off"><b>☀ --°F</b><span>Loading weather…</span></div>
  <div id="mon"><div id="monN"></div><div class="bar"><i id="monB"></i></div></div>
- <div id="tr"><button id="miniB" aria-label="Open the map and places list" style="all:unset;cursor:pointer;border-radius:50%"><canvas id="mini" width="344" height="344"></canvas></button>
+ <div id="tr"><button id="miniB" aria-label="Open the map and places list" style="all:unset;cursor:pointer;border-radius:50%"><canvas id="mini" width="344" height="344"></canvas></button><div id="hudrow"><div id="wxSq" class="pill" aria-label="Weather"></div><button id="bNav" type="button" class="pill" aria-label="Navigate: pick a place for the GPS" onclick="document.getElementById('miniB').click()">🧭<span>GPS</span></button></div><div id="gps" class="pill" aria-live="polite"><span id="gpsA" aria-hidden="true">▲</span><span id="gpsT"></span><button id="gpsX" type="button" aria-label="Turn GPS off">×</button></div>
   <div class="btns"><button class="ic" id="bPlaces" type="button" aria-label="Places">Places</button><button class="ic" id="bTime" type="button" aria-label="Change the time of day">☀︎</button><button class="ic" id="bRain" type="button" aria-label="Rain on or off" aria-pressed="false">☂︎</button><button class="ic" id="bParrot" type="button" aria-label="Teach your parrot a word">🦜</button><button class="ic" id="bRadio" type="button" aria-label="Radio on or off" aria-pressed="false">📻</button><button class="ic" id="bSound" type="button" aria-label="Sound on or off">♪</button></div></div>
  <div id="toast" aria-live="polite"></div>
  <button id="act" type="button"><kbd>E</kbd><span id="actT"></span></button>
