@@ -103,6 +103,9 @@ window.addEventListener('error',function(e){if(e.filename&&/\/world\/|three\.js/
 setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)g.textContent='Still loading the island…'},12000);
 setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)fail()},60000)})();</script>
 <script src="../assets/beats.js"></script>
+<script>document.body.setAttribute("data-no-cine","");</script>
+<script src="../assets/cine.js"></script>
+<script>if(window.PoyCine)PoyCine.card({kick:"Gaspar's Grotto presents",title:"Ybor Cay: Plunder & Heat",sub:["Crack the supply drops. Outrun the marines.","Beat the squall. Claim the bounty.","Every visit, the island deals a new hand."][Math.floor(Math.random()*3)],button:"⚓ Drop anchor"});</script>
 <script>
 /* Grotto FM is DJ Bouche: the radio button steps through Miami Bass, East Coast, West Coast, Dubstep and Rave, then off. Music starts with the game. */
 (function(){var B=window.PoyBeats;if(!B)return;var ORD=["miami","east","west","dubstep","rave"];

@@ -56,6 +56,17 @@
   function mtof(m){return 440*Math.pow(2,(m-69)/12);}
   function isMuted(){if(forceMute!==null)return forceMute;var b=document.getElementById("soundBtn");if(b)return b.getAttribute("aria-pressed")==="false";try{return localStorage.getItem("py_mute")==="1";}catch(e){return false;}}
 
+  /* iPhones mute web audio when the ring switch is on silent unless a media element is playing: keep a silent one looping. */
+  var unlockEl=null;
+  function unlock(){
+    try{
+      if(!unlockEl){var n=2000,b=new Uint8Array(44+n),dv=new DataView(b.buffer),w=function(o,s){for(var i=0;i<s.length;i++)b[o+i]=s.charCodeAt(i);};
+        w(0,"RIFF");dv.setUint32(4,36+n,true);w(8,"WAVEfmt ");dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,8000,true);dv.setUint32(28,8000,true);dv.setUint16(32,1,true);dv.setUint16(34,8,true);w(36,"data");dv.setUint32(40,n,true);for(var i=44;i<b.length;i++)b[i]=128;
+        var bin="";for(var j=0;j<b.length;j++)bin+=String.fromCharCode(b[j]);
+        unlockEl=document.createElement("audio");unlockEl.src="data:audio/wav;base64,"+btoa(bin);unlockEl.loop=true;unlockEl.setAttribute("playsinline","");unlockEl.preload="auto";}
+      var pr=unlockEl.play();if(pr&&pr.catch)pr.catch(function(){});
+    }catch(e){}
+  }
   function ensure(){
     if(ctx)return true;
     if(!AC)return false;
@@ -181,13 +192,13 @@
     start:function(s,explicit){
       if(s&&S[s]&&s!==style){style=s;step=0;lastBass=0;lastLead=0;if(ctx)next=ctx.currentTime+.08;}
       if(!ensure())return false;
-      try{if(ctx.state!=="running")ctx.resume();}catch(e){}
+      unlock();try{if(ctx.state!=="running")ctx.resume();}catch(e){}
       if(!on){on=true;step=0;drop=0;next=ctx.currentTime+.08;clearInterval(timer);timer=setInterval(tick,40);}
       pref=style;if(explicit!==false){try{localStorage.setItem("py_beat",style);}catch(e){}}
       var sh=document.getElementById("shantyBtn");if(sh&&sh.getAttribute("aria-pressed")==="true")sh.click();
       vol();emit();return true;
     },
-    stop:function(remember){on=false;clearInterval(timer);vol();if(remember!==false){pref="off";try{localStorage.setItem("py_beat","off");}catch(e){}}emit();},
+    stop:function(remember){try{if(unlockEl)unlockEl.pause();}catch(e){}on=false;clearInterval(timer);vol();if(remember!==false){pref="off";try{localStorage.setItem("py_beat","off");}catch(e){}}emit();},
     isOn:function(){return on;},
     style:function(){return style;},
     pref:function(){return pref;},
