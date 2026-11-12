@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Ybor Cay</title>
+<meta name="description" content="Walk, swim and sail a 3D pirate island. Every game, the movies and Gaspar's Grotto are places you can walk into.">
+<link rel="icon" href="../assets/brand-watermark.png"><meta name="theme-color" content="#121318">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Alegreya:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--brass:#e0b056;--ink:#f3ead7;--mute:#bcc8c6;--sea:#3fb6a8;--rum:#c4572b;--glass:rgba(9,18,26,.62);--line:rgba(255,235,190,.2)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#0b1a26;overflow:hidden;color:var(--ink);font:16px/1.4 Alegreya,Georgia,serif;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none;cursor:grab}#c:active{cursor:grabbing}
+button{font:inherit;color:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.pill{background:var(--glass);border:1px solid var(--line);border-radius:12px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .6s;z-index:3}.on #hud{opacity:1}
+#tl{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(52px,calc(env(safe-area-inset-left) + 52px));padding:8px 13px;max-width:min(52vw,320px)}
+#where{font:400 1.45rem/1.05 "Pirata One",Georgia,serif;color:var(--brass)}#loot{font-size:.92rem;color:var(--mute);font-variant-numeric:tabular-nums}
+#tr{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:auto}
+#mini{display:block;width:clamp(112px,20vw,172px);height:clamp(112px,20vw,172px);border-radius:50%;border:2px solid var(--brass);box-shadow:0 6px 22px #0008;background:#0d3b4a;cursor:pointer;padding:0}
+.btns{display:flex;gap:6px}.ic{min-width:44px;height:44px;padding:0 11px;display:grid;place-items:center;font-size:.95rem;background:var(--glass);border:1px solid var(--line);border-radius:12px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.ic:hover{border-color:var(--brass)}
+#act{position:absolute;left:50%;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 74px);transform:translateX(-50%);pointer-events:auto;min-height:52px;padding:0 20px;display:none;align-items:center;gap:10px;white-space:nowrap;background:var(--brass);color:#1b1305;border:0;border-radius:14px;font:700 1.08rem Alegreya,Georgia,serif;box-shadow:0 8px 26px #0009;max-width:calc(100vw - 24px)}#act.show{display:inline-flex}#act kbd{font:700 .85rem Alegreya,Georgia,serif;background:#1b1305;color:var(--brass);border-radius:6px;padding:2px 8px}.touch #act kbd{display:none}
+#toast{position:absolute;top:18%;left:50%;transform:translateX(-50%);text-align:center;font:400 clamp(1.3rem,4vw,2.1rem)/1.15 "Pirata One",Georgia,serif;color:#ffe6b0;text-shadow:0 2px 12px #000c;opacity:0;transition:opacity .4s;width:min(92vw,720px)}#toast.show{opacity:1}#toast small{display:block;font:500 1rem Alegreya,Georgia,serif;color:#fff;margin-top:4px}
+#keys{position:absolute;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));padding:8px 12px;font-size:.9rem;color:var(--mute);line-height:1.5}#keys b{color:var(--ink);font-weight:700}.touch #keys{display:none}
+#joy{position:absolute;display:none;width:124px;height:124px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.3);transform:translate(-50%,-50%)}#joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px;border-radius:50%;background:rgba(224,176,86,.75)}
+#tbtn{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:none;gap:10px;pointer-events:auto}.touch #tbtn{display:flex}#tbtn button{width:70px;height:70px;border-radius:50%;background:var(--glass);border:2px solid rgba(255,255,255,.34);font:700 .9rem Alegreya,Georgia,serif;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}#tbtn button.held{background:var(--brass);color:#1b1305}
+.pp-wm{position:fixed;left:50%;bottom:max(3px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:4;pointer-events:none;display:flex;align-items:center;gap:6px;opacity:.9;filter:drop-shadow(0 0 6px rgba(255,214,120,.65));white-space:nowrap}
+body .pp-wm{left:50%;right:auto;animation:none;z-index:4}body .pp-wm img{width:42px;height:auto}.pp-wm span{font:600 10.5px/1.15 Georgia,serif;color:#fff;text-shadow:0 1px 3px #000}.pp-wm .sp{position:absolute;color:#ffe9a8;font-size:10px;animation:tw 2.6s ease-in-out infinite}.pp-wm .a{left:-7px;top:-5px}.pp-wm .b{left:32px;top:-9px;animation-delay:1s}@keyframes tw{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.1)}}
+@media(max-width:560px){.pp-wm span{max-width:150px;white-space:normal;font-size:9px}#tl{max-width:44vw}#where{font-size:1.2rem}#loot{font-size:.82rem}#toast{top:30%}#tbtn{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 34px)!important}.pp-wm span{max-width:none;white-space:nowrap}#act{bottom:calc(max(18px,env(safe-area-inset-bottom)) + 124px)}}
+#fade{position:fixed;inset:0;background:#05090e;opacity:0;pointer-events:none;transition:opacity .45s;z-index:6}
+#start{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;justify-content:flex-end;padding:0 max(22px,env(safe-area-inset-right)) max(46px,env(safe-area-inset-bottom)) max(22px,env(safe-area-inset-left));background:linear-gradient(transparent 36%,#050b12d9);transition:opacity .7s}.on #start{opacity:0;pointer-events:none}
+#start .box{max-width:620px;width:100%;margin:0 auto;text-align:center}.kick{color:#ffe6b0;letter-spacing:.09em;text-transform:uppercase;font-size:.8rem;font-weight:700}h1{font:400 clamp(3.2rem,12vw,6.4rem)/.95 "Pirata One",Georgia,serif;color:var(--brass);margin:4px 0 8px;text-shadow:0 4px 26px #000b}
+#start p{margin:0 auto 18px;max-width:50ch;color:#f6efdf;font-size:1.08rem;text-shadow:0 1px 6px #000}
+#go{min-height:56px;min-width:230px;padding:0 28px;border:0;border-radius:14px;background:var(--brass);color:#1b1305;font:700 1.2rem Alegreya,Georgia,serif;box-shadow:0 10px 30px #000a}#go:disabled{background:#6f6147;color:#e9dfc8;cursor:progress}
+.alt{display:block;margin-top:12px;color:var(--ink);padding:6px}
+@media(min-width:820px){#start{background:linear-gradient(90deg,#050b12d6,transparent 60%)}#start .box{margin:0 0 0 36px;text-align:left}#start .box p{margin-left:0}#start #bar{margin-left:0}#start .alt{padding-left:0}}
+#bar{height:3px;background:#ffffff22;border-radius:9px;margin:14px auto 0;max-width:230px;overflow:hidden}#bar i{display:block;height:100%;width:0;background:var(--brass);transition:width .2s}
+#places{position:fixed;inset:0;z-index:5;display:none;background:rgba(4,10,16,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));overflow:auto;touch-action:pan-y;-webkit-user-select:text;user-select:text}#places.show{display:block}
+.pwrap{max-width:980px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}@media(max-width:760px){.pwrap{grid-template-columns:1fr}}
+.phead{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px}.phead h2{font:400 2.1rem/1 "Pirata One",Georgia,serif;color:var(--brass);margin:0}
+#big{width:100%;max-width:min(100%,62vh);margin:0 auto;aspect-ratio:1;display:block;border-radius:14px;border:2px solid var(--brass);background:#0d3b4a}
+#plist{list-style:none;margin:0;padding:0;display:grid;gap:6px}#plist li{display:flex;gap:6px;align-items:center;padding:6px 6px 6px 12px;border:1px solid var(--line);border-radius:10px;background:#0f2433cc}#plist span{flex:1;min-width:0;line-height:1.15}#plist span small{display:block;color:var(--mute);font-size:.82rem}#plist a,#plist button{min-height:40px;display:inline-flex;align-items:center;padding:0 11px;border-radius:8px;text-decoration:none;font-size:.92rem;font-weight:700;border:0;white-space:nowrap}#plist button{background:#ffffff18;color:var(--ink)}#plist a{background:var(--brass);color:#1b1305}
+#hpW{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:.82rem;color:var(--mute)}.bar{flex:1;min-width:70px;height:9px;background:#0009;border-radius:6px;overflow:hidden;border:1px solid var(--line)}.bar i{display:block;height:100%;width:100%;background:#6fd36f;transition:width .15s}#mon{position:absolute;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(40vw,360px);display:none;text-align:center;padding:5px 12px;background:var(--glass);border:1px solid #ff7a4a88;border-radius:12px}#mon.show{display:block}#monN{font:400 1.2rem/1.1 "Pirata One",Georgia,serif;color:#ffb199}#monB{background:#e0523a}#bFight{background:var(--rum)!important;color:#fff}@media(max-width:900px){#mon{top:auto;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 62px)}}@media(max-width:560px){#mon{top:auto;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 112px);width:60vw}}
+#no3d{position:fixed;inset:0;z-index:9;display:none;place-items:center;text-align:center;padding:20px;background:#0b1a26}
+body .poy-tab{z-index:4}body .poy-bar.float{z-index:7}
+.pill,.ic{box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#wx{position:absolute;top:calc(max(12px,env(safe-area-inset-top)) + 0px);left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 12px;padding:7px 14px;font-size:.92rem;color:var(--ink);font-variant-numeric:tabular-nums;max-width:min(46vw,520px);pointer-events:none}
+#wx b{font:400 1.25rem/1 "Pirata One",Georgia,serif;color:var(--brass)}
+#wx span{color:var(--mute);white-space:nowrap}
+@media(max-width:900px){#wx{top:auto;bottom:calc(max(12px,env(safe-area-inset-bottom)) + 30px);max-width:calc(100vw - 24px);font-size:.82rem;gap:2px 10px}.touch #wx{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 110px)}}
+#home{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));pointer-events:auto;width:36px;height:44px;display:grid;place-items:center;text-decoration:none;color:var(--ink);font-size:1.1rem}
+
+/* Battle Stations: iron, brass and blood-red warship chrome */
+:root{--brass:#d9a944;--sea:#3fb6a8;--rum:#9c1f1f;--glass:rgba(18,19,24,.72);--line:rgba(217,169,68,.5);--mute:#c9c2b4;--ink:#f3ead7;--blood:#9c1f1f;--iron:#2b2d33}
+.pill,.ic{border:1px solid var(--line);background:linear-gradient(180deg,rgba(43,45,51,.86),rgba(18,19,24,.82));box-shadow:0 8px 22px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08);border-radius:8px;position:relative}
+.pill::before,.pill::after,.ic::before,.ic::after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f1d58a,#7a5a1c 70%);pointer-events:none}
+.pill::before,.ic::before{left:4px;top:4px}.pill::after,.ic::after{right:4px;bottom:4px}
+#where{font:400 1.7rem/1 "Pirata One",Georgia,serif;color:var(--brass);text-shadow:0 2px 0 #3a2a08,0 0 14px rgba(217,169,68,.35)}
+#wx b{color:#ffd36b}
+#mini{border:3px solid var(--brass);border-radius:50%;box-shadow:0 0 0 3px #1b1a1f,0 0 0 4px rgba(217,169,68,.5),0 10px 26px #000b}
+.bar{border-color:var(--line);background:#0b0b0f}.bar i{background:linear-gradient(90deg,#9c1f1f,#e04a3a)}
+#act,#go{background:linear-gradient(180deg,#e2b85a,#b9872a);color:#1b1305;border:1px solid #6b4b12;box-shadow:0 0 0 2px #15151a,0 10px 26px rgba(0,0,0,.65);border-radius:8px}
+#act kbd{background:#1b1305;color:#ffd36b}
+h1{font:400 clamp(3.6rem,13vw,7rem)/.92 "Pirata One",Georgia,serif;color:#f1d58a;text-shadow:0 3px 0 #5b3d0a,0 6px 0 #2a1d05,0 0 30px rgba(156,31,31,.7),0 14px 30px #000}
+.kick{color:#e04a3a;letter-spacing:.3em;text-shadow:0 1px 0 #000}
+#start{background:linear-gradient(transparent 28%,rgba(10,9,12,.9))}
+@media(min-width:820px){#start{background:linear-gradient(90deg,rgba(10,9,12,.92),transparent 62%)}}
+#toast{color:#fff1d6;text-shadow:0 2px 0 #3a0a0a,0 0 18px rgba(156,31,31,.9)}
+#bRadio[aria-pressed="true"],#bRain[aria-pressed="true"]{background:linear-gradient(180deg,#e2b85a,#b9872a);color:#1b1305}
+.phead h2{color:var(--brass)}#big{border-color:var(--brass)}#plist a{background:linear-gradient(180deg,#e2b85a,#b9872a);color:#1b1305}#plist li{background:rgba(18,19,24,.86)}
+#mon{border-color:#e04a3a;background:linear-gradient(180deg,rgba(60,14,14,.9),rgba(18,19,24,.9))}#monB{background:#e04a3a}
+#tbtn button{background:linear-gradient(180deg,rgba(43,45,51,.9),rgba(18,19,24,.9));border:2px solid var(--line)}#tbtn button.held,#bFight{background:linear-gradient(180deg,#b92a22,#7a1414)!important;color:#fff;border-color:#e04a3a}
+.pp-wm span{color:#f3ead7}
+
+@media(max-width:900px){#where{font-size:1.3rem}.btns{flex-wrap:wrap;justify-content:flex-end;max-width:150px}
+ #wx.inl{position:static;transform:none;padding:4px 0 0;margin:0;justify-content:flex-start;background:none;border:0;box-shadow:none;clip-path:none;max-width:none;font-size:.78rem;gap:0 8px;-webkit-backdrop-filter:none;backdrop-filter:none}
+ #wx.inl b{font-size:1.05rem}}
+
+/* Pirate lettering everywhere */
+body,body *:not(canvas){font-family:"Pirata One",Georgia,serif !important;letter-spacing:.02em}
+#loot,#keys,#wx span{font-size:.98rem}
+
+#hudrow{display:flex;gap:8px;align-items:stretch;pointer-events:auto}
+#wxSq{width:clamp(76px,11vw,96px);aspect-ratio:1;display:grid;place-items:center;align-content:center;gap:0;padding:6px;text-align:center;line-height:1.1;border-radius:12px}
+#wxSq i{font-style:normal;font-size:1.4rem}#wxSq b{font:400 1.35rem/1 "Pirata One",Georgia,serif;color:#ffd36b}#wxSq span{font-size:.66rem;color:var(--mute);white-space:nowrap}#wxSq em{font-style:normal;font-size:.6rem;color:#9fe1ff}
+#bNav{width:clamp(52px,7vw,64px);display:grid;place-items:center;align-content:center;gap:2px;font-size:1.4rem;cursor:pointer;border-radius:12px;color:var(--ink);min-height:44px}#bNav span{font-size:.7rem;color:#9fe1ff;font-weight:700}
+#gps{display:none;align-items:center;gap:9px;padding:7px 8px 7px 11px;max-width:min(78vw,300px);border-color:#4fc3ff99}
+#gps.show{display:flex}
+#gpsA{flex:none;width:30px;height:30px;border-radius:50%;background:#4fc3ff;color:#06202e;display:grid;place-items:center;font-size:1rem;transition:transform .12s linear}
+#gpsT{min-width:0;line-height:1.15;font-size:.9rem}
+#gpsT b{display:block;color:#bfe9ff;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gpsT span{color:var(--mute);font-size:.82rem;font-variant-numeric:tabular-nums}
+#gpsX{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;font-size:1.1rem;line-height:1;color:var(--ink)}
+#gpsQuick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+#gpsQuick b{color:#bfe9ff;margin-right:2px}
+#gpsQuick button{min-height:40px;padding:0 13px;border-radius:20px;border:1px solid #4fc3ff88;background:#0f2433cc;color:var(--ink);font-size:.92rem}
+#plist button[data-gps]{border-color:#4fc3ff88;color:#bfe9ff}
+
+/* Dark pirate grade over the 3D view */
+#grade{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 38%,rgba(0,0,0,.72) 100%),linear-gradient(rgba(160,70,55,.55),rgba(120,60,70,.55));mix-blend-mode:multiply;transition:opacity .5s}
+body.lightview #grade{opacity:0}
+#bDark{width:clamp(52px,7vw,64px);display:grid;place-items:center;align-content:center;gap:2px;font-size:1.3rem;cursor:pointer;border-radius:12px;color:var(--ink);min-height:44px}#bDark span{font-size:.7rem;color:#ffd36b;font-weight:700}
+
+body.cine #hud{opacity:0!important;pointer-events:none}
+</style></head>
+<body>
+<div id="grade" aria-hidden="true"></div><canvas id="c" tabindex="0" aria-label="A 3D pirate island you can walk around. Open the places list for links to every room."></canvas>
+<div id="hud">
+ <div id="tl" class="pill"><div id="where" aria-live="polite">Ybor Cay</div><div id="loot"></div><div id="hpW"><span id="hpL">Health</span><div class="bar"><i id="hpB"></i></div></div></div>
+ <a id="home" class="ic" href="../index.html" aria-label="Back to the site home">⌂</a><div id="wx" class="pill" aria-live="off"><b>☀ --°F</b><span>Loading weather…</span></div>
+ <div id="mon"><div id="monN"></div><div class="bar"><i id="monB"></i></div></div>
+ <div id="tr"><button id="miniB" aria-label="Open the map and places list" style="all:unset;cursor:pointer;border-radius:50%"><canvas id="mini" width="344" height="344"></canvas></button><div id="hudrow"><div id="wxSq" class="pill" aria-label="Weather"></div><button id="bDark" type="button" class="pill" aria-pressed="true" aria-label="Dark pirate look on or off">🌑<span>Dark</span></button><button id="bNav" type="button" class="pill" aria-label="Navigate: pick a place for the GPS" onclick="document.getElementById('miniB').click()">🧭<span>GPS</span></button></div><div id="gps" class="pill" aria-live="polite"><span id="gpsA" aria-hidden="true">▲</span><span id="gpsT"></span><button id="gpsX" type="button" aria-label="Turn GPS off">×</button></div>
+  <div class="btns"><button class="ic" id="bPlaces" type="button" aria-label="Places">Places</button><button class="ic" id="bTime" type="button" aria-label="Change the time of day">☀︎</button><button class="ic" id="bRain" type="button" aria-label="Rain on or off" aria-pressed="false">☂︎</button><button class="ic" id="bParrot" type="button" aria-label="Teach your parrot a word">🦜</button><button class="ic" id="bRadio" type="button" aria-label="Radio on or off" aria-pressed="false">📻</button><button class="ic" id="bSound" type="button" aria-label="Sound on or off">♪</button></div></div>
+ <div id="toast" aria-live="polite"></div>
+ <button id="act" type="button"><kbd>E</kbd><span id="actT"></span></button>
+ <div id="keys" class="pill"><b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>drag</b> look · <b>scroll</b> zoom · <b>F</b> fight or fire · <b>E</b> act / ride the Vanicular · <b>R</b> rain · <b>M</b> map</div>
+ <div id="joy"><i></i></div>
+ <div id="tbtn"><button id="bFight" type="button">Fight</button><button id="bSprint" type="button">Sprint</button><button id="bJump" type="button">Jump</button></div>
+</div>
+<div class="pp-wm" aria-hidden="true"><img src="../assets/brand-watermark.png" alt=""><i class="sp a">✦</i><i class="sp b">✧</i><span>© 2026 Adam Kornreich / R.A. Consulting ❤ Pops &amp; Pippy</span></div>
+<script>(function(){var m=matchMedia('(max-width:900px)');function place(){var w=document.getElementById('wx'),t=document.getElementById('tl');if(!w||!t)return;if(m.matches){if(w.parentNode!==t){t.appendChild(w);w.classList.add('inl')}}else if(w.parentNode===t){document.getElementById('hud').appendChild(w);w.classList.remove('inl')}}place();m.addEventListener?m.addEventListener('change',place):m.addListener(place)})();</script>
+<section id="start"><div class="box"><div class="kick">Gaspar's Grotto presents · Battle Stations</div><h1>Ybor Cay</h1><p>Walk the beach with Pops and Pippy at your heels, wander Seventh Avenue, and take the helm of the Pippy to sail out to Danny Alonso Island, or hop the Vanicular, the Seventh Avenue streetcar, and ride La Séptima end to end. The Iron Gaspar rides at anchor off the dock and fires a broadside when you sail close. Your crew fights in iron and brass beside you, the Gulf rain rolls in, and day turns to night. Collect doubloons, and walk into every game on the island.</p><button id="go" type="button" disabled>Loading the island</button><div id="bar"><i></i></div><a class="alt" href="../arcade.html">Skip to the list of games</a></div></section>
+<section id="places" role="dialog" aria-modal="true" aria-labelledby="ph"><div class="pwrap"><div class="phead"><h2 id="ph">The chart</h2><button class="ic" id="bClose" type="button">Close</button></div><canvas id="big" width="900" height="900" aria-hidden="true"></canvas><ul id="plist"></ul></div></section>
+<div id="fade"></div>
+<div id="no3d"><div><h1>Ybor Cay</h1><p>The walkable 3D island can't run in this browser, but every other game still plays right here.</p><a class="alt" href="../arcade.html" style="color:var(--brass);font-size:1.2rem;font-weight:700">Play every game</a></div></div>
+<script>(function(){function fail(){var g=document.getElementById('go');if(g&&!g.disabled)return;document.getElementById('no3d').style.display='grid';document.getElementById('start').style.display='none'}
+window.addEventListener('error',function(e){if(e.filename&&/\/world\/|three\.js/.test(e.filename))fail()});window.addEventListener('unhandledrejection',fail);
+setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)g.textContent='Still loading the island…'},12000);
+setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)fail()},60000)})();</script>
+<script src="../assets/beats.js"></script>
+<script>(function(){var on=true;try{on=localStorage.getItem("py_dark")!=="0";}catch(e){}function set(v){on=v;document.body.classList.toggle("lightview",!on);var b=document.getElementById("bDark");if(b)b.setAttribute("aria-pressed",String(on));try{localStorage.setItem("py_dark",on?"1":"0");}catch(e){}}document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("#bDark"))set(!on);});if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){set(on);});else set(on);})();</script>
+<script>document.body.setAttribute("data-no-cine","");</script>
+<script src="../assets/cine.js"></script>
+<script>if(window.PoyCine)PoyCine.card({kick:"Gaspar's Grotto presents",title:"Ybor Cay: Plunder & Heat",sub:["Crack the supply drops. Outrun the marines.","Beat the squall. Claim the bounty.","Every visit, the island deals a new hand."][Math.floor(Math.random()*3)],button:"⚓ Drop anchor"});</script>
+<script>
+/* Grotto FM is DJ Josh Bouche: the radio button steps through Miami Bass, East Coast, West Coast, Dubstep and Rave, then off. Music starts with the game. */
+(function(){var B=window.PoyBeats;if(!B)return;var ORD=["miami","east","west","dubstep","rave"];
+  function lab(){var b=document.getElementById("bRadio");if(!b)return;var on=B.isOn();b.setAttribute("aria-pressed",String(on));b.textContent=on?"📻 "+B.styles[B.pendingStyle()||B.style()].name:"📻 Off";b.style.width="auto";b.style.padding="0 10px";b.title=on?"Grotto FM with DJ Josh Bouche: tap for the next sound":"Radio off: tap for music";b.setAttribute("aria-label",b.title);}
+  document.addEventListener("click",function(e){var t=e.target&&e.target.closest?e.target.closest("#bRadio,#bSound"):null;if(!t)return;
+    if(t.id==="bRadio"){e.stopPropagation();e.preventDefault();if(!B.isOn())B.start(ORD[0]);else{var i=ORD.indexOf(B.pendingStyle()||B.style());if(i<ORD.length-1)B.mixTo(ORD[i+1]);else B.stop();}lab();}
+    else setTimeout(function(){B.setMuted(t.getAttribute("aria-pressed")==="false");},0);},true);
+  B.onState(lab);if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",lab);else lab();})();
+</script>
+<script src="rooms.js"></script><script type="module" src="main.js" onerror="document.getElementById('no3d').style.display='grid'"></script>
+<script nomodule>document.getElementById('no3d').style.display='grid';document.getElementById('start').style.display='none'</script>
+</body></html>

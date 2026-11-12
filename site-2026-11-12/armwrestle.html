@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7th Ave Arm Wrestling</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.ah{padding:18px 0 6px}.ah h1{margin:0;color:var(--gold2);font-size:clamp(1.9rem,7vw,2.8rem);line-height:1.05}.ah p{margin:6px 0 0;color:var(--mute);max-width:66ch}
+.ah .where{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sea)}
+.arena{position:relative;max-width:820px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);touch-action:none;user-select:none;-webkit-user-select:none}
+#aw{display:block;width:100%;height:auto;aspect-ratio:4/3;background:#1a0f0a}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;text-align:center;background:rgba(11,14,20,.78)}
+.ov[hidden]{display:none}
+.ov h2{margin:0;font:400 clamp(1.8rem,7vw,2.6rem) 'Pirata One',Georgia,serif;color:#f6d67a}
+.ov p{margin:0;color:#fff3d6;max-width:44ch}
+.foes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:min(560px,100%)}
+@media (max-width:520px){.foes{grid-template-columns:1fr}}
+.foe{border-radius:12px;border:2px solid rgba(232,184,74,.4);background:var(--panel2);color:#fff3d6;padding:10px;font:inherit;cursor:pointer;text-align:left;min-width:0}
+.foe b{display:block;font:400 1.3rem 'Pirata One',Georgia,serif;color:#f6d67a}.foe span{font-size:.82rem;color:var(--mute)}
+.foe:disabled{opacity:.45;cursor:not-allowed}
+.foe:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.pads{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;max-width:820px;margin:10px auto 0}
+.pad{min-height:84px;border-radius:14px;border:2px solid rgba(232,184,74,.4);background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d05;font:800 1.15rem system-ui,sans-serif;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.pad.p2{background:linear-gradient(180deg,#ff9a7a,#c0412a);color:#fff}
+.pad.one{grid-column:1/-1}
+.pad.on{transform:scale(.97);filter:brightness(1.15)}
+.pad small{display:block;font-weight:600;font-size:.78rem;opacity:.8}
+.pass{max-width:820px;margin:16px auto 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center}
+@media (max-width:620px){.pass{grid-template-columns:minmax(0,1fr)}}
+.stamps{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.stamp{width:62px;height:62px;border-radius:50%;border:2px dashed rgba(232,184,74,.5);display:grid;place-items:center;font-size:1.6rem;opacity:.35}
+.stamp.on{opacity:1;border-style:solid;background:rgba(232,184,74,.12)}
+.how{color:var(--mute);font-size:.88rem;max-width:820px;margin:10px auto 0}
+</style></head>
+<body>
+<main class="wrap">
+  <div class="ah"><div class="where">7th Ave · Ybor City · next to Acropolis</div><h1>Ronnie &amp; Joe's 7th Ave Arm Wrestling</h1><p>Ronnie and Joe work 7th Ave for Gaspar's Grotto, packing the street and sending everyone down to the Grotto. Step up to the table, beat them both, and earn a stamp on your Ybor Night Pass.</p></div>
+  <div class="arena">
+    <canvas id="aw" width="800" height="600" aria-label="Arm wrestling table. Tap fast to push your opponent's hand down."></canvas>
+    <div class="ov" id="ov">
+      <h2 id="oT">Grip it and rip it</h2>
+      <p id="oP">Tap as fast as you can to push their hand to the table. When the gold ring lights up, hit it for a power surge.</p>
+      <div class="foes" id="foes"></div>
+      <button class="btn ghost" id="duo">Two players, one screen</button>
+    </div>
+  </div>
+  <div class="pads" id="pads"><button class="pad one" id="padA" data-p="0">TAP! <small>Space · or tap anywhere on the table</small></button></div>
+  <section class="panel pass">
+    <div><h2 style="margin:0">Ybor Night Pass</h2><p style="margin:4px 0 0;color:var(--mute)">Win at the table to stamp your pass. Fill all three, then go see the crew at Gaspar's Grotto on 7th Ave.</p><div class="stamps" id="stamps"></div></div>
+    <a class="btn rum" href="https://gasparsgrotto.com" target="_blank" rel="noopener">⚓ Visit GasparsGrotto.com</a>
+  </section>
+  <p class="how">Tip: steady fast taps beat frantic ones. A power surge pushes hard, so watch for the ring. <a href="world.html#armwrestle">🏝 Back to 7th Ave on the island</a></p>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+const cv=document.getElementById("aw"),g=cv.getContext("2d"),$=i=>document.getElementById(i);
+const W=800,H=600;
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const FOES=[
+ {k:"ronnie",n:"Ronnie",d:"Warms up with a crowd on 7th Ave every night.",rate:5.2,surge:.55,shirt:"#2459c7",skin:"#c98d62",line:"Ronnie: Beat me and the first round at the Grotto is on the house. In the game, anyway."},
+ {k:"joe",n:"Joe",d:"Grip like a ship's anchor. Talks the whole time.",rate:6.4,surge:.7,shirt:"#1f8a4a",skin:"#e8c4a0",line:"Joe: Everybody on 7th Ave ends up at Gaspar's eventually. Might as well be tonight."},
+ {k:"both",n:"Ronnie & Joe",d:"Tag team. They switch arms when one gets tired.",rate:7.4,surge:.85,shirt:"#7a1f1f",skin:"#d8a47f",line:"Ronnie & Joe: Win this and tell the whole street where the party is."}];
+const STAMPS=["⚓","🍺","☠"];
+let wins=store.get("py_arm_wins",{});
+function drawStamps(){$("stamps").innerHTML=FOES.map((f,i)=>`<div class="stamp ${wins[f.k]?"on":""}" title="${f.n}">${STAMPS[i]}</div>`).join("");}
+function menu(t,p){
+ $("oT").textContent=t||"Grip it and rip it";$("oP").textContent=p||"Tap as fast as you can to push their hand to the table. When the gold ring lights up, hit it for a power surge.";
+ $("foes").innerHTML=FOES.map((f,i)=>{const locked=i===2&&!(wins.ronnie&&wins.joe);return `<button class="foe" data-i="${i}" ${locked?"disabled":""}><b>${f.n}${wins[f.k]?" ✓":""}</b><span>${locked?"Beat Ronnie and Joe first":f.d}</span></button>`;}).join("");
+ $("ov").hidden=false;drawStamps();
+}
+let M=null; // match
+function start(mode,i){
+ const foe=mode==="duo"?null:FOES[i];
+ M={mode,foe,pos:0,taps:[0,0],last:performance.now(),surge:null,nextSurge:1.6,ai:0,count:3,over:false,shake:0,msg:foe?foe.line:"Player 1 on the left, Player 2 on the right. First to pin wins."};
+ $("pads").innerHTML=mode==="duo"?`<button class="pad" data-p="0">PLAYER 1<small>A key · left half</small></button><button class="pad p2" data-p="1">PLAYER 2<small>L key · right half</small></button>`:`<button class="pad one" data-p="0">TAP! <small>Space · or tap anywhere on the table</small></button>`;
+ bindPads();$("ov").hidden=true;
+ let n=3;M.count=3;const tick=()=>{if(!M)return;n--;M.count=n;tone(n>0?440:880,.12,.06);if(n>0)setTimeout(tick,650);};setTimeout(tick,650);tone(440,.12,.06);
+}
+function push(p){
+ if(!M||M.over||M.count>0)return;
+ const dir=p===0?1:-1;
+ if(M.surge&&M.surge.p===p&&M.surge.t<M.surge.d){M.pos+=dir*.11;M.surge=null;M.shake=.25;M.msg=p===0||M.mode==="duo"?"POWER SURGE!":M.msg;tone(220,.25,.12,"sawtooth");return;}
+ M.pos+=dir*.018;M.taps[p]++;tone(300+Math.random()*80,.04,.03);
+}
+function bindPads(){document.querySelectorAll(".pad").forEach(b=>{b.addEventListener("pointerdown",e=>{e.preventDefault();b.classList.add("on");push(+b.dataset.p);});const up=()=>b.classList.remove("on");b.addEventListener("pointerup",up);b.addEventListener("pointercancel",up);b.addEventListener("contextmenu",e=>e.preventDefault());});}
+cv.addEventListener("pointerdown",e=>{if(!M)return;e.preventDefault();if(M.mode==="duo"){const r=cv.getBoundingClientRect();push(e.clientX-r.left<r.width/2?0:1);}else push(0);});
+addEventListener("keydown",e=>{if(!M||e.repeat)return;if(M.mode==="duo"){if(e.code==="KeyA")push(0);else if(e.code==="KeyL")push(1);else return;}else if(e.code==="Space"||e.code==="Enter")push(0);else return;e.preventDefault();});
+$("foes").addEventListener("click",e=>{const b=e.target.closest(".foe");if(b&&!b.disabled)start("ai",+b.dataset.i);});
+$("duo").onclick=()=>start("duo");
+
+function update(dt){
+ if(!M||M.over||M.count>0)return;
+ // opponent
+ if(M.mode==="ai"){M.ai+=dt*M.foe.rate*(1+Math.sin(performance.now()/700)*.25);while(M.ai>=1){M.ai-=1;M.pos-=.018;}}
+ // surge ring
+ M.nextSurge-=dt;
+ if(!M.surge&&M.nextSurge<=0){const p=M.mode==="duo"?(Math.random()<.5?0:1):(Math.random()<.65?0:1);M.surge={p,t:0,d:.9};M.nextSurge=2.2+Math.random()*1.6;}
+ if(M.surge){M.surge.t+=dt;if(M.mode==="ai"&&M.surge.p===1&&M.surge.t>.35){if(Math.random()<M.foe.surge){M.pos-=.11;M.shake=.25;M.msg=`${M.foe.n} surges!`;tone(160,.25,.12,"sawtooth");}M.surge=null;}else if(M.surge&&M.surge.t>=M.surge.d)M.surge=null;}
+ M.pos=Math.max(-1,Math.min(1,M.pos));M.shake=Math.max(0,M.shake-dt);
+ if(Math.abs(M.pos)>=1)end(M.pos>0?0:1);
+}
+function end(w){
+ M.over=true;const m=M;
+ setTimeout(()=>{if(m.mode==="duo"){menu(`Player ${w+1} wins!`,"Rematch, or take on Ronnie and Joe.");if(true)window.PY&&PY.celebrate&&PY.celebrate();}
+  else if(w===0){wins[m.foe.k]=true;store.set("py_arm_wins",wins);window.PY&&PY.celebrate&&PY.celebrate();
+   const all=FOES.every(f=>wins[f.k]);menu(`You pinned ${m.foe.n}!`,all?"Your Ybor Night Pass is full. Tell your crew and head down to Gaspar's Grotto on 7th Ave.":`Stamp earned. ${m.foe.k==="both"?"":"Keep going for the full pass."}`);}
+  else menu(`${m.foe.n} wins this one`,`${m.foe.n} slaps the table. Shake it off and try again.`);M=null;},900);
+ tone(w===0?660:200,.4,.08);
+}
+
+/* ---------- drawing ---------- */
+function draw(now){
+ const t=now/1000,sh=M&&M.shake?Math.sin(t*90)*M.shake*10:0;
+ g.save();g.translate(sh,0);
+ // 7th Ave backdrop: brick, neon, string lights
+ g.fillStyle="#3a1a12";g.fillRect(0,0,W,H);
+ for(let y=0;y<330;y+=22)for(let x=(y/22)%2?-24:0;x<W;x+=48){g.fillStyle=((x+y)/22)%3<1?"#5a2a1e":"#4a2218";g.fillRect(x+1,y+1,46,20);}
+ g.save();g.shadowColor="#ff4fa0";g.shadowBlur=24;g.fillStyle="#ff7fc0";g.font="54px 'Pirata One',Georgia";g.textAlign="center";g.fillText("GASPAR'S GROTTO",W/2,86);g.restore();
+ g.fillStyle="#7fe0e4";g.font="18px Pirata One,Georgia,serif";g.textAlign="center";g.fillText("7TH AVE · YBOR CITY · THIS WAY →",W/2,118);
+ const cols=["#ff4fa0","#f6d67a","#4fd1c0","#ff8a3a"];for(let i=0;i<22;i++){const x=i*38+10,y=150+Math.sin(i/21*Math.PI)*18;g.fillStyle=cols[i%4];g.globalAlpha=.6+.4*Math.abs(Math.sin(t*3+i));g.beginPath();g.arc(x,y,5,0,7);g.fill();}g.globalAlpha=1;
+ // crowd silhouettes
+ g.fillStyle="#1a0c08";for(let i=0;i<9;i++){const x=40+i*90,bob=Math.sin(t*4+i)*4;g.beginPath();g.arc(x,262+bob,22,0,7);g.fill();g.fillRect(x-28,282+bob,56,60);}
+ // table
+ g.fillStyle="#5a3418";g.fillRect(60,380,W-120,30);g.fillStyle="#7a4a24";g.beginPath();g.moveTo(40,380);g.lineTo(W-40,380);g.lineTo(W-80,330);g.lineTo(80,330);g.fill();
+ g.fillStyle="#3a1f10";g.fillRect(90,410,26,190);g.fillRect(W-116,410,26,190);
+ g.fillStyle="#c0412a";g.beginPath();g.ellipse(170,356,26,10,0,0,7);g.ellipse(W-170,356,26,10,0,0,7);g.fill();// pin pads
+ // arms
+ const pos=M?M.pos:0,ang=pos*1.15;// + toward player win (opponent's hand goes right)
+ const pivot={x:W/2,y:350},len=150;
+ const hand={x:pivot.x+Math.sin(ang)*len,y:pivot.y-Math.cos(ang)*len};
+ const me={shirt:"#f4ead6",skin:"#d8a47f"},op=M&&M.foe?M.foe:{shirt:"#c0412a",skin:"#c98d62",n:"Player 2"};
+ function arm(ex,ey,skin,shirt){g.strokeStyle=shirt;g.lineWidth=46;g.lineCap="round";g.beginPath();g.moveTo(ex<W/2?-40:W+40,ey+40);g.lineTo(ex,ey);g.stroke();g.strokeStyle=skin;g.lineWidth=34;g.beginPath();g.moveTo(ex,ey);g.lineTo(hand.x,hand.y);g.stroke();}
+ arm(W/2-70,352,me.skin,me.shirt);arm(W/2+70,352,op.skin,op.shirt);
+ g.fillStyle="#c98d62";g.beginPath();g.arc(hand.x,hand.y,28,0,7);g.fill();g.strokeStyle="rgba(0,0,0,.25)";g.lineWidth=3;g.beginPath();g.arc(hand.x,hand.y,28,0,7);g.stroke();
+ // names
+ g.font="700 24px Pirata One,Georgia,serif";g.fillStyle="#fff3d6";g.textAlign="left";g.fillText(M&&M.mode==="duo"?"Player 1":"You",30,470);g.textAlign="right";g.fillText(M&&M.foe?M.foe.n:"Player 2",W-30,470);
+ // pressure bar
+ g.fillStyle="rgba(0,0,0,.45)";g.fillRect(150,510,W-300,20);const mid=W/2,half=(W-300)/2;g.fillStyle=pos>=0?"#f6d67a":"#ff8a6b";g.fillRect(pos>=0?mid:mid+pos*half,510,Math.abs(pos)*half,20);g.fillStyle="#fff";g.fillRect(mid-1,505,2,30);
+ // surge ring
+ if(M&&M.surge){const s=M.surge,k=s.t/s.d,x=s.p===0?150:W-150;g.strokeStyle=s.p===0?"#f6d67a":"#ff8a6b";g.lineWidth=6;g.beginPath();g.arc(x,440,46*(1-k)+18,0,7);g.stroke();g.fillStyle=g.strokeStyle;g.font="800 18px Pirata One,Georgia,serif";g.textAlign="center";g.fillText(s.p===0?(M.mode==="duo"?"P1 SURGE!":"SURGE! TAP!"):(M.mode==="duo"?"P2 SURGE!":"WATCH OUT"),x,380+ (s.p===0?0:0));}
+ // countdown + message
+ if(M&&M.count>0){g.fillStyle="#f6d67a";g.font="400 140px 'Pirata One',Georgia";g.textAlign="center";g.fillText(M.count,W/2,260);}
+ else if(M&&M.count===0&&!M.over&&performance.now()-M.last<700){g.fillStyle="#f6d67a";g.font="400 90px 'Pirata One',Georgia";g.textAlign="center";g.fillText("GO!",W/2,250);}
+ if(M&&M.msg){g.fillStyle="rgba(11,14,20,.65)";g.fillRect(0,H-46,W,46);g.fillStyle="#fff3d6";g.font="600 19px Pirata One,Georgia,serif";g.textAlign="center";g.fillText(M.msg,W/2,H-17);}
+ g.restore();
+}
+let last=performance.now(),goT=0;
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(M&&M.count===0&&!goT){goT=1;M.last=now;}if(!M)goT=0;update(dt);draw(now);requestAnimationFrame(loop);}
+let ac=null;function tone(f,d,v,type){const sb=document.getElementById("soundBtn");if(sb&&/off/.test(sb.textContent))return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),gn=ac.createGain(),s=ac.currentTime;o.type=type||"triangle";o.frequency.value=f;gn.gain.setValueAtTime(v||.05,s);gn.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(gn);gn.connect(ac.destination);o.start(s);o.stop(s+d);}catch(e){}}
+menu();bindPads();requestAnimationFrame(loop);
+})();
+</script>
+</body></html>

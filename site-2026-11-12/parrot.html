@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Pirates of Ybor Parrot Trivia</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Spectral:wght@400;600;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one warship deck card, parrot perched over the question, brass rail controls at the bottom */
+:root{
+  --iron:#14110f;      /* hull */
+  --plate:#211b17;     /* deck plate */
+  --plate-2:#2d241e;
+  --brass:#c9a24a;
+  --brass-dim:#8a6f33;
+  --blood:#9e1b1b;
+  --blood-hot:#c8312a;
+  --sea:#1f6f63;
+  --bone:#efe4cf;
+  --bone-dim:#b9ab92;
+  --display:"Pirata One","Luminari",fantasy,serif;
+  --body:"Spectral",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{
+  background:var(--iron);
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(201,162,74,.14), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 2px, transparent 2px 90px);
+  color:var(--bone);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:16px;
+}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px;position:relative}
+.bgmark{position:fixed;right:-40px;bottom:-30px;width:340px;opacity:.06;pointer-events:none;z-index:0}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:1}
+.brand{display:flex;flex-direction:column;line-height:1}
+.brand small{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--brass-dim)}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,8vw,44px);margin:2px 0 0;color:var(--brass);text-shadow:0 2px 0 #000,0 0 18px rgba(201,162,74,.25);text-wrap:balance}
+.toggles{display:flex;gap:8px}
+.tog{appearance:none;border:1px solid var(--brass-dim);background:var(--plate);color:var(--bone);font:500 12px var(--mono);letter-spacing:.06em;padding:8px 10px;border-radius:4px;cursor:pointer}
+.tog[aria-pressed="false"]{color:var(--bone-dim);opacity:.55;text-decoration:line-through}
+.tog:focus-visible,.btn:focus-visible,.ans:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+.deck{position:relative;z-index:1;background:linear-gradient(180deg,var(--plate-2),var(--plate));border:2px solid #000;box-shadow:inset 0 0 0 1px var(--brass-dim),0 18px 40px rgba(0,0,0,.6);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:16px}
+.rivets::before,.rivets::after{content:"";position:absolute;top:8px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e8c76d,var(--brass-dim) 60%,#3a2c12)}
+.rivets::before{left:8px}.rivets::after{right:8px}
+
+.perch{display:flex;gap:12px;align-items:flex-end}
+.parrot{width:110px;flex:0 0 auto;filter:drop-shadow(0 6px 6px rgba(0,0,0,.5))}
+.parrot #beakLow{transform-origin:62px 38px;transition:transform .07s}
+.parrot.talk #beakLow{transform:rotate(16deg)}
+.parrot.bob{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px) rotate(-2deg)}}
+.parrot.hop{animation:hop .5s ease}
+@keyframes hop{40%{transform:translateY(-14px)}}
+.bubble{flex:1;min-width:0;background:var(--bone);color:#1c1410;border-radius:10px 10px 10px 2px;padding:12px 14px;position:relative;box-shadow:0 4px 0 #000}
+.bubble::before{content:"";position:absolute;left:-9px;bottom:10px;border:9px solid transparent;border-right-color:var(--bone);border-left:0}
+.bubble .en{font-weight:600;margin:0}
+.bubble .es{margin:4px 0 0;font-style:italic;color:#6b4a1c;font-size:14px}
+.who{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--blood);margin-bottom:2px}
+
+.hud{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:13px;color:var(--bone-dim);font-variant-numeric:tabular-nums}
+.hud b{color:var(--brass);font-weight:500}
+.fuse{height:8px;background:#000;border:1px solid var(--brass-dim);border-radius:4px;overflow:hidden}
+.fuse i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--blood),var(--blood-hot),#f0a43a);transform-origin:left;transition:transform .25s linear}
+.q{font-size:clamp(19px,4.8vw,23px);font-weight:800;line-height:1.3;margin:0;text-wrap:balance}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:460px){.answers{grid-template-columns:1fr}}
+.ans{appearance:none;text-align:left;background:var(--iron);color:var(--bone);border:1px solid var(--brass-dim);border-radius:5px;padding:12px 14px;font:600 16px var(--body);cursor:pointer;display:flex;gap:10px;align-items:baseline;transition:transform .1s,background .15s}
+.ans span{font-family:var(--display);color:var(--brass);font-size:20px;line-height:1}
+.ans:hover:not(:disabled){background:#1d1814;transform:translateY(-1px)}
+.ans:disabled{cursor:default}
+.ans.right{background:var(--sea);border-color:#7fd6c4}
+.ans.wrong{background:var(--blood);border-color:var(--blood-hot)}
+.fact{font-size:14px;color:var(--bone-dim);margin:0;border-left:3px solid var(--brass);padding-left:10px}
+
+.btn{appearance:none;border:2px solid #000;background:linear-gradient(180deg,#d8b45c,var(--brass) 45%,var(--brass-dim));color:#1a1206;font:400 24px var(--display);letter-spacing:.04em;padding:10px 22px;border-radius:5px;cursor:pointer;box-shadow:0 4px 0 #000;align-self:center}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.btn.blood{background:linear-gradient(180deg,var(--blood-hot),var(--blood));color:var(--bone)}
+.intro{display:flex;flex-direction:column;gap:12px}
+.intro ul{margin:0;padding-left:20px;color:var(--bone-dim);font-size:15px}
+.final{text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.final .big{font-family:var(--display);font-size:56px;color:var(--brass);line-height:1}
+.final .rank{font-size:20px;font-weight:800}
+
+footer{position:relative;z-index:1;display:flex;align-items:center;gap:12px;justify-content:center;color:var(--bone-dim);font-size:12px;text-align:left;padding-top:4px}
+footer svg{width:64px;flex:0 0 auto}
+.spark{animation:tw 2.2s ease-in-out infinite}
+.spark.s2{animation-delay:.7s}.spark.s3{animation-delay:1.4s}
+@keyframes tw{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head><body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Pops & Pippy emblem: original art, pirate bar cat Pops and pirate chihuahua Pippy -->
+    <symbol id="popsPippy" viewBox="0 0 160 120">
+      <circle cx="80" cy="62" r="56" fill="#2d241e" stroke="#c9a24a" stroke-width="3"/>
+      <!-- Pops the cat -->
+      <g>
+        <path d="M30 104 Q32 66 58 64 Q84 66 84 104 Z" fill="#6e6a64"/>
+        <circle cx="57" cy="56" r="20" fill="#7d7973"/>
+        <path d="M40 46 L38 26 L52 40 Z M74 46 L76 26 L62 40 Z" fill="#7d7973"/>
+        <path d="M36 40 Q57 18 78 40 Q57 34 36 40 Z" fill="#14110f"/>
+        <path d="M46 31 L57 22 L68 31" fill="none" stroke="#c9a24a" stroke-width="2"/>
+        <rect x="45" y="52" width="10" height="7" rx="2" fill="#14110f"/>
+        <path d="M40 50 L72 56" stroke="#14110f" stroke-width="1.5"/>
+        <circle cx="64" cy="56" r="3.2" fill="#d9c25a"/><circle cx="64" cy="56" r="1.2" fill="#14110f"/>
+        <path d="M54 63 L57 66 L60 63" fill="none" stroke="#e8a3a3" stroke-width="2"/>
+        <path d="M44 66 L30 64 M44 68 L30 70 M70 66 L84 64 M70 68 L84 70" stroke="#efe4cf" stroke-width=".8"/>
+      </g>
+      <!-- Pippy the chihuahua -->
+      <g>
+        <path d="M90 104 Q92 74 110 72 Q128 74 130 104 Z" fill="#c99a62"/>
+        <path d="M94 84 Q110 92 126 84 L124 90 Q110 98 96 90 Z" fill="#9e1b1b"/>
+        <circle cx="110" cy="62" r="16" fill="#d6aa72"/>
+        <path d="M96 58 L84 34 L102 50 Z M124 58 L136 34 L118 50 Z" fill="#d6aa72"/>
+        <path d="M97 54 L88 40 L101 50 Z M123 54 L132 40 L119 50 Z" fill="#e8b9a0"/>
+        <path d="M95 50 Q110 40 125 50 L125 46 Q110 34 95 46 Z" fill="#9e1b1b"/>
+        <circle cx="104" cy="61" r="3.4" fill="#14110f"/><circle cx="116" cy="61" r="3.4" fill="#14110f"/>
+        <circle cx="105" cy="60" r="1" fill="#fff"/><circle cx="117" cy="60" r="1" fill="#fff"/>
+        <ellipse cx="110" cy="69" rx="3.4" ry="2.4" fill="#14110f"/>
+      </g>
+      <g fill="#f3dc8a">
+        <path class="spark" style="transform-box:fill-box;transform-origin:center" d="M28 26 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z"/>
+        <path class="spark s2" style="transform-box:fill-box;transform-origin:center" d="M134 20 l1.6 5 5 1.6 -5 1.6 -1.6 5 -1.6 -5 -5 -1.6 5 -1.6z"/>
+        <path class="spark s3" style="transform-box:fill-box;transform-origin:center" d="M80 6 l1.4 4 4 1.4 -4 1.4 -1.4 4 -1.4 -4 -4 -1.4 4 -1.4z"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<svg class="bgmark" aria-hidden="true"><use href="#popsPippy"/></svg>
+
+<div class="wrap">
+  <a href="index.html" style="color:var(--brass);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-decoration:none;position:relative;z-index:1">← BACK TO THE SHIP</a>
+  <header>
+    <div class="brand">
+      <small>Ybor Cay · Gaspar's Grotto</small>
+      <h1>Pirates of Ybor</h1>
+    </div>
+    <div class="toggles">
+      <button class="tog" id="tVoice" aria-pressed="true">VOICE</button>
+      <button class="tog" id="tMusic" aria-pressed="true">MUSIC</button>
+    </div>
+  </header>
+
+  <main class="deck rivets" id="deck">
+    <div class="perch">
+      <svg class="parrot bob" id="parrot" viewBox="0 0 120 130" role="img" aria-label="Capitán Loro the parrot">
+        <rect x="6" y="118" width="108" height="8" rx="3" fill="#5a3a1c"/>
+        <path d="M44 116 l-4 6 M52 116 l2 6 M66 116 l-2 6 M74 116 l4 6" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
+        <path d="M58 70 Q40 110 30 128 L46 126 Q60 104 66 76 Z" fill="#1f5fae"/>
+        <path d="M62 72 Q56 112 52 128 L62 128 Q68 104 70 78 Z" fill="#e0b229"/>
+        <ellipse cx="58" cy="78" rx="24" ry="34" fill="#c8312a"/>
+        <path d="M40 72 Q34 96 48 112 Q60 100 58 76 Z" fill="#2c8a4e"/>
+        <path d="M40 80 Q38 96 46 106" fill="none" stroke="#1f5fae" stroke-width="4"/>
+        <circle cx="56" cy="40" r="22" fill="#d83a2f"/>
+        <ellipse cx="50" cy="38" rx="9" ry="10" fill="#f6efe2"/>
+        <circle cx="51" cy="37" r="4.2" fill="#14110f"/><circle cx="52.4" cy="35.6" r="1.4" fill="#fff"/>
+        <path d="M36 24 Q56 4 78 22 Q58 18 36 24 Z" fill="#14110f"/>
+        <path d="M44 18 L56 9 L68 18" fill="none" stroke="#c9a24a" stroke-width="2.4"/>
+        <circle cx="56" cy="15" r="2.6" fill="#efe4cf"/>
+        <path d="M62 30 Q86 30 82 50 Q76 44 64 44 Z" fill="#efe4cf" stroke="#14110f" stroke-width="1.5"/>
+        <path id="beakLow" d="M63 42 Q76 44 76 52 Q68 54 62 48 Z" fill="#3a332c"/>
+      </svg>
+      <div class="bubble" aria-live="polite">
+        <div class="who">Capitán Loro</div>
+        <p class="en" id="sayEn">Ahoy! I be Capitán Loro, first mate of Ybor Cay.</p>
+        <p class="es" id="sayEs">¡Ahoy! Soy el Capitán Loro, primer oficial de Ybor Cay.</p>
+      </div>
+    </div>
+
+    <section id="screen"></section>
+  </main>
+
+  <footer>
+    <svg aria-hidden="true"><use href="#popsPippy"/></svg>
+    <span>© 2026 Adam Kornreich / R.A. Consulting ❤ Pops &amp; Pippy. All rights reserved.</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+const Q = [
+  {q:"Since what year has Tampa held the Gasparilla Pirate Festival?", a:["1904","1950","1886","1999"], c:0, f:"The first Gasparilla invasion sailed in 1904."},
+  {q:"Who founded Ybor City as a cigar town in the 1880s?", a:["Vicente Martinez Ybor","José Gaspar","Henry Plant","Juan Ponce de León"], c:0, f:"Vicente Martinez Ybor moved his cigar works from Key West to Tampa."},
+  {q:"Ybor City earned which nickname?", a:["Cigar Capital of the World","Rum Port of the South","City of Bridges","Little Havana"], c:0, f:"Ybor's factories rolled millions of hand-made cigars a year."},
+  {q:"What is the name of the pirate ship that leads the Gasparilla invasion?", a:["José Gasparilla","Queen Anne's Revenge","Black Pearl","Santa María"], c:0, f:"The José Gasparilla is a full-rigged ship crewed by the Krewe."},
+  {q:"Which krewe started the Gasparilla tradition?", a:["Ye Mystic Krewe of Gasparilla","Krewe of Rex","Krewe of Zulu","Ybor Social Club"], c:0, f:"Ye Mystic Krewe of Gasparilla was formed in 1904."},
+  {q:"Which feathered locals famously roam Ybor's streets?", a:["Chickens","Peacocks","Flamingos","Pelicans"], c:0, f:"Ybor's free-roaming chickens are protected residents."},
+  {q:"What do locals call Ybor's Seventh Avenue?", a:["La Septima","El Malecón","La Rambla","Calle Ocho"], c:0, f:"La Septima is the heart of Ybor's nightlife."},
+  {q:"What links Ybor City to downtown Tampa on rails?", a:["TECO Line Streetcar","Gaspar Monorail","Bay Ferry","Cigar Express"], c:0, f:"Ybor's streetcar line runs to the downtown waterfront."},
+  {q:"The Columbia Restaurant in Ybor opened in which year?", a:["1905","1955","1885","1925"], c:0, f:"The Columbia calls itself Florida's oldest restaurant."},
+  {q:"What does a true Tampa Cuban sandwich add that others skip?", a:["Genoa salami","Turkey","Bacon","Pineapple"], c:0, f:"Tampa's Cuban nods to its Italian immigrants with salami."},
+  {q:"Tampa's NFL team is named after which kind of sailor?", a:["Buccaneers","Privateers","Corsairs","Vikings"], c:0, f:"The Bucs have won two Super Bowls."},
+  {q:"Blackbeard's real name was usually given as what?", a:["Edward Teach","William Kidd","Henry Morgan","Bartholomew Roberts"], c:0, f:"Edward Teach terrorized the Carolinas around 1718."},
+  {q:"What were Spanish 'pieces of eight' worth?", a:["Eight reales","Eight gold crowns","Eight pence","Eight doubloons"], c:0, f:"One silver peso equaled eight reales."},
+  {q:"Which two women sailed with Calico Jack's crew?", a:["Anne Bonny and Mary Read","Grace O'Malley and Ching Shih","Jane and Mary Teach","Rose and Ruth Kidd"], c:0, f:"Bonny and Read were captured with Calico Jack in 1720."},
+  {q:"What's the classic name for a skull-and-crossbones flag?", a:["Jolly Roger","Black Spot","Davy Jones","Union Jack"], c:0, f:"Pirates flew it to scare ships into surrender."},
+  {q:"José Gaspar, Tampa's pirate hero, is best described as what?", a:["A legend with no proven history","A Spanish admiral","A U.S. senator","A cigar maker"], c:0, f:"Historians have never confirmed Gaspar was real. The legend lives anyway!"},
+  {q:"In pirate talk, what's a 'scallywag'?", a:["A rascal","A treasure map","A cannon","A rum barrel"], c:0, f:"Call a friend a scallywag at your own risk."},
+  {q:"What bay does Ybor City sit beside?", a:["Tampa Bay","Biscayne Bay","Mobile Bay","Galveston Bay"], c:0, f:"Gasparilla's ship sails up Hillsborough Bay, part of Tampa Bay."}
+];
+const LINES = {
+  right:[["Shiver me timbers, that be right!","¡Rayos y truenos, eso es correcto!"],["Treasure for ye, matey!","¡Tesoro para ti, compañero!"],["Pippy approves! Arrr!","¡Pippy lo aprueba!"],["Pops would buy ye a round!","¡Pops te invita una ronda!"]],
+  wrong:[["Walk the plank, ye scallywag!","¡Camina por la tabla, bribón!"],["Blimey, not that one!","¡Caramba, esa no!"],["Squawk! Wrong course, captain!","¡Rumbo equivocado, capitán!"]],
+  slow:[["Too slow! The tide waits for no pirate!","¡Muy lento! La marea no espera a ningún pirata."]]
+};
+const ROUNDS=10, TIME=20;
+const $=s=>document.querySelector(s);
+const screen=$("#screen"), parrot=$("#parrot");
+let st={i:0,score:0,right:0,set:[],timer:null,left:TIME,locked:false};
+let voiceOn=true, musicOn=true;
+
+/* ---------- audio ---------- */
+let ac=null, master=null, musicGain=null, musicTimer=null, nextT=0, step=0;
+function ensureAudio(){
+  if(ac) return;
+  try{
+    ac=new (window.AudioContext||window.webkitAudioContext)();
+    master=ac.createGain(); master.gain.value=.8; master.connect(ac.destination);
+    musicGain=ac.createGain(); musicGain.gain.value=musicOn?.18:0; musicGain.connect(master);
+  }catch(e){ac=null}
+}
+function tone(f,t,d,type="triangle",vol=.3,dest){
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.type=type; o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g); g.connect(dest||master); o.start(t); o.stop(t+d+.05); return o;
+}
+function noise(t,d,vol,freq){
+  const len=Math.floor(ac.sampleRate*d), b=ac.createBuffer(1,len,ac.sampleRate), ch=b.getChannelData(0);
+  for(let k=0;k<len;k++) ch[k]=(Math.random()*2-1)*Math.pow(1-k/len,2);
+  const s=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain();
+  s.buffer=b; f.type="lowpass"; f.frequency.value=freq; g.gain.value=vol;
+  s.connect(f); f.connect(g); g.connect(master); s.start(t);
+}
+const sfx={
+  cannon(){ if(!ac)return; const t=ac.currentTime; noise(t,.9,1.2,500); const o=tone(90,t,.6,"sine",.7); o.frequency.exponentialRampToValueAtTime(35,t+.5); },
+  coins(){ if(!ac)return; const t=ac.currentTime; [1568,2093,2637,3136].forEach((f,k)=>tone(f,t+k*.06,.35,"sine",.18)); },
+  thud(){ if(!ac)return; const t=ac.currentTime; const o=tone(160,t,.5,"sawtooth",.25); o.frequency.exponentialRampToValueAtTime(60,t+.45); noise(t,.25,.4,300); },
+  squawk(){ if(!ac)return; const t=ac.currentTime; const o=tone(900,t,.28,"sawtooth",.12); o.frequency.exponentialRampToValueAtTime(1800,t+.08); o.frequency.exponentialRampToValueAtTime(700,t+.26); },
+  tick(){ if(!ac)return; tone(1200,ac.currentTime,.05,"square",.05); }
+};
+/* sea-shanty loop: "Drunken Sailor" (traditional), D dorian, eighth-note grid */
+const N={D3:146.8,A2:110,C3:130.8,D4:293.7,E4:329.6,F4:349.2,G4:392,A4:440,B4:493.9,C5:523.3,D5:587.3,E5:659.3};
+const MEL=["A4","A4","A4","A4","A4","A4","A4","D4","F4","A4","-","-","G4","G4","G4","G4","G4","G4","G4","C4x","E4","G4","-","-","A4","A4","A4","A4","A4","A4","A4","B4","C5","D5","-","-","C5","A4","G4","E4","D4","-","D4","-","D4","-","-","-"];
+const BASS=["D3","D3","D3","C3","C3","C3","D3","D3","D3","A2","D3","D3"];
+N.C4x=261.6;
+function schedule(){
+  if(!ac) return;
+  const spb=60/168/2; // eighth note at 168 bpm quarter
+  while(nextT<ac.currentTime+.25){
+    const m=MEL[step%MEL.length];
+    if(m!=="-") tone(N[m],nextT,spb*1.8,"triangle",.22,musicGain);
+    if(step%4===0){ tone(N[BASS[(step/4|0)%BASS.length]],nextT,spb*3.6,"square",.08,musicGain); }
+    if(step%2===0){ const o=tone(70,nextT,.12,"sine",.35,musicGain); o.frequency.exponentialRampToValueAtTime(40,nextT+.1); }
+    nextT+=spb; step++;
+  }
+}
+function startMusic(){ if(!ac||musicTimer) return; nextT=ac.currentTime+.1; musicTimer=setInterval(schedule,60); }
+
+/* ---------- parrot voice ---------- */
+const synth=window.speechSynthesis||null;
+let enVoice=null, esVoice=null;
+function pickVoices(){
+  if(!synth) return; const v=synth.getVoices();
+  enVoice=v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;
+  esVoice=v.find(x=>/es-(MX|US)/i.test(x.lang))||v.find(x=>/^es/i.test(x.lang))||null;
+}
+if(synth){ pickVoices(); synth.onvoiceschanged=pickVoices; } else { $("#tVoice").disabled=true; $("#tVoice").setAttribute("aria-pressed","false"); voiceOn=false; }
+let talkTimer=null;
+function flap(){
+  clearInterval(talkTimer);
+  let n=0;
+  talkTimer=setInterval(()=>{
+    const busy=synth&&voiceOn&&(synth.speaking||synth.pending);
+    if(!busy && n>6){ parrot.classList.remove("talk"); clearInterval(talkTimer); return; }
+    parrot.classList.toggle("talk"); n++;
+  },120);
+}
+function say(en,es,{speak=true,cancel=true}={}){
+  $("#sayEn").textContent=en; $("#sayEs").textContent=es||"";
+  parrot.classList.remove("hop"); void parrot.getBoundingClientRect(); parrot.classList.add("hop");
+  flap();
+  if(!(synth&&voiceOn&&speak)) return;
+  try{
+    if(cancel) synth.cancel();
+    const u=new SpeechSynthesisUtterance(en); u.pitch=1.7; u.rate=1.08; u.lang="en-GB"; if(enVoice) u.voice=enVoice; synth.speak(u);
+    if(es){ const s=new SpeechSynthesisUtterance(es); s.pitch=1.6; s.rate=1.05; s.lang="es-MX"; if(esVoice) s.voice=esVoice; synth.speak(s); }
+  }catch(e){}
+}
+function readQuestion(text){
+  if(!(synth&&voiceOn)) return;
+  try{ const u=new SpeechSynthesisUtterance(text); u.pitch=1.5; u.rate=1.05; u.lang="en-GB"; if(enVoice) u.voice=enVoice; synth.speak(u); flap(); }catch(e){}
+}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.random()*(k+1)|0;[a[k],a[j]]=[a[j],a[k]]}return a};
+
+/* ---------- screens ---------- */
+function intro(){
+  clearInterval(st.timer);
+  screen.innerHTML=`<div class="intro">
+    <p class="q">Ten questions about Tampa, Ybor City and the pirate life.</p>
+    <ul>
+      <li>20 seconds a question. Faster answers earn more doubloons.</li>
+      <li>Capitán Loro reads each question and answers back in English and Spanish.</li>
+      <li>Turn on your sound for cannons, coins and the shanty.</li>
+    </ul>
+    <button class="btn blood" id="go">Fire the cannon</button>
+  </div>`;
+  $("#go").onclick=start;
+}
+function start(){
+  ensureAudio(); if(ac&&ac.state==="suspended") ac.resume();
+  if(musicOn) startMusic();
+  sfx.cannon(); setTimeout(sfx.squawk,350);
+  st={i:0,score:0,right:0,set:shuffle(Q).slice(0,ROUNDS),timer:null,left:TIME,locked:false};
+  say("Ahoy, crew! Hoist the colors, here comes the first question!","¡Ahoy, tripulación! ¡Iza la bandera, aquí viene la primera pregunta!");
+  setTimeout(ask,600);
+}
+function ask(){
+  const item=st.set[st.i];
+  const order=shuffle(item.a.map((t,k)=>({t,ok:k===item.c})));
+  st.order=order; st.left=TIME; st.locked=false;
+  screen.innerHTML=`
+    <div class="hud"><span>Question <b>${st.i+1}</b> / ${ROUNDS}</span><span><b id="sc">${st.score}</b> doubloons</span></div>
+    <div class="fuse" aria-hidden="true"><i id="fz"></i></div>
+    <p class="q">${item.q}</p>
+    <div class="answers">${order.map((o,k)=>`<button class="ans" data-k="${k}"><span>${"ABCD"[k]}</span>${o.t}</button>`).join("")}</div>
+    <p class="fact" id="fact" hidden></p>
+    <button class="btn" id="next" hidden>${st.i+1<ROUNDS?"Next question":"See your loot"}</button>`;
+  screen.querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(+b.dataset.k));
+  $("#next").onclick=()=>{ st.i++; st.i<ROUNDS?ask():finish(); };
+  if(synth&&voiceOn){ try{ synth.cancel(); }catch(e){} }
+  readQuestion(item.q);
+  clearInterval(st.timer);
+  st.timer=setInterval(()=>{
+    st.left-=.25; $("#fz").style.transform=`scaleX(${Math.max(0,st.left/TIME)})`;
+    if(st.left<=5 && Math.abs(st.left-Math.round(st.left))<.01) sfx.tick();
+    if(st.left<=0) answer(-1);
+  },250);
+}
+function answer(k){
+  if(st.locked) return; st.locked=true; clearInterval(st.timer);
+  const item=st.set[st.i], btns=screen.querySelectorAll(".ans");
+  btns.forEach((b,j)=>{ b.disabled=true; if(st.order[j].ok) b.classList.add("right"); });
+  let line;
+  if(k>=0 && st.order[k].ok){
+    const gain=100+Math.round(st.left)*5; st.score+=gain; st.right++;
+    $("#sc").textContent=st.score; sfx.coins(); line=pick(LINES.right);
+  } else {
+    if(k>=0) btns[k].classList.add("wrong");
+    sfx.thud(); line=pick(k<0?LINES.slow:LINES.wrong);
+  }
+  setTimeout(sfx.squawk,120);
+  say(line[0],line[1]);
+  const f=$("#fact"); f.textContent=item.f; f.hidden=false;
+  if(synth&&voiceOn){ try{ const u=new SpeechSynthesisUtterance(item.f); u.pitch=1.5; u.rate=1.08; u.lang="en-GB"; if(enVoice) u.voice=enVoice; synth.speak(u);}catch(e){} }
+  $("#next").hidden=false; $("#next").focus({preventScroll:true});
+}
+function finish(){
+  const r=st.right;
+  const rank=r>=9?["Pirate King of Ybor","Rey Pirata de Ybor"]:r>=7?["Captain of the José Gasparilla","Capitán del José Gasparilla"]:r>=4?["Able Seaman","Marinero"]:["Bilge Rat","Rata de sentina"];
+  sfx.cannon(); setTimeout(sfx.coins,500);
+  screen.innerHTML=`<div class="final">
+    <div class="big">${st.score}</div>
+    <div>doubloons · ${r} of ${ROUNDS} right</div>
+    <div class="rank">${rank[0]}</div>
+    <button class="btn blood" id="again" style="margin-top:10px">Sail again</button>
+  </div>`;
+  say(`Ye be a ${rank[0]}! Pops and Pippy salute ye!`,`¡Eres ${rank[1]}! ¡Pops y Pippy te saludan!`);
+  $("#again").onclick=start;
+}
+
+/* ---------- toggles ---------- */
+$("#tVoice").onclick=e=>{ voiceOn=!voiceOn; e.currentTarget.setAttribute("aria-pressed",voiceOn); if(!voiceOn&&synth){try{synth.cancel()}catch(_){} } };
+$("#tMusic").onclick=e=>{
+  musicOn=!musicOn; e.currentTarget.setAttribute("aria-pressed",musicOn);
+  ensureAudio(); if(!ac) return; if(ac.state==="suspended") ac.resume();
+  musicGain.gain.setTargetAtTime(musicOn?.18:0,ac.currentTime,.1);
+  if(musicOn) startMusic();
+};
+
+intro();
+})();
+</script>
+
+<!-- Official Pops & Pippy watermark. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy -->
+<style>
+.pp-watermark{position:fixed;right:10px;bottom:10px;width:190px;opacity:.82;z-index:30;pointer-events:none;text-align:center;filter:drop-shadow(0 0 10px rgba(246,214,122,.45))}
+.pp-watermark img{display:block;width:100%}
+.pp-watermark small{display:block;font:7.5px Georgia,serif;color:#f6d67a;margin-top:2px}
+.pp-watermark i{position:absolute;font-style:normal;color:#f6d67a;font-size:14px;line-height:1;animation:ppTwinkle 2.2s infinite ease-in-out}
+.pp-watermark i:nth-of-type(1){left:-4px;top:-6px}.pp-watermark i:nth-of-type(2){right:0;top:-8px;animation-delay:.7s}.pp-watermark i:nth-of-type(3){left:48%;bottom:8px;animation-delay:1.4s}
+@keyframes ppTwinkle{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+@media (max-width:640px){.pp-watermark{width:110px;opacity:.65}}
+@media (prefers-reduced-motion:reduce){.pp-watermark i{animation:none}}
+</style>
+<div class="pp-watermark" aria-hidden="true"><img src="assets/brand-watermark.png" alt=""><i>✦</i><i>✦</i><i>✦</i><small>© 2026 Adam Kornreich / R.A. Consulting ❤ Pops &amp; Pippy</small></div>
+<script src="assets/cine.js"></script>
+</body></html>

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flex Grotto — The Pirates of Ybor</title>
+<meta name="description" content="Flex Grotto, Josh Bouche and Lita's club on Ybor Cay: East Coast, West Coast, Miami Bass, Dubstep and Rave, mixed live, with an underground rave floor and a rhythm game.">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Flex Grotto: Josh Bouche & Lita's club. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+.club-head{text-align:center;padding:26px 0 8px}
+.club-head .kick{display:block;color:var(--ember,#e2622b);letter-spacing:.28em;text-transform:uppercase;font-size:.8rem}
+.club-head h1{margin:4px 0 4px;font-size:clamp(2rem,6.5vw,3.6rem);color:var(--gold2,#f6d67a);text-shadow:0 0 24px rgba(255,63,164,.45),0 3px 0 #2a1608}
+.club-head p{margin:0 auto;max-width:640px;color:var(--fog,#c9c2b4)}
+.floors,.decks,.pads,.taps{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.floors button,.decks button,.pads button,.taps button{font:600 1rem Georgia,serif;color:#f3ead7;background:#17181d;border:2px solid #6b4b12;border-radius:10px;padding:10px 14px;cursor:pointer;min-height:44px}
+.floors button[aria-pressed=true],.decks button[aria-pressed=true]{background:linear-gradient(180deg,#d9a944,#a8741c);color:#15100a;border-color:#f6d67a}
+.decks button.mixing{outline:2px dashed #f6d67a;outline-offset:2px}
+.decks button small{display:block;font:400 .72rem system-ui,sans-serif;opacity:.8}
+.pads button{background:#3a1010;border-color:#9c1f1f}.pads button.big{background:linear-gradient(180deg,#c22a2a,#7c1515);border-color:#ff9a8a;font-size:1.1rem}
+.pads button:disabled,.decks button:disabled{opacity:.45;cursor:not-allowed}
+.stage{position:relative;max-width:980px;margin:0 auto;border:3px solid #6b4b12;border-radius:12px;overflow:hidden;box-shadow:0 0 0 3px #15151a,0 18px 40px rgba(0,0,0,.7);background:#05060a}
+.stage canvas{display:block;width:100%;height:auto;touch-action:manipulation}
+#club3d{position:absolute;inset:0;overflow:hidden}.stage #cv{position:relative;z-index:1}
+.camrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0}.camrow button{font:600 .9rem Georgia,serif;color:#f3ead7;background:#17181d;border:1px solid #6b4b12;border-radius:8px;padding:8px 12px;min-height:40px;cursor:pointer}
+.now{text-align:center;color:var(--gold2,#f6d67a);min-height:1.4em;margin:10px 0 0;font-size:1.05rem}
+.lita{text-align:center;color:#f3ead7;min-height:2.8em;margin:4px auto 0;max-width:680px;font-style:italic}
+.taps button{flex:1 1 20%;max-width:150px;min-height:64px;font-size:1.2rem;border-width:3px}
+.taps button:nth-child(1){border-color:#5aa0ff}.taps button:nth-child(2){border-color:#ff9a3c}.taps button:nth-child(3){border-color:#ff3fa4}.taps button:nth-child(4){border-color:#8cff3c}
+.taps button.hit{background:#f6d67a;color:#111}
+.taps[hidden]{display:none}
+.how{max-width:720px;margin:14px auto;color:var(--fog,#c9c2b4);text-align:center;font-size:.95rem}
+.gate{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:rgba(3,4,8,.96);padding:20px}
+.gate .box{max-width:460px;text-align:center;border:3px solid #6b4b12;border-radius:14px;padding:26px 22px;background:#101117;box-shadow:0 0 60px rgba(255,63,164,.25)}
+.gate h2{margin:0 0 8px;color:#f6d67a;font-size:1.7rem}.gate p{color:#d8d0bf;margin:8px 0 16px}
+.gate .age{font:700 3rem Georgia,serif;color:#ff5a5a;border:4px solid #ff5a5a;border-radius:50%;width:96px;height:96px;display:grid;place-items:center;margin:0 auto 12px}
+.gate .btn{display:block;width:100%;margin:8px 0}
+.gate[hidden]{display:none}
+</style></head>
+<body data-beats-manual>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT">
+  <div class="box">
+    <div class="age" aria-hidden="true">21+</div>
+    <h2 id="gateT">Flex Grotto is 21 and over</h2>
+    <p>Lita is on the door. No one under 21 gets into the club. Everything else on the ship is open to all ages.</p>
+    <button class="btn" id="gateYes" type="button">I'm 21 or older — let me in</button>
+    <a class="btn ghost" href="arcade.html">I'm under 21 — back to the Arcade</a>
+  </div>
+</div>
+
+<main class="wrap">
+  <section class="club-head">
+    <span class="kick">Josh Bouche &amp; Lita's club · Ybor Cay after dark · 21+</span>
+    <h1>Flex Grotto</h1>
+    <p>DJ Josh Bouche on the decks. Lita runs the room. Five sounds mixed live on the bar line, a Miami-style laser show on both floors, and an underground rave below the floorboards.</p>
+  </section>
+
+  <div class="floors" role="group" aria-label="Choose a floor">
+    <button type="button" id="fMain" aria-pressed="true">🍸 Main Floor</button>
+    <button type="button" id="fUnder" aria-pressed="false">🔦 The Underground Rave</button>
+  </div>
+
+  <div class="stage"><div id="club3d" aria-hidden="true"></div><canvas id="cv" width="960" height="600" aria-label="Flex Grotto: DJ Josh Bouche at the decks, Lita on the mic, lights and a dance floor moving to the beat"></canvas></div>
+  <div class="camrow" role="group" aria-label="Camera"><button type="button" data-cam="0">🎥 Wide</button><button type="button" data-cam="2">🎧 DJ booth</button><button type="button" data-cam="1">💃 Dance floor</button><button type="button" data-cam="3">🚁 Overhead</button></div>
+  <p class="now" id="now" aria-live="polite">Tap a deck to start the music.</p>
+  <p class="lita" id="lita" aria-live="polite"></p>
+
+  <div class="decks" id="decks" role="group" aria-label="Choose the sound"></div>
+  <div class="pads" role="group" aria-label="DJ pads">
+    <button type="button" class="big" id="pDrop">💥 Drop the bass</button>
+    <button type="button" id="pHorn">📯 Air horn</button>
+    <button type="button" id="pScratch">💿 Scratch</button>
+    <button type="button" id="pPlay">⏸ Pause</button>
+    <button type="button" id="pGame">🕹 Rock the Floor</button>
+  </div>
+  <div class="taps" id="taps" hidden role="group" aria-label="Tap pads for Rock the Floor">
+    <button type="button" data-l="0">D</button><button type="button" data-l="1">F</button><button type="button" data-l="2">J</button><button type="button" data-l="3">K</button>
+  </div>
+  <p class="how"><b>Rock the Floor:</b> hit D, F, J, K (or tap the four pads) as each light reaches the line. Stay on the beat for 45 seconds to fill the floor. All music is original and made live in your browser.</p>
+</main>
+
+<script src="assets/beats.js"></script>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+  var B=window.PoyBeats,cv=document.getElementById("cv"),g=cv.getContext("2d"),W=960,H=600;
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var $=function(id){return document.getElementById(id);};
+  var PAL={east:["#5aa0ff","#b06cff","#dfe8ff"],west:["#ff9a3c","#ff4f9a","#ffe2b0"],miami:["#ff3fa4","#22e0d0","#fff0a0"],dubstep:["#8cff3c","#7a2cff","#d6ffb0"],rave:["#fff23c","#ff3cf0","#3cf0ff"]};
+  var TAG={east:"Boom bap · 91 BPM",west:"G-funk · 95 BPM",miami:"808s · 128 BPM",dubstep:"Wobble · 140 BPM",rave:"Four on the floor · 138 BPM"};
+  var LANE=["#5aa0ff","#ff9a3c","#ff3fa4","#8cff3c"];
+  var floor="main",pulses=[],pulse=0,snr=0,hype=20,spin=0,flash=0,last=performance.now();
+  var game=null,notes=[],genStep=0,best=0;
+  try{best=(window.PY&&PY.best)?PY.best("club"):0;}catch(e){}
+
+  /* 21+ door */
+  var gate=$("gate"),ok=false;try{ok=sessionStorage.getItem("py_club21")==="1";}catch(e){}
+  if(ok)gate.hidden=true;
+  $("gateYes").addEventListener("click",function(){gate.hidden=true;try{sessionStorage.setItem("py_club21","1");}catch(e){}B.start(B.pref()==="off"?"east":B.style());say("Lita: Welcome to Flex Grotto. Coats on the cannon, drinks at the bar, Josh Bouche has the decks.");});
+
+  /* decks */
+  var decks=$("decks");
+  B.order.forEach(function(k){var b=document.createElement("button");b.type="button";b.dataset.k=k;b.innerHTML=B.styles[k].name+"<small>"+TAG[k]+"</small>";decks.appendChild(b);
+    b.addEventListener("click",function(){if(game)return;if(!B.isOn()){B.start(k);say(line("start",k));}else if(k!==B.style()||B.pendingStyle()){B.mixTo(k);say(line("mix",k));}ui();});});
+  function line(kind,k){var n=k&&B.styles[k]?B.styles[k].name:"";
+    var L={start:["Lita: "+n+" to open the night. Hands up, Ybor!","DJ Josh Bouche: "+n+" on deck one. Let's work."],
+      mix:["DJ Josh Bouche: Bringing in "+n+" on the bar line. Wait for the drop…","Lita: Hold tight, "+n+" is coming in. Here it comes…"],
+      drop:["Lita: BASS! Everybody down low, then jump!","DJ Josh Bouche: Here comes the drop. Three, two, one…"],
+      under:["Lita: Down the hatch. The Underground is open: lasers on, phones away.","DJ Josh Bouche: Underground set. Dubstep, rave, Miami bass, whatever you call for."],
+      main:["Lita: Back upstairs to the Main Floor. East to West, we play it all."]};
+    var a=L[kind];return a[Math.floor(Math.random()*a.length)];}
+  function say(t){$("lita").textContent=t;}
+  function ui(){
+    var st=B.pendingStyle()||B.style(),on=B.isOn();
+    [].forEach.call(decks.children,function(b){b.setAttribute("aria-pressed",String(on&&b.dataset.k===B.style()&&!B.pendingStyle()));b.classList.toggle("mixing",B.pendingStyle()===b.dataset.k);b.disabled=!!game;});
+    $("pPlay").textContent=on?"⏸ Pause":"▶ Play";
+    $("now").textContent=!on?"Tap a deck to start the music.":(B.pendingStyle()?"Mixing into "+B.styles[st].name+"… drop on the bar line":"Now playing: "+B.styles[B.style()].name+" · "+TAG[B.style()]);
+    $("pGame").textContent=game?"■ End set":"🕹 Rock the Floor"+(best?" (best "+best+")":"");
+    $("fMain").disabled=$("fUnder").disabled=false;
+  }
+  B.onState(ui);
+  $("pDrop").addEventListener("click",function(){if(!B.isOn()){B.start();}else{B.bassDrop();}say(line("drop"));});
+  $("pHorn").addEventListener("click",function(){B.fx("horn");hype=Math.min(100,hype+3);});
+  $("pScratch").addEventListener("click",function(){B.fx("scratch");spin-=1.4;});
+  $("pPlay").addEventListener("click",function(){if(game)return;if(B.isOn())B.stop(false);else B.start();ui();});
+  function setFloor(f){floor=f;$("fMain").setAttribute("aria-pressed",String(f==="main"));$("fUnder").setAttribute("aria-pressed",String(f==="under"));
+    if(f==="under"){say(line("under"));if(!game&&B.isOn()&&["dubstep","rave","miami"].indexOf(B.pendingStyle()||B.style())<0)B.mixTo("rave");else if(!B.isOn()&&gate.hidden)B.start("rave");}
+    else say(line("main"));ui();}
+  $("fMain").addEventListener("click",function(){setFloor("main");});
+  $("fUnder").addEventListener("click",function(){setFloor("under");});
+
+  /* beat pulses for the lights */
+  B.onStep(function(n,t,i,bar){var p=B.styles[B.style()];if(p.kick[bar][i]==="x")pulses.push([t,0]);if(p.snare[bar][i]==="x")pulses.push([t,1]);});
+
+  /* Rock the Floor */
+  function chart(n){var i=n%16,bar=Math.floor(n/16)%4,dub=B.style()==="dubstep";
+    if(i===0)return 0;if(dub){if(i===8)return 2;if(i===10)return 1;if(i===4&&bar%2)return 3;if(i===14&&bar===3)return 3;return -1;}
+    if(i===4||i===12)return 2;if(i===8)return 1;if(i===14&&bar%2)return 3;if(i===6&&bar===3)return 1;return -1;}
+  function startGame(){if(!B.isOn())B.start();var c=B.clock();if(!c)return;
+    game={score:0,combo:0,max:0,hits:0,miss:0,end:c.now+45,t0:c.now};notes=[];genStep=c.step+12;hype=30;$("taps").hidden=false;say("Lita: Floor's yours. Stay on the beat and I'll keep them dancing.");ui();}
+  function endGame(done){if(!game)return;var r=game;game=null;notes=[];$("taps").hidden=true;
+    if(done){try{if(window.PY&&PY.best)best=PY.best("club",r.score);}catch(e){}
+      var tot=r.hits+r.miss,acc=tot?Math.round(r.hits/tot*100):0;
+      say("Lita: Set over. "+r.score+" points, "+acc+"% on beat, best streak "+r.max+". "+(acc>=80?"The floor is PACKED. Josh Bouche wants you back tomorrow.":acc>=50?"Good crowd. Run it again and fill the corners.":"Shake it off and try another sound."));
+      if(acc>=80&&window.PY&&PY.celebrate)PY.celebrate();}
+    ui();}
+  $("pGame").addEventListener("click",function(){if(game)endGame(false);else startGame();});
+  function tap(l){if(!game)return;var c=B.clock();if(!c)return;var now=c.now,bestN=null,bd=.17;
+    for(var k=0;k<notes.length;k++){var n=notes[k];if(n.l===l&&!n.done){var d=Math.abs(n.t-now);if(d<bd){bd=d;bestN=n;}}}
+    var b=$("taps").children[l];b.classList.add("hit");setTimeout(function(){b.classList.remove("hit");},90);
+    if(bestN){bestN.done=1;bestN.hit=1;game.combo++;game.max=Math.max(game.max,game.combo);game.hits++;game.score+=(bd<.07?150:100)+Math.min(game.combo,20)*5;hype=Math.min(100,hype+4);flash=.5;}
+    else{game.combo=0;hype=Math.max(0,hype-2);B.fx("miss");}}
+  document.addEventListener("keydown",function(e){if(e.repeat)return;var m={d:0,f:1,j:2,k:3}[String(e.key).toLowerCase()];if(m!==undefined&&game){e.preventDefault();tap(m);}});
+  [].forEach.call($("taps").children,function(b){b.addEventListener("pointerdown",function(e){e.preventDefault();tap(+b.dataset.l);});});
+
+  /* drawing */
+  function person(x,y,s,o){g.save();g.translate(x,y);g.scale(s,s);
+    var bob=o.bob||0,arm=o.arm||0;g.translate(0,-bob);
+    g.fillStyle=o.coat||"#3a1414";g.beginPath();g.moveTo(-26,0);g.quadraticCurveTo(-30,-70,-16,-92);g.lineTo(16,-92);g.quadraticCurveTo(30,-70,26,0);g.closePath();g.fill();
+    g.strokeStyle=o.trim||"#d9a944";g.lineWidth=3;g.beginPath();g.moveTo(0,-90);g.lineTo(0,-6);g.stroke();
+    g.strokeStyle=o.coat||"#3a1414";g.lineWidth=11;g.lineCap="round";
+    g.beginPath();g.moveTo(-18,-80);g.lineTo(-40-arm*6,-52-arm*46);g.stroke();
+    g.beginPath();g.moveTo(18,-80);g.lineTo(40+(o.arm2||0)*6,-52-(o.arm2||0)*46);g.stroke();
+    g.fillStyle=o.skin||"#b9835a";g.beginPath();g.arc(0,-108,17,0,7);g.fill();
+    g.beginPath();g.arc(-40-arm*6,-52-arm*46,6,0,7);g.arc(40+(o.arm2||0)*6,-52-(o.arm2||0)*46,6,0,7);g.fill();
+    if(o.hat){g.fillStyle="#111";g.beginPath();g.moveTo(-34,-118);g.quadraticCurveTo(0,-160,34,-118);g.quadraticCurveTo(0,-128,-34,-118);g.fill();g.strokeStyle="#d9a944";g.lineWidth=2;g.stroke();
+      g.strokeStyle="#ddd";g.lineWidth=4;g.beginPath();g.arc(0,-110,21,Math.PI*1.05,Math.PI*1.95);g.stroke();g.fillStyle="#ddd";g.fillRect(-25,-114,7,14);g.fillRect(18,-114,7,14);}
+    if(o.hair){g.fillStyle=o.hair;g.beginPath();g.arc(0,-112,19,Math.PI,0);g.lineTo(22,-70);g.quadraticCurveTo(12,-92,16,-108);g.lineTo(-16,-108);g.quadraticCurveTo(-12,-92,-22,-70);g.closePath();g.fill();
+      g.fillStyle="#c22a2a";g.fillRect(-19,-124,38,8);g.strokeStyle="#f6d67a";g.lineWidth=2;g.beginPath();g.arc(17,-98,5,0,7);g.stroke();}
+    if(o.mic){g.strokeStyle="#bbb";g.lineWidth=4;var mx=40+(o.arm2||0)*6,my=-52-(o.arm2||0)*46;g.beginPath();g.moveTo(mx,my);g.lineTo(mx-8,my-16);g.stroke();g.fillStyle="#222";g.beginPath();g.arc(mx-9,my-19,6,0,7);g.fill();}
+    g.restore();}
+  function glowText(t,x,y,size,col,a){g.save();g.font="700 "+size+"px Georgia,serif";g.textAlign="center";g.shadowColor=col;g.shadowBlur=22;g.globalAlpha=a;g.fillStyle="#fff";g.fillText(t,x,y);g.shadowBlur=8;g.fillStyle=col;g.globalAlpha=a*.55;g.fillText(t,x,y);g.restore();}
+  function frame(ts){
+    var dt=Math.min(.05,(ts-last)/1000);last=ts;var c=B.clock(),now=c?c.now:0,on=B.isOn();
+    for(var k=pulses.length-1;k>=0;k--){if(pulses[k][0]<=now){if(pulses[k][1])snr=1;else pulse=1;pulses.splice(k,1);}}
+    if(pulses.length>60)pulses.splice(0,30);
+    pulse=Math.max(0,pulse-dt*4.5);snr=Math.max(0,snr-dt*5);flash=Math.max(0,flash-dt*2.5);
+    if(!game)hype+=((on?55:12)-hype)*dt*.4;
+    spin+=dt*(on?3.4:.2);
+    var pal=PAL[B.style()]||PAL.east,under=floor==="under",T=ts/1000,mv=reduce?0:1;
+    if(window.CLUB3D){g.clearRect(0,0,W,H);}else{
+    /* room */
+    var bg=g.createLinearGradient(0,0,0,H);if(under){bg.addColorStop(0,"#020306");bg.addColorStop(1,"#0a0d12");}else{bg.addColorStop(0,"#0c0710");bg.addColorStop(1,"#1a0d10");}
+    g.fillStyle=bg;g.fillRect(0,0,W,H);
+    if(under){g.strokeStyle="rgba(120,130,140,.22)";g.lineWidth=14;for(var a=0;a<4;a++){g.beginPath();g.arc(W/2,330,300+a*130,Math.PI,0);g.stroke();}
+      g.strokeStyle="rgba(90,100,110,.35)";g.lineWidth=7;g.beginPath();g.moveTo(0,46);g.lineTo(W,46);g.moveTo(0,66);g.lineTo(W,66);g.stroke();}
+    else{g.fillStyle="rgba(255,255,255,.025)";for(var by=0;by<8;by++)for(var bx=0;bx<17;bx++)g.fillRect(bx*60+(by%2?30:0)-20,by*34+10,54,28);}
+    glowText(under?"THE UNDERGROUND":"FLEX GROTTO",W/2,74,under?46:56,pal[0],.75+.25*pulse);
+    glowText(under?"FLEX GROTTO · RAVE · DUBSTEP · MIAMI BASS":"JOSH BOUCHE & LITA'S · EAST · WEST · MIAMI",W/2,104,17,pal[1],.8);
+    /* lights */
+    g.save();g.globalCompositeOperation="lighter";
+    /* Miami-style laser show on both floors: two truss heads throwing fans that open and close on the beat */
+    var fanN=under?11:7,spread=(under?.95:.6)*(.55+.45*Math.sin(T*.5*mv))+pulse*.12;
+    [[150,58,1],[W-150,58,-1],[W/2,46,0]].forEach(function(hd,hi){var aim=Math.PI/2+hd[2]*-.45+Math.sin(T*(.6+hi*.17)*mv+hi)*.35;
+      for(var l=0;l<fanN;l++){var ang=aim+(l/(fanN-1)-.5)*spread*2;g.strokeStyle=pal[(l+hi)%pal.length];g.globalAlpha=(under?.2:.13)+.3*pulse;g.lineWidth=under?2:1.6;g.beginPath();g.moveTo(hd[0],hd[1]);g.lineTo(hd[0]+Math.cos(ang)*900,hd[1]+Math.sin(ang)*900);g.stroke();}
+      g.globalAlpha=.9;g.fillStyle="#fff";g.beginPath();g.arc(hd[0],hd[1],3+pulse*3,0,7);g.fill();});
+    if(!under){for(var l2=0;l2<6;l2++){var x0=110+l2*148,an=Math.sin(T*.7*mv+l2*1.3)*.5,x1=x0+an*420;var gr=g.createLinearGradient(x0,40,x1,H);gr.addColorStop(0,pal[l2%2]);gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.globalAlpha=.12+.18*pulse;g.beginPath();g.moveTo(x0-6,40);g.lineTo(x0+6,40);g.lineTo(x1+90,H);g.lineTo(x1-90,H);g.closePath();g.fill();}}
+    g.restore();
+    /* speakers */
+    [70,W-70].forEach(function(sx){var sc=1+pulse*.05;g.save();g.translate(sx,300);g.scale(sc,sc);g.fillStyle="#0c0c10";g.strokeStyle="#3a3a44";g.lineWidth=3;g.fillRect(-48,-120,96,240);g.strokeRect(-48,-120,96,240);
+      [-62,38].forEach(function(cy,q){g.fillStyle="#1b1b22";g.beginPath();g.arc(0,cy+ (q?0:0),q?40:30,0,7);g.fill();g.fillStyle=pal[0];g.globalAlpha=.25+.6*pulse;g.beginPath();g.arc(0,cy,(q?16:11)*(1+pulse*.5),0,7);g.fill();g.globalAlpha=1;});g.restore();});
+    /* dance floor */
+    var fy=380;for(var r=0;r<5;r++){var y0=fy+r*r*7+r*18,y1=fy+(r+1)*(r+1)*7+(r+1)*18,w0=300+r*90,w1=300+(r+1)*90;for(var cx=0;cx<8;cx++){var u0=cx/8,u1=(cx+1)/8;
+      var lit=((cx+r+Math.floor(T*(on?2.2:.4)))%3===0);g.fillStyle=lit?pal[(cx+r)%pal.length]:"#15131a";g.globalAlpha=lit?(.22+.5*pulse):.9;
+      g.beginPath();g.moveTo(W/2-w0+u0*2*w0,y0);g.lineTo(W/2-w0+u1*2*w0-2,y0);g.lineTo(W/2-w1+u1*2*w1-2,y1-2);g.lineTo(W/2-w1+u0*2*w1,y1-2);g.closePath();g.fill();}}
+    g.globalAlpha=1;
+    /* booth */
+    g.fillStyle="#120d0a";g.strokeStyle="#6b4b12";g.lineWidth=4;g.beginPath();g.rect(W/2-170,300,340,74);g.fill();g.stroke();
+    glowText("DJ JOSH BOUCHE",W/2,350,20,pal[1],.9);
+    var bob=on?pulse*7:0;
+    person(W/2,304,1.05,{hat:1,coat:"#1c2a4a",trim:"#f6d67a",skin:"#8a5a3c",bob:bob,arm:on?.25+snr*.5:0,arm2:on?.2+pulse*.3:0});
+    [-108,108].forEach(function(dx,q){g.save();g.translate(W/2+dx,292);g.scale(1,.38);g.fillStyle="#0a0a0d";g.beginPath();g.arc(0,0,44,0,7);g.fill();g.strokeStyle="#444";g.lineWidth=2;for(var rr=14;rr<44;rr+=9){g.beginPath();g.arc(0,0,rr,0,7);g.stroke();}
+      g.rotate(spin*(q?1:1.03));g.fillStyle=pal[q];g.fillRect(-3,-40,6,22);g.beginPath();g.arc(0,0,10,0,7);g.fill();g.restore();});
+    /* Lita */
+    g.fillStyle="#1a1210";g.fillRect(196,356,96,18);
+    person(244,358,.98,{hair:"#2a120a",coat:"#7c1530",trim:"#f6d67a",skin:"#c28a62",bob:on?snr*6:0,arm:on?.3+pulse*.7:0,arm2:.55,mic:1});
+    glowText("LITA",244,396,18,pal[0],.9);
+    /* crowd */
+    for(var p=0;p<17;p++){var px=40+p*55+(p%2?12:0),ph=Math.sin(T*6*mv+p*1.7)*.5+.5,up=hype>45&&(p*7+Math.floor(T*2))%3===0?1:0;
+      g.fillStyle=p%2?"#0a0a0e":"#101016";var by2=H+8-(on?(pulse*10+ph*4):0)-(p%3)*8;g.beginPath();g.arc(px,by2-70,17,0,7);g.fill();g.fillRect(px-22,by2-56,44,70);
+      if(up){g.strokeStyle=g.fillStyle;g.lineWidth=9;g.lineCap="round";g.beginPath();g.moveTo(px-18,by2-50);g.lineTo(px-30,by2-104-pulse*8);g.moveTo(px+18,by2-50);g.lineTo(px+30,by2-104-pulse*8);g.stroke();}}
+    if(under&&!reduce){g.fillStyle="rgba(255,255,255,"+(pulse*.05)+")";g.fillRect(0,0,W,H);}
+    }
+
+    /* game */
+    if(game){
+      var lx=W/2-210,lw=105,hitY=520,top=150,travel=1.7;
+      while(B.timeOf(genStep)<now+travel+.2){var ln=chart(genStep),tt=B.timeOf(genStep);if(ln>=0&&tt<game.end-.3&&tt>game.t0+1.2)notes.push({t:tt,l:ln});genStep++;}
+      g.fillStyle="rgba(4,5,10,.72)";g.fillRect(lx-8,top-10,lw*4+16,hitY-top+60);
+      for(var q2=0;q2<4;q2++){g.strokeStyle="rgba(255,255,255,.12)";g.lineWidth=1;g.strokeRect(lx+q2*lw,top,lw,hitY-top+40);g.strokeStyle=LANE[q2];g.lineWidth=4;g.strokeRect(lx+q2*lw+8,hitY-14,lw-16,28);
+        g.fillStyle=LANE[q2];g.font="700 18px system-ui,sans-serif";g.textAlign="center";g.fillText("DFJK"[q2],lx+q2*lw+lw/2,hitY+38);}
+      for(var m=notes.length-1;m>=0;m--){var nt=notes[m],d=nt.t-now;
+        if(!nt.done&&d<-.17){nt.done=1;game.combo=0;game.miss++;hype=Math.max(0,hype-5);}
+        if(d<-.4){notes.splice(m,1);continue;}
+        if(nt.hit)continue;var y=hitY-(d/travel)*(hitY-top);if(y<top-10)continue;
+        g.fillStyle=LANE[nt.l];g.globalAlpha=nt.done?.25:1;g.beginPath();g.roundRect?g.roundRect(lx+nt.l*lw+12,y-11,lw-24,22,8):g.rect(lx+nt.l*lw+12,y-11,lw-24,22);g.fill();g.globalAlpha=1;}
+      if(flash>0){g.fillStyle="rgba(246,214,122,"+flash*.35+")";g.fillRect(lx,hitY-16,lw*4,32);}
+      g.fillStyle="#f6d67a";g.font="700 22px Georgia,serif";g.textAlign="left";g.fillText("Score "+game.score,24,150);g.fillText("Streak "+game.combo,24,180);
+      g.textAlign="right";g.fillText(Math.max(0,Math.ceil(game.end-now))+"s",W-24,150);
+      if(now>=game.end)endGame(true);
+    }
+    /* hype meter */
+    g.fillStyle="rgba(0,0,0,.55)";g.fillRect(24,20,180,14);var hg=g.createLinearGradient(24,0,204,0);hg.addColorStop(0,pal[1]);hg.addColorStop(1,pal[0]);g.fillStyle=hg;g.fillRect(24,20,180*hype/100,14);
+    g.strokeStyle="#6b4b12";g.lineWidth=2;g.strokeRect(24,20,180,14);g.fillStyle="#f3ead7";g.font="600 12px system-ui,sans-serif";g.textAlign="left";g.fillText("FLOOR HYPE",24,50);
+    if(B.pendingStyle()||B.barsToDrop()>0){var left=B.barsToDrop();glowText("DROP IN "+left.toFixed(1),W/2,200,40,pal[2]||"#fff",.9);}
+    requestAnimationFrame(frame);
+  }
+  function fit(){var dpr=Math.min(2,window.devicePixelRatio||1),w=cv.clientWidth||960;cv.width=Math.round(w*dpr);cv.height=Math.round(w*H/W*dpr);g.setTransform(cv.width/W,0,0,cv.height/H,0,0);}
+  window.addEventListener("resize",fit);fit();ui();requestAnimationFrame(frame);
+  if(ok){say("Lita: Welcome back. Tap a deck and Josh Bouche will take it from there.");}
+})();
+</script>
+<script type="module">
+/* Real-time 3D club. Falls back to the drawn club if WebGL is not available. */
+import {startClub3D} from './world/club3d.js';
+try{const host=document.getElementById('club3d'),c=startClub3D(host);if(c){window.CLUB3D=c;document.querySelectorAll('[data-cam]').forEach(b=>b.addEventListener('click',()=>c.shot(+b.dataset.cam)));}else{document.querySelector('.camrow').hidden=true;}}
+catch(e){console.warn('club3d',e);document.querySelector('.camrow').hidden=true;}
+</script>
+</body></html>

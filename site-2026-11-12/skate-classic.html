@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Skate the Grotto Classic</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.sh{padding:18px 0 6px}.sh h1{margin:0;color:var(--gold2);font-size:clamp(1.9rem,7vw,2.8rem)}.sh p{margin:4px 0 0;color:var(--mute);max-width:65ch}
+.sh .where{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sea)}
+.stage{position:relative;max-width:900px;margin:0 auto}
+#sk{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:14px;border:2px solid rgba(232,184,74,.4);background:#1a1030;touch-action:none}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:16px;background:rgba(11,14,20,.72);border-radius:14px}
+.ov[hidden]{display:none}
+.ov h2{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,6vw,2.4rem);color:var(--gold2)}
+.ov p{margin:0;color:var(--fog);max-width:46ch}
+.pads{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;max-width:900px;margin:10px auto 0}
+.pad{min-height:64px;border-radius:12px;border:2px solid rgba(232,184,74,.35);background:var(--panel2);color:var(--fog);font:700 .95rem/1.15 system-ui,sans-serif;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-width:0;padding:6px 4px}
+.pad small{display:block;font-weight:400;color:var(--mute);font-size:.72rem;margin-top:2px}
+.pad.ollie{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d05;border-color:var(--gold)}
+.pad.ollie small{color:#5a4410}
+.pad.on{filter:brightness(1.25);transform:scale(.97)}
+.pad:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.info{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;max-width:900px;margin:12px auto 0}
+.info .stat{font-variant-numeric:tabular-nums}
+.how{color:var(--mute);font-size:.88rem;max-width:900px;margin:10px auto 0}
+.decksel{width:auto}
+</style></head>
+<body>
+<main class="wrap">
+  <div class="sh"><div class="where">Skate park · Pippy's Surf &amp; Skate Shack · Danny Alonso Island</div><h1>Skate the Grotto Classic</h1><p>Two pirate parks: Gaspar's Docks at sunset and a night run down 7th Ave past Gaspar's Grotto. Ninety seconds per session. Ollie the cannon ramps, flip and spin in the air, slide the rope rails and chain it all into one big combo. Land clean to bank it, or bail and lose it all.</p></div>
+  <div class="stage">
+    <canvas id="sk" width="960" height="540" aria-label="Skate course. Use the buttons or keyboard to ollie, flip, grab, spin and grind."></canvas>
+    <div class="ov" id="ov">
+      <h2 id="ovT">Drop in</h2>
+      <p id="ovP">Ollie to jump. In the air, hit Flip, Spin or hold Grab. Press Grind over a rail. Different tricks in one combo raise the multiplier.</p>
+      <div class="row" style="justify-content:center"><label style="margin:0;color:var(--fog)">Level: <select class="decksel" id="lvl"><option value="1">Level 1 · Gaspar's Docks</option><option value="2">Level 2 · Ybor Night Run</option></select></label>
+      <label style="margin:0;color:var(--fog)">Deck: <select class="decksel" id="deck"></select></label></div>
+      <div class="row" style="justify-content:center"><button class="btn" id="go">Start session</button><a class="btn ghost" href="surfshop.html">🏄 Visit the shop</a><a class="btn ghost" href="skate.html">🛹 3D park</a></div>
+    </div>
+  </div>
+  <div class="pads" id="pads">
+    <button class="pad" data-a="flip">Flip<small>A</small></button>
+    <button class="pad" data-a="grab">Grab<small>hold · S</small></button>
+    <button class="pad ollie" data-a="ollie">Ollie<small>Space</small></button>
+    <button class="pad" data-a="spin">Spin<small>D</small></button>
+    <button class="pad" data-a="grind">Grind<small>F / ↓</small></button>
+  </div>
+  <div class="info"><span class="stat" id="best"></span><span class="stat" id="bank"></span><a class="btn ghost" href="world.html#skatepark">🏝 Back to the island</a></div>
+  <p class="how">Tips: ollie right at the top of a kicker to fly higher. A trick still spinning when you land is a bail. Grab gets more points the longer you hold it. Gold doubloons over the course add to your shop money.</p>
+</main>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+const cv=document.getElementById("sk"),g=cv.getContext("2d"),$=i=>document.getElementById(i);
+const W=960,H=540,BASE=H-92,SESSION=90,GRAV=1650;
+const DECKS={deckhand:{n:"Deckhand Deck",pop:1,spd:1,bal:1,col:"#b5532a"},pippy:{n:"Pippy Pink Cruiser",pop:1.04,spd:1.02,bal:1.25,col:"#ff7fb0"},kraken:{n:"Kraken Black",pop:1.12,spd:1.06,bal:1.1,col:"#20242c"},gaspar:{n:"Gaspar Gold",pop:1.18,spd:1.12,bal:1.3,col:"#e8b84a"}};
+const LV={1:{name:"Gaspar's Docks"},2:{name:"Ybor Night Run"}};let lvl="1";
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const owned=store.get("py_skate_owned",["deckhand"]);let sel=store.get("py_skate_deck","deckhand");if(!owned.includes(sel))sel="deckhand";
+$("deck").innerHTML=owned.map(k=>`<option value="${k}" ${k===sel?"selected":""}>${DECKS[k].n}</option>`).join("");
+$("deck").onchange=e=>{sel=e.target.value;store.set("py_skate_deck",sel);};
+function infoLine(){$("best").textContent=`Best on ${LV[lvl].name}: ${store.get("py_skate_best_"+lvl,0).toLocaleString()}`;$("bank").textContent=`🪙 ${store.get("py_skate_doub",0)} doubloons to spend`;}
+$("lvl").onchange=e=>{lvl=e.target.value;infoLine();reset();draw(performance.now());};
+infoLine();
+
+/* ---------- course ---------- */
+let obs,coins,genX;
+function gen(until){
+ while(genX<until){
+  const r=Math.random(),gapAfter=200+Math.random()*240;
+  if(r<.3){const w=150+Math.random()*60,h=58+Math.random()*30;obs.push({t:"kick",x:genX,w,h});coins.push({x:genX+w+120,y:h+150,got:false});genX+=w;}
+  else if(r<.55){const w=220+Math.random()*200,h=46+Math.random()*16;obs.push({t:"rail",x:genX,w,h});coins.push({x:genX+w/2,y:h+120,got:false});genX+=w;}
+  else if(r<.75){const w=90+Math.random()*60;obs.push({t:"gap",x:genX,w});coins.push({x:genX+w/2,y:140,got:false});genX+=w;}
+  else{const wr=90,top=150+Math.random()*120,h=40;obs.push({t:"box",x:genX,wr,top,h});genX+=wr*2+top;}
+  genX+=gapAfter;
+ }
+}
+function groundAt(x){
+ for(const o of obs){
+  if(o.t==="kick"&&x>=o.x&&x<=o.x+o.w)return o.h*(x-o.x)/o.w;
+  if(o.t==="gap"&&x>=o.x&&x<=o.x+o.w)return -1e9;
+  if(o.t==="box"){const e=o.x+o.wr*2+o.top;if(x>=o.x&&x<=e){if(x<o.x+o.wr)return o.h*(x-o.x)/o.wr;if(x>e-o.wr)return o.h*(e-x)/o.wr;return o.h;}}
+ }
+ return 0;
+}
+function railAt(x){return obs.find(o=>o.t==="rail"&&x>=o.x&&x<=o.x+o.w);}
+
+/* ---------- state ---------- */
+let P,run,combo,score,left,last,coinsGot,msg,msgT,keysDown={},grindReq=0,bailT=0,best;
+const TRICKS={flip:[["Kickflip",500],["Heelflip",500],["Cannonball Flip",650],["Hardflip",700]],grab:[["Crow's Nest Grab",300],["Jolly Roger Grab",350],["Indy Grab",300],["Parrot Grab",350]]};
+function reset(){
+ const D=DECKS[sel];obs=[];coins=[];genX=600;gen(4000);
+ P={x:120,y:0,vy:0,air:false,grind:null,spin:0,spinT:0,flip:0,trick:null,grabbing:false,grabPts:0,spd:330*D.spd,pop:560*D.pop,bal:D.bal,col:D.col,airSpins:0};
+ combo={list:[],pts:0};score=0;left=SESSION;coinsGot=0;msg="";bailT=0;
+}
+function say(t){msg=t;msgT=performance.now();}
+function addTrick(name,pts){combo.list.push(name);combo.pts+=pts;sfx("trick");}
+function mult(){return Math.min(10,new Set(combo.list.map(n=>n.replace(/^\d+ /,""))).size);}
+function bank(){if(!combo.list.length)return;const got=Math.round(combo.pts*mult());score+=got;say(`Landed! ${combo.pts} × ${mult()} = ${got.toLocaleString()}`);if(got>4000)sfx("big");combo={list:[],pts:0};}
+function bail(why){if(bailT>0)return;bailT=.9;say(`BAIL! ${why}`);combo={list:[],pts:0};P.trick=null;P.grabbing=false;P.spin=0;P.flip=0;P.grind=null;sfx("bail");}
+
+/* ---------- actions ---------- */
+function act(a,down){
+ if(!run||bailT>0)return;
+ if(a==="grab"){if(down&&P.air&&!P.trick){P.grabbing=true;const t=TRICKS.grab[Math.floor(Math.random()*4)];P.grabName=t[0];P.grabPts=t[1];}if(!down&&P.grabbing){P.grabbing=false;addTrick(P.grabName,Math.round(P.grabPts));}return;}
+ if(!down)return;
+ if(a==="ollie"){if(!P.air||P.grind){const sl=slope();P.vy=P.pop+Math.max(0,sl)*P.spd*1.1;P.air=true;if(P.grind){P.grind=null;}P.airSpins=0;sfx("pop");}return;}
+ if(a==="grind"){grindReq=performance.now();return;}
+ if(!P.air||P.grind||P.trick||P.grabbing)return;
+ if(a==="flip"){const t=TRICKS.flip[Math.floor(Math.random()*4)];P.trick={k:"flip",t:0,d:.42/P.bal**.3,name:t[0],pts:t[1]};}
+ if(a==="spin"){P.airSpins++;const deg=180+P.airSpins*180;P.trick={k:"spin",t:0,d:.5,name:`${deg} Plank Walk`,pts:200+P.airSpins*250};}
+}
+function slope(){return (groundAt(P.x+4)-groundAt(P.x-4))/8;}
+const KM={Space:"ollie",KeyW:"ollie",ArrowUp:"ollie",KeyA:"flip",ArrowLeft:"flip",KeyS:"grab",KeyD:"spin",ArrowRight:"spin",KeyF:"grind",ArrowDown:"grind"};
+addEventListener("keydown",e=>{const a=KM[e.code];if(!a||!run)return;e.preventDefault();if(keysDown[e.code])return;keysDown[e.code]=true;act(a,true);});
+addEventListener("keyup",e=>{const a=KM[e.code];if(!a)return;keysDown[e.code]=false;act(a,false);});
+document.querySelectorAll(".pad").forEach(b=>{const a=b.dataset.a;
+ b.addEventListener("pointerdown",e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}b.classList.add("on");act(a,true);});
+ const up=()=>{b.classList.remove("on");act(a,false);};b.addEventListener("pointerup",up);b.addEventListener("pointercancel",up);
+ b.addEventListener("contextmenu",e=>e.preventDefault());});
+cv.addEventListener("pointerdown",e=>{if(run){e.preventDefault();act("ollie",true);}});
+
+/* ---------- physics ---------- */
+function update(dt){
+ left-=dt;if(left<=0){if(!P.air&&!P.grind)bank();return finish();}
+ if(bailT>0){bailT-=dt;P.x+=P.spd*.35*dt;if(bailT<=0){P.y=Math.max(0,groundAt(P.x));if(P.y<0)P.y=0;P.air=false;P.vy=0;}return;}
+ P.x+=P.spd*dt;gen(P.x+2400);while(obs.length&&obs[0].x+(obs[0].w||obs[0].wr*2+obs[0].top)<P.x-800){obs.shift();}
+ if(P.trick){P.trick.t+=dt;const k=P.trick.t/P.trick.d;if(P.trick.k==="spin")P.spin=k*Math.PI;else P.flip=k*Math.PI*2;if(k>=1){addTrick(P.trick.name,P.trick.pts);P.trick=null;P.spin=0;P.flip=0;}}
+ if(P.grabbing)P.grabPts+=320*dt;
+ if(P.grind){const r=P.grind;combo.pts+=260*dt;P.y=r.h;if(Math.random()<.02)sfx("grind");if(P.x>r.x+r.w){P.grind=null;P.air=true;P.vy=240;}return;}
+ const gnd=groundAt(P.x);
+ if(!P.air){
+  if(gnd<-1e8){P.air=true;P.vy=0;}
+  else if(gnd<P.y-7){P.air=true;P.vy=Math.max(0,(P.y-groundAt(P.x-6))/6*P.spd);P.airSpins=0;}
+  else P.y=gnd;
+  if(!P.air&&combo.list.length&&!P.grind)bank();
+  return;
+ }
+ P.vy-=GRAV*dt;P.y+=P.vy*dt;
+ // grind catch
+ const r=railAt(P.x);
+ if(r&&P.vy<=0&&performance.now()-grindReq<350*P.bal&&P.y<=r.h+48&&P.y>=r.h-10&&!P.trick){P.grind=r;P.y=r.h;P.vy=0;if(P.grabbing){P.grabbing=false;addTrick(P.grabName,Math.round(P.grabPts));}addTrick("Rope Slide",400);return;}
+ // coins
+ for(const c of coins){if(!c.got&&Math.abs(c.x-P.x)<26&&Math.abs(c.y-(P.y+40))<46){c.got=true;coinsGot++;combo.pts+=100;sfx("coin");}}
+ if(gnd<-1e8){if(P.y<-120)bail("Fell in the gap.");return;}
+ if(P.y<=gnd&&P.vy<=0){
+  P.y=gnd;P.air=false;P.vy=0;
+  if(P.trick){const k=P.trick.t/P.trick.d;if(k<1-.18*P.bal){bail(P.trick.k==="spin"?"Under-rotated.":"Board didn't come around.");return;}addTrick(P.trick.name,P.trick.pts);P.trick=null;P.spin=0;P.flip=0;}
+  if(P.grabbing){P.grabbing=false;addTrick(P.grabName,Math.round(P.grabPts*.6));}
+  sfx("land");bank();
+ }
+}
+
+/* ---------- drawing ---------- */
+function draw(now){
+ const cam=P.x-W*.3,t=now/1000;
+ const night=lvl==="2";
+ const sky=g.createLinearGradient(0,0,0,H);
+ if(night){sky.addColorStop(0,"#05060f");sky.addColorStop(.6,"#1b1438");sky.addColorStop(1,"#3a1a3a");}else{sky.addColorStop(0,"#2c1458");sky.addColorStop(.45,"#c92f6a");sky.addColorStop(.7,"#fb9633");}
+ g.fillStyle=sky;g.fillRect(0,0,W,H);
+ if(night){g.fillStyle="#fff";for(let i=0;i<40;i++){g.globalAlpha=.3+.4*Math.abs(Math.sin(t+i));g.fillRect((i*137)%W,(i*61)%(BASE-200),2,2);}g.globalAlpha=1;g.fillStyle="#f4ead6";g.beginPath();g.arc(W*.8,90,30,0,7);g.fill();}
+ else{g.fillStyle="#fff06a";g.beginPath();g.arc(W*.72,BASE-150,52,0,7);g.fill();g.fillStyle="#2a7f9a";g.fillRect(0,BASE-110,W,110);g.fillStyle="rgba(255,255,255,.35)";for(let i=0;i<14;i++){const x=((i*90-cam*.15)%W+W)%W;g.fillRect(x,BASE-96+Math.sin(t+i)*2,40,2);}
+  // pirate ships in the harbor
+  for(let i=0;i<3;i++){const x=((i*420-cam*.12)%(W+400)+W+400)%(W+400)-200,y=BASE-104;g.fillStyle="#2a1408";g.beginPath();g.moveTo(x,y);g.lineTo(x+120,y);g.lineTo(x+100,y+18);g.lineTo(x+20,y+18);g.fill();g.fillRect(x+58,y-70,4,70);g.fillStyle="#f4ead6";g.fillRect(x+30,y-62,60,40);g.fillStyle="#111";g.fillRect(x+52,y-80,16,10);}}
+ // buildings / palms parallax
+ if(night){for(let i=0;i<9;i++){const x=((i*150-cam*.35)%(W+300)+W+300)%(W+300)-150,h=140+(i*53)%90;g.fillStyle=i%2?"#3a1f1a":"#4a2a20";g.fillRect(x,BASE-70-h,140,h);g.fillStyle="#f6c96a";for(let r=0;r<3;r++)for(let c=0;c<4;c++)if((i+r+c)%3)g.fillRect(x+12+c*32,BASE-60-h+16+r*38,16,22);
+   g.strokeStyle="#2a1a10";g.lineWidth=3;g.beginPath();g.moveTo(x,BASE-70-h*.45);g.lineTo(x+140,BASE-70-h*.45);g.stroke();}
+  // street lamps
+  for(let i=0;i<6;i++){const x=((i*220-cam*.6)%(W+200)+W+200)%(W+200)-100;g.fillStyle="#1a1a1a";g.fillRect(x,BASE-150,5,80);g.fillStyle="#ffe08a";g.beginPath();g.arc(x+2,BASE-154,9,0,7);g.fill();g.fillStyle="rgba(255,224,138,.12)";g.beginPath();g.arc(x+2,BASE-150,46,0,7);g.fill();}}
+ else{g.fillStyle="#1b0f24";for(let i=0;i<8;i++){const x=((i*170-cam*.35)%(W+200)+W+200)%(W+200)-100,y=BASE-70;g.fillRect(x,y-110,6,110);for(let f=0;f<5;f++){g.save();g.translate(x+3,y-110);g.rotate(-1.4+f*.7);g.fillRect(0,-3,46,6);g.restore();}}}
+ // Gaspar's Grotto sign
+ const sx=((-cam*.35)%2000+2000)%2000-300;
+ g.fillStyle=night?"#120a06":"#2a1d05";g.fillRect(sx,BASE-190,230,96);g.strokeStyle="#e8b84a";g.lineWidth=3;g.strokeRect(sx+4,BASE-186,222,88);
+ g.save();if(night){g.shadowColor="#ff4fa0";g.shadowBlur=18;}g.fillStyle=night?"#ff7fc0":"#f6d67a";g.font="30px 'Pirata One',Georgia";g.textAlign="center";g.fillText("GASPAR'S GROTTO",sx+115,BASE-150);g.restore();
+ g.fillStyle=night?"#7fe0e4":"#f4ead6";g.font="14px Pirata One,Georgia,serif";g.textAlign="center";g.fillText(night?"7TH AVE · YBOR CITY":"☠ PIRATE SKATE DOCKS ☠",sx+115,BASE-118);
+ // Jolly Roger flag
+ const fx=sx+250;g.fillStyle="#222";g.fillRect(fx,BASE-210,4,140);g.fillStyle="#111";g.beginPath();g.moveTo(fx+4,BASE-210);g.lineTo(fx+60+Math.sin(t*4)*4,BASE-202);g.lineTo(fx+58+Math.sin(t*4+1)*4,BASE-172);g.lineTo(fx+4,BASE-176);g.fill();g.fillStyle="#f4ead6";g.beginPath();g.arc(fx+30,BASE-192,7,0,7);g.fill();g.fillRect(fx+20,BASE-184,20,3);
+ // ground: dock planks or brick street
+ g.fillStyle=night?"#6a3a2a":"#8a6038";g.beginPath();g.moveTo(0,H);for(let x=0;x<=W;x+=4){const gy=groundAt(cam+x);g.lineTo(x,gy<-1e8?H+10:BASE-gy);}g.lineTo(W,H);g.fill();
+ g.strokeStyle=night?"rgba(0,0,0,.25)":"rgba(40,20,5,.35)";g.lineWidth=2;
+ for(let y=BASE+14;y<H;y+=16){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+ for(let x=-((cam%(night?40:90))+ (night?40:90));x<W;x+=night?40:90){for(let y=BASE;y<H;y+=16){const off=night&&((y-BASE)/16)%2?20:0;g.beginPath();g.moveTo(x+off,y);g.lineTo(x+off,y+16);g.stroke();}}
+ g.strokeStyle=night?"#c9a14a":"#e8c48a";g.lineWidth=3;g.beginPath();let pen=false;for(let x=0;x<=W;x+=4){const gy=groundAt(cam+x);if(gy<-1e8){pen=false;continue;}if(!pen){g.moveTo(x,BASE-gy);pen=true;}else g.lineTo(x,BASE-gy);}g.stroke();
+ for(const o of obs){const x=o.x-cam;if(x>W+50||x+800<0)continue;
+  if(o.t==="kick"){g.fillStyle="#6b3e1c";g.beginPath();g.moveTo(x,BASE);g.lineTo(x+o.w,BASE-o.h);g.lineTo(x+o.w,BASE);g.fill();g.strokeStyle="#3a2010";g.lineWidth=2;for(let k=20;k<o.w;k+=22){g.beginPath();g.moveTo(x+k,BASE);g.lineTo(x+k,BASE-o.h*k/o.w);g.stroke();}
+   // cannon under the ramp lip
+   g.fillStyle="#1a1a1a";g.beginPath();g.ellipse(x+o.w-18,BASE-14,20,10,0,0,7);g.fill();g.fillRect(x+o.w-6,BASE-22,22,14);g.fillStyle="#4a2a14";g.beginPath();g.arc(x+o.w-28,BASE-6,8,0,7);g.arc(x+o.w-6,BASE-6,8,0,7);g.fill();}
+  if(o.t==="gap"){g.fillStyle=night?"#0a0612":"#123a4a";g.fillRect(x,BASE,o.w,H-BASE);if(!night){g.fillStyle="rgba(255,255,255,.3)";g.fillRect(x+6,BASE+24+Math.sin(t*3)*3,o.w-12,2);}g.fillStyle="#f6d67a";g.font="14px Pirata One,Georgia,serif";g.textAlign="center";g.fillText(night?"GAP":"SHARK GAP 🦈",x+o.w/2,BASE+44);}
+  if(o.t==="box"){const e=o.wr*2+o.top;g.fillStyle="#7a4a24";g.beginPath();g.moveTo(x,BASE);g.lineTo(x+o.wr,BASE-o.h);g.lineTo(x+e-o.wr,BASE-o.h);g.lineTo(x+e,BASE);g.fill();
+   for(let k=x+o.wr+8;k<x+e-o.wr-20;k+=34){g.fillStyle="#5a3418";g.beginPath();g.roundRect(k,BASE-o.h+4,26,o.h-6,6);g.fill();g.strokeStyle="#c9a14a";g.lineWidth=2;g.beginPath();g.moveTo(k,BASE-o.h+12);g.lineTo(k+26,BASE-o.h+12);g.moveTo(k,BASE-12);g.lineTo(k+26,BASE-12);g.stroke();}}
+  if(o.t==="rail"){g.strokeStyle="#4a2e16";g.lineWidth=6;for(let k=0;k<=o.w;k+=Math.max(60,o.w/4)){g.beginPath();g.moveTo(x+k,BASE);g.lineTo(x+k,BASE-o.h-4);g.stroke();}
+   if(night){g.strokeStyle="#d9dee6";g.lineWidth=6;g.beginPath();g.moveTo(x,BASE-o.h);g.lineTo(x+o.w,BASE-o.h);g.stroke();}
+   else{g.strokeStyle="#d8b47a";g.lineWidth=7;g.beginPath();g.moveTo(x,BASE-o.h);g.lineTo(x+o.w,BASE-o.h);g.stroke();g.strokeStyle="#8a6a3a";g.lineWidth=2;for(let k=0;k<o.w;k+=10){g.beginPath();g.moveTo(x+k,BASE-o.h-3);g.lineTo(x+k+6,BASE-o.h+3);g.stroke();}}}
+ }
+ for(const c of coins){if(c.got)continue;const x=c.x-cam,y=BASE-c.y;if(x<-30||x>W+30)continue;g.fillStyle="#f6d67a";g.beginPath();g.ellipse(x,y,10*Math.abs(Math.cos(t*3+c.x)),10,0,0,7);g.fill();}
+ // skater
+ const px=P.x-cam,py=BASE-P.y;g.save();g.translate(px,py);g.scale(1.3,1.3);
+ if(bailT>0){g.rotate((.9-bailT)*9);}
+ g.rotate(-P.spin*0+0);const flipScale=Math.cos(P.flip);
+ // board
+ g.save();g.translate(0,-6);g.scale(1,P.trick&&P.trick.k==="flip"?flipScale:1);g.fillStyle=P.col;g.beginPath();g.roundRect(-30,-4,60,8,4);g.fill();g.fillStyle="#222";g.beginPath();g.arc(-20,6,4,0,7);g.arc(20,6,4,0,7);g.fill();g.restore();
+ // body (spin turns the body)
+ const sc=P.trick&&P.trick.k==="spin"?Math.cos(P.spin*2):1;g.scale(sc===0?.05:sc,1);
+ const crouch=P.grabbing?14:P.air?6:0;
+ g.strokeStyle="#22354f";g.lineWidth=7;g.lineCap="round";g.beginPath();g.moveTo(-10,-12);g.lineTo(-6,-40+crouch);g.moveTo(10,-12);g.lineTo(6,-40+crouch);g.stroke();
+ g.fillStyle="#f4ead6";g.beginPath();g.roundRect(-12,-72+crouch,24,34,6);g.fill();g.fillStyle="#7a1f1f";g.fillRect(-12,-48+crouch,24,6);g.fillStyle="#2a1408";g.fillRect(-12,-72+crouch,6,34);
+ g.strokeStyle="#d8a47f";g.lineWidth=6;g.beginPath();if(P.grabbing){g.moveTo(10,-64+crouch);g.lineTo(18,-14);}else{g.moveTo(10,-64+crouch);g.lineTo(26,-74+crouch);}g.moveTo(-10,-64+crouch);g.lineTo(-26,-56+crouch);g.stroke();
+ g.fillStyle="#d8a47f";g.beginPath();g.arc(0,-84+crouch,11,0,7);g.fill();g.fillStyle="#1a1210";g.beginPath();g.moveTo(-20,-90+crouch);g.quadraticCurveTo(0,-112+crouch,20,-90+crouch);g.quadraticCurveTo(0,-96+crouch,-20,-90+crouch);g.fill();g.fillStyle="#e8b84a";g.fillRect(-16,-93+crouch,32,2);g.fillStyle="#f4ead6";g.beginPath();g.arc(0,-99+crouch,3,0,7);g.fill();g.fillStyle="#111";g.fillRect(-2,-87+crouch,10,4);
+ g.restore();
+ // HUD
+ g.fillStyle="rgba(11,14,20,.6)";g.fillRect(0,0,W,62);g.fillStyle="#f6d67a";g.font="700 38px Pirata One,Georgia,serif";g.textAlign="left";g.fillText(`⏱ ${Math.ceil(Math.max(0,left))}`,18,45);g.textAlign="center";g.fillText(score.toLocaleString(),W/2,45);g.textAlign="right";g.fillText(`🪙 ${coinsGot}`,W-18,45);
+ if(combo.list.length){g.textAlign="center";g.fillStyle="#fff";g.font="700 34px Pirata One,Georgia,serif";g.fillText(`${Math.round(combo.pts).toLocaleString()} × ${mult()}`,W/2,104);g.font="24px Pirata One,Georgia,serif";g.fillStyle="#ffe7b0";const s=combo.list.slice(-3).join(" + ");g.fillText(s,W/2,136);}
+ if(P.grabbing){g.fillStyle="#7fe0e4";g.font="700 24px Pirata One,Georgia,serif";g.textAlign="center";g.fillText(P.grabName+"…",W/2,166);}
+ if(P.grind){g.fillStyle="#7fe0e4";g.font="700 24px Pirata One,Georgia,serif";g.textAlign="center";g.fillText("Rope Slide…",W/2,166);}
+ if(msg&&now-msgT<1400){g.fillStyle=msg.startsWith("BAIL")?"#ff8a6b":"#f6d67a";g.font="400 50px 'Pirata One',Georgia";g.textAlign="center";g.fillText(msg,W/2,BASE-226);}
+}
+
+/* ---------- loop ---------- */
+function loop(now){if(!run)return;const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);if(run)draw(now);requestAnimationFrame(loop);}
+function begin(){reset();run=true;$("ov").hidden=true;last=performance.now();say("Drop in!");requestAnimationFrame(loop);}
+function finish(){
+ run=false;const earned=Math.floor(score/400)+coinsGot,b=store.get("py_skate_best_"+lvl,0),nb=score>b;
+ if(nb)store.set("py_skate_best_"+lvl,score);store.set("py_skate_best",Math.max(score,store.get("py_skate_best",0)));store.set("py_skate_doub",store.get("py_skate_doub",0)+earned);infoLine();
+ $("ovT").textContent=nb?"New best session!":"Session over";
+ $("ovP").textContent=`Score ${score.toLocaleString()}. You picked up ${coinsGot} doubloons on the course and earned ${earned} in all. Spend them on new decks at Pippy's Surf & Skate Shack.`;
+ $("go").textContent="Skate again";$("ov").hidden=false;if(nb&&score>0)window.PY&&PY.celebrate&&PY.celebrate();
+}
+$("go").onclick=begin;
+
+/* ---------- sound ---------- */
+let ac=null;function sfx(k){const sb=document.getElementById("soundBtn");if(sb&&/off/.test(sb.textContent))return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const s=ac.currentTime,o=ac.createOscillator(),gn=ac.createGain();
+ const S={pop:[300,120,.12,.08,"square"],land:[120,60,.1,.1,"sine"],trick:[700,900,.1,.05,"triangle"],coin:[1200,1600,.12,.05,"triangle"],bail:[200,50,.5,.12,"sawtooth"],grind:[2400,2200,.08,.02,"sawtooth"],big:[523,1047,.5,.07,"triangle"]}[k];
+ o.type=S[4];o.frequency.setValueAtTime(S[0],s);o.frequency.exponentialRampToValueAtTime(S[1],s+S[2]);gn.gain.setValueAtTime(S[3],s);gn.gain.exponentialRampToValueAtTime(.0001,s+S[2]);o.connect(gn);gn.connect(ac.destination);o.start(s);o.stop(s+S[2]);}catch(e){}}
+
+// idle frame
+reset();draw(performance.now());
+})();
+</script>
+</body></html>

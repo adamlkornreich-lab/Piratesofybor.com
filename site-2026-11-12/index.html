@@ -1,0 +1,215 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Pirates of Ybor — Welcome Aboard</title>
+<meta name="description" content="The Pirates of Ybor: trivia, treasure hunt, pirate chess, Andy Golf Club, Shere's Revenge and tavern games from Gaspar's Grotto, Ybor City.">
+<link rel="stylesheet" href="assets/site.css"><style>
+/* Treasure Ship hero art. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+.ship-hero{position:relative;isolation:isolate;overflow:hidden;border-radius:14px;border:3px solid #6b4b12;box-shadow:0 0 0 3px #15151a,0 0 0 4px rgba(217,169,68,.5),0 18px 40px rgba(0,0,0,.7);
+  min-height:clamp(380px,56vw,600px);display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:clamp(22px,4vw,44px) 16px 20px;margin:0 0 22px;
+  background:#06121b url("assets/pirates-of-ybor-treasure-ship.jpg") center 55%/cover no-repeat;
+  background-image:image-set(url("assets/pirates-of-ybor-treasure-ship.webp") type("image/webp"),url("assets/pirates-of-ybor-treasure-ship.jpg") type("image/jpeg"))}
+.ship-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,10,16,.80) 0%,rgba(4,10,16,.42) 34%,rgba(4,10,16,.04) 58%,rgba(4,10,16,.55) 100%)}
+.ship-hero .spacer{flex:1}
+.ship-hero p.lead{text-shadow:0 1px 3px #000,0 0 14px #000;color:#f3ead7}
+.ship-hero .row{position:relative}
+@media (max-width:640px){.ship-hero{min-height:0;background-size:150% auto;background-position:62% 100%;padding-bottom:66vw}
+.ship-hero::before{background:linear-gradient(180deg,rgba(4,10,16,.92) 0%,rgba(4,10,16,.92) calc(100% - 92vw),rgba(4,10,16,0) calc(100% - 60vw),rgba(4,10,16,0) 100%)}}
+/* Opening cinematic */
+#opening{position:fixed;inset:0;z-index:300;background:#020409;display:grid;place-items:center;overflow:hidden;transition:opacity .9s}
+#opening.out{opacity:0;pointer-events:none}
+#opening canvas{position:absolute;inset:0;width:100%;height:100%}
+#opening .gatebox{position:relative;text-align:center;padding:20px;max-width:560px}
+#opening .gatebox h2{font:700 clamp(2rem,8vw,3.6rem)/1.05 Georgia,serif;color:#f6d67a;margin:0 0 6px;text-shadow:0 3px 0 #3a2a08,0 0 30px rgba(0,0,0,.9)}
+#opening .gatebox p{color:#e9dfc8;margin:0 0 18px;text-shadow:0 1px 4px #000}
+#opening .btn{font-size:1.15rem;padding:14px 26px}
+#opening .skip{position:absolute;right:14px;top:14px;z-index:2;background:rgba(0,0,0,.55);color:#f3ead7;border:1px solid #6b4b12;border-radius:8px;padding:10px 14px;font:600 .95rem Georgia,serif;cursor:pointer;min-height:44px}
+#opening.auto .gatebox{position:absolute;left:0;right:0;bottom:12%;margin:0 auto}
+#opening.auto .gatebox h2,#opening.auto .gatebox p{display:none}
+#opening .quiet{display:block;margin:14px auto 0;background:none;border:0;color:#cfc6b2;text-decoration:underline;font:1rem Georgia,serif;cursor:pointer;min-height:44px}
+.replay{background:none;border:0;color:var(--gold2,#f6d67a);text-decoration:underline;font:1rem Georgia,serif;cursor:pointer;margin-top:10px;min-height:44px}
+</style>
+</head>
+<body data-beats-manual>
+<div id="opening" role="dialog" aria-modal="true" aria-label="Opening">
+  <canvas id="opCv" aria-hidden="true"></canvas>
+  <button class="skip" id="opSkip" type="button" hidden>Skip ▸</button>
+  <div class="gatebox" id="opGate">
+    <h2>The Pirates of Ybor</h2>
+    <p>Gaspar's Grotto presents. Turn your sound up: DJ Josh Bouche is on the decks.</p>
+    <button class="btn" id="opGo" type="button">⚓ Set sail with sound</button>
+    <button class="quiet" id="opQuiet" type="button">Enter with no music</button>
+  </div>
+</div>
+<main class="wrap">
+  <section class="hero">
+    <div class="ship-hero" role="img" aria-label="Pirates of Ybor treasure ship: a black-sailed pirate ship in a storm with a glowing treasure chest">
+    <span class="kick">Gaspar's Grotto presents · Battle Stations</span>
+    <h1>The Pirates of Ybor</h1>
+    <p class="lead">Welcome aboard a warship. Iron, brass and blood-red sails: crosswords, chess, sword fights, tavern games and a whole island to wander, from Gaspar's Grotto on 7th Avenue. The Iron Gaspar fires a broadside for every pirate who sails close. Pops and Pippy saved you a seat. Every game is unlocked and free to play.</p>
+    <div class="spacer"></div>
+    <div class="row" style="justify-content:center">
+      <a class="btn" href="arcade.html">⚔ Enter the Arcade</a>
+      <a class="btn ghost" href="world.html">🏝 Explore the Open World</a>
+      <a class="btn rum" href="plank-bar.html">🍻 Book the Plank Bar</a>
+      <a class="btn ghost" href="movie.html">🎬 Watch the Movie</a>
+    </div>
+    </div>
+    <div id="heroArt"></div>
+    <button class="replay" id="opReplay" type="button">🎬 Replay the opening</button>
+  </section>
+
+  <section>
+    <h2>Choose your adventure</h2>
+    <div class="grid">
+      <a class="card" href="shop.html"><div class="icon">🪙</div><h3>Doubloon Shop</h3><p>Every win pays doubloons. Spend them on new arena challengers, crosshair skins and how your doubloons rain. New!</p></a>
+      <a class="card" href="arena.html"><div class="icon">🎯</div><h3>Alonso Arena Showdown</h3><p>Light-gun duels in the arena on Danny Alonso Island. One on one or one against two, with a jumbotron, cinematic knockouts, controller and light-gun support. New!</p></a>
+      <a class="card" href="club.html"><div class="icon">🎧</div><h3>Flex Grotto</h3><p>Josh Bouche &amp; Lita's club. DJ Josh Bouche mixes East Coast, West Coast, Miami Bass, Dubstep and Rave live, with an underground rave below, with a laser show on both floors. Drop the bass and rock the floor. 21+. New!</p></a>
+      <a class="card" href="parrot.html"><div class="icon">🦜</div><h3>Capitán Loro's Trivia</h3><p>A talking parrot reads every question aloud and squawks back in English and Spanish. Cannons, coins and a sea shanty. New!</p></a>
+      <a class="card" href="trivia.html"><div class="icon">🧠</div><h3>Pirate Trivia</h3><p>Tampa, Ybor, Florida, the USA, movies and Gaspar's Grotto. Fresh questions every round.</p></a>
+      <a class="card" href="treasure.html"><div class="icon">💰</div><h3>Treasure Hunt</h3><p>Dig the island grid for Gaspar's lost chest before your shovels run out.</p></a>
+      <a class="card" href="chess.html"><div class="icon">♞</div><h3>Pirate Chess</h3><p>Play the ship's AI or a mate beside you. Dedicated to the next chess master.</p></a>
+      <a class="card" href="golf.html"><div class="icon">⛳</div><h3>Andy Golf Club</h3><p>Starring Andy Seavey. Nine pirate holes with an island green, sand, water and wind, plus TV-style commentary.</p></a>
+      <a class="card" href="swashbuckle.html"><div class="icon">⚔</div><h3>Shere's Revenge</h3><p>Swashbuckling sword duels — parry, strike and claim the deck.</p></a>
+      <a class="card" href="crossword.html"><div class="icon">✒</div><h3>Laura &amp; Dom's Crossword</h3><p>Endless voyages, a daily puzzle, and stamps and crowns to collect.</p></a>
+      <a class="card" href="jen.html"><div class="icon">📋</div><h3>Jen Runs the Ship</h3><p>The owners left town. Keep the bar afloat through five days of manager jobs.</p></a>
+      <a class="card" href="ledger.html"><div class="icon">📒</div><h3>The Schiller Ledger</h3><p>Learn real accounting by keeping a pirate tavern's books.</p></a>
+      <a class="card" href="armwrestle.html"><div class="icon">💪</div><h3>Ronnie &amp; Joe's Arm Wrestling</h3><p>On 7th Ave next to Acropolis. Beat them both, fill your Ybor Night Pass, and come see us at Gaspar's Grotto.</p></a>
+      <a class="card" href="guitar.html"><div class="icon">🎸</div><h3>Rene's Guitar School</h3><p>Learn the strings and seven chords, then play your first song. A tribute to Rene.</p></a>
+      <a class="card" href="acropolis.html"><div class="icon">🐉</div><h3>The Dragon Table at Acropolis</h3><p>Landon, Steph and Roger roll dice through the tunnels under 7th Ave to a dragon's hoard.</p></a>
+      <a class="card" href="mixology.html"><div class="icon">🍹</div><h3>Mixology Duel</h3><p>Hold a bottle, pour to the line, serve into a Gaspar's glass. Take on Landon or Stephania.</p></a>
+      <a class="card" href="ashlee-crossword.html"><div class="icon">🧩</div><h3>Ashlee Rae's Crosswords</h3><p>Ybor Nights, High Seas, Silver Screen and The Gallery.</p></a>
+      <a class="card" href="tire-toss.html"><div class="icon">🏈</div><h3>Ashlee Rae's Tire Toss</h3><p>Thread a football through the swinging tire. Five in a row for a bonus.</p></a>
+      <a class="card" href="pool.html"><div class="icon">🎱</div><h3>Pirate Pool</h3><p>Eight-ball in the hall on Danny Alonso Island. Sink your group, then the eight.</p></a>
+      <a class="card" href="bingo.html"><div class="icon">🔔</div><h3>Pirate Bingo</h3><p>Eyes down. Beat Pops, Pippy and Landon to the bell for doubloons.</p></a>
+      <a class="card" href="skate.html"><div class="icon">🛹</div><h3>Skate the Grotto</h3><p>Pirate skateboarding on Gaspar's Docks and 7th Ave. Chain tricks, land clean, bank the combo.</p></a>
+      <a class="card" href="surfshop.html"><div class="icon">🏄</div><h3>Pippy's Surf &amp; Skate Shack</h3><p>New decks and surfboards on Danny Alonso Island.</p></a>
+      <a class="card" href="camp.html"><div class="icon">🏕</div><h3>Camp Akiba</h3><p>Pull up a log at the campfire with the best friends in your life. Bracelets, camp letters and marshmallows.</p></a>
+      <a class="card" href="travel.html"><div class="icon">🏝</div><h3>Danny Alonso Island</h3><p>Resort villas and a travel guide to Rincón, Valparaíso and Santiago.</p></a>
+      <a class="card" href="world.html"><div class="icon">🗺</div><h3>Ybor Cay</h3><p>The 3D pirate island, now at battle stations. Pops and Pippy follow you, the rain rolls in, parrots of every color squawk pirate talk in English and Spanish, the Vanicular streetcar rides La Séptima, and every game is a place you can walk into.</p></a>
+      <a class="card" href="arcade.html"><div class="icon">🍺</div><h3>Tavern Games</h3><p>Cup Pong, Flip Cup, Shuffleboard, Pirate Darts, Pool, Bingo and the Mixology Duel.</p></a>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>🔓 Every game unlocked</h2>
+    <p>Every game, every arena challenger and every skin is open to everyone, on every page, with nothing to buy. Pick a game and play. All Access membership ($1.00 / year plus tax and processing fees) arrives later with the App Store and Google Play release, for tournaments and online matchmaking.</p>
+  </section>
+
+  <section>
+    <h2>Around the Ship</h2>
+    <div class="grid">
+      <a class="card" href="movie.html"><div class="icon">🎬</div><h3>The Movie</h3><p>Sixty minutes of 3D: Pops &amp; Pippy, the Grotto, Waldo's paintings, the store, every game and the islands.</p></a>
+      <a class="card" href="card.html"><div class="icon">🎟</div><h3>Crew Member Card</h3><p>Your crew card with a scannable QR and crew number. Save it to your phone for perks at Gaspar's Grotto.</p></a>
+      <a class="card" href="crew.html"><div class="icon">🏴‍☠️</div><h3>The Crew</h3><p>Captains, navigators, artists and partners who built this ship.</p></a>
+      <a class="card" href="merch.html"><div class="icon">👕</div><h3>Merch Store</h3><p>Gaspar's Grotto and Ybor City pirate gear and branded glassware.</p></a>
+      <a class="card" href="plank-bar.html"><div class="icon">🍹</div><h3>Plank Bar &amp; Events</h3><p>Book the VIP Plank Bar experience or build your own event with famous artists and DJs.</p></a>
+      <a class="card" href="station.html"><div class="icon">🚓</div><h3>Police Station &amp; Hospital</h3><p>Captain College keeps Ybor Cay safe, and Rani patches up every pirate back from the reef.</p></a>
+      <a class="card" href="legal.html"><div class="icon">📜</div><h3>Legal &amp; Privacy</h3><p>Copyright, likeness permissions and the no-endorsement notice.</p></a>
+    </div>
+  </section>
+</main>
+<script src="assets/beats.js"></script>
+<script>
+/* Opening cinematic: storm, treasure ship, title, then the beat drops. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+(function(){
+  var el=document.getElementById("opening"),cv=document.getElementById("opCv"),g=cv.getContext("2d"),B=window.PoyBeats;
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var img=new Image();img.src="assets/pirates-of-ybor-treasure-ship.jpg";
+  var pp=new Image();pp.src="assets/pops-pippy-official.jpg";var wp=new Image();wp.src="assets/waldo-painting.jpg";
+  var pp2=new Image();pp2.src="assets/crew/pops-pippy-poster-2.jpg";var pir=new Image();pir.src="assets/crew/pirate.jpg";var jz=new Image();jz.src="assets/crew/jazz-1.jpg";
+  /* The picture starts rolling by itself. Browsers only allow sound after a tap, so the sound button rides along. */
+  var sound=false,auto=!reduce;
+  var W=0,H=0,t0=0,playing=false,done=false,raf=0,rain=[],sparks=[],bolt=0,bolts=[1.1,3.2,5.95,11,13.5,16,18.5],fired=[],dropped=false,LEN=22;
+  /* The opening plays every time the home page loads. */
+  document.body.setAttribute("data-beats-manual","");
+  function fit(){var d=Math.min(2,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0);}
+  function cover(img,z,fx,fy){if(!img.complete||!img.naturalWidth)return;var s=Math.max(W/img.naturalWidth,H/img.naturalHeight)*z,w=img.naturalWidth*s,h=img.naturalHeight*s;
+    var x=W/2-w*fx,y=H/2-h*fy;x=Math.min(0,Math.max(W-w,x));y=Math.min(0,Math.max(H-h,y));g.imageSmoothingQuality="high";g.drawImage(img,x,y,w,h);return{x:x,y:y,w:w,h:h};}
+  function text(t,y,size,a,col,sp){if(a<=0)return;g.save();g.globalAlpha=Math.min(1,a);g.font="700 "+size+"px Georgia,serif";g.textAlign="center";g.shadowColor="#000";g.shadowBlur=18;g.fillStyle=col||"#f3ead7";
+    if(sp){try{g.letterSpacing=sp+"px";}catch(e){}}g.fillText(t,W/2,y);g.restore();}
+  function fade(t,a,b,c,d){return t<a?0:t<b?(t-a)/(b-a):t<c?1:t<d?1-(t-c)/(d-c):0;}
+  function draw(ts){
+    if(done)return;raf=requestAnimationFrame(draw);
+    var t=playing?(ts-t0)/1000:0,k=Math.min(1,t/LEN),e=k*k*(3-2*k);
+    g.fillStyle="#020409";g.fillRect(0,0,W,H);
+    var r=null;
+    if(!playing||t<3.2){cover(img,1.06+Math.min(1,t/3.2)*.12,.5,.5);}
+    else if(t<6){var a1=(t-3.2)/2.8;cover(pp2,1.02+a1*.14,.5,.42+a1*.1);}
+    else if(t<11){var a2=(t-6)/5,e2=a2*a2*(3-2*a2);r=cover(img,1.1+e2*.5,.5+e2*.16,.5+e2*.2);}
+    else if(t<13.5){var a5=(t-11)/2.5;cover(pir,1.05+a5*.18,.5,.22+a5*.12);}
+    else if(t<16){var a6=(t-13.5)/2.5;cover(jz,1.04+a6*.16,.4+a6*.12,.45);}
+    else if(t<18.5){var a3=(t-16)/2.5;cover(wp,1.04+a3*.14,.45+a3*.1,.5);}
+    else{var a4=Math.min(1,(t-18.5)/3.5);cover(pp,1.3-a4*.2,.5,.3+a4*.1);}
+    /* storm tint */
+    /* Darker pirate grade: deep shadow, blood-red multiply, film grain. */
+    g.fillStyle="rgba(3,5,10,"+(playing?.5:.68)+")";g.fillRect(0,0,W,H);
+    g.save();g.globalCompositeOperation="multiply";g.fillStyle="rgba(150,60,50,.55)";g.fillRect(0,0,W,H);g.restore();
+    if(playing&&!reduce){g.save();g.globalAlpha=.07;for(var gi=0;gi<70;gi++){g.fillStyle=gi%2?"#fff":"#000";g.fillRect(Math.random()*W,Math.random()*H,2,2);}g.restore();}
+    if(playing&&!reduce){
+      /* fog */
+      for(var f=0;f<3;f++){var fx=((t*18*(f+1))%(W+600))-300,gr=g.createRadialGradient(fx,H*(.55+f*.12),10,fx,H*(.55+f*.12),W*.45);gr.addColorStop(0,"rgba(150,170,190,.10)");gr.addColorStop(1,"rgba(150,170,190,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);}
+      /* rain */
+      if(rain.length<160)for(var i=rain.length;i<160;i++)rain.push([Math.random()*W*1.3,Math.random()*H,9+Math.random()*12]);
+      g.strokeStyle="rgba(190,210,230,.35)";g.lineWidth=1;g.beginPath();rain.forEach(function(d){d[0]-=d[2]*.35;d[1]+=d[2];if(d[1]>H){d[1]=-20;d[0]=Math.random()*W*1.3;}g.moveTo(d[0],d[1]);g.lineTo(d[0]+d[2]*.4,d[1]-d[2]*1.3);});g.stroke();
+      /* gold rising from the chest */
+      if(r&&t>6.5){var cx=r.x+r.w*.72,cy=r.y+r.h*.8;if(sparks.length<70)sparks.push([cx+(Math.random()-.5)*r.w*.12,cy,(Math.random()-.5)*.8,-1-Math.random()*2,1]);
+        g.save();g.globalCompositeOperation="lighter";sparks.forEach(function(s){s[0]+=s[2];s[1]+=s[3];s[4]-=.012;g.fillStyle="rgba(255,214,110,"+Math.max(0,s[4])+")";g.beginPath();g.arc(s[0],s[1],1.6+s[4]*2,0,7);g.fill();});g.restore();sparks=sparks.filter(function(s){return s[4]>0;});
+        var cg=g.createRadialGradient(cx,cy,4,cx,cy,r.w*.2);cg.addColorStop(0,"rgba(255,200,90,"+(.25+.2*Math.sin(t*5))+")");cg.addColorStop(1,"rgba(255,200,90,0)");g.fillStyle=cg;g.fillRect(0,0,W,H);}
+      /* lightning */
+      bolts.forEach(function(b,i){if(t>=b&&!fired[i]){fired[i]=1;bolt=1;if(B&&sound)B.fx("thunder");}});
+      if(bolt>0){g.fillStyle="rgba(220,235,255,"+bolt*.5+")";g.fillRect(0,0,W,H);bolt-=.06;}
+    }
+    /* vignette and letterbox */
+    var v=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.75);v.addColorStop(0,"rgba(0,0,0,.12)");v.addColorStop(1,"rgba(0,0,0,.94)");g.fillStyle=v;g.fillRect(0,0,W,H);
+    if(playing){var lb=H*.09;g.fillStyle="#000";g.fillRect(0,0,W,lb);g.fillRect(0,H-lb,W,lb);
+      var s=Math.min(W,900)/900,big=Math.max(30,74*s),mid=Math.max(16,26*s);
+      text("GASPAR'S GROTTO PRESENTS",H*.3,mid,fade(t,.4,1.2,2.6,3.2),"#e9dfc8",4);
+      text("A Pops & Pippy adventure",H*.3,mid*1.25,fade(t,3.3,4,5.3,5.8),"#f6d67a");
+      if(t>=6&&t<11){if(!dropped){dropped=true;if(B&&sound){B.start(B.pref()==="off"?"east":undefined,false);B.fx("crash");}}
+        var p=Math.min(1,(t-6)/.35),sc=1+(1-p)*.6;g.save();g.translate(W/2,H*.36);g.scale(sc,sc);g.translate(-W/2,-H*.36);
+        if(W<560){text("THE PIRATES",H*.32,big,p,"#f6d67a");text("OF YBOR",H*.32+big*1.05,big,p,"#f6d67a");}else text("THE PIRATES OF YBOR",H*.38,big,p,"#f6d67a");g.restore();
+        text("East Coast · West Coast · Miami Bass · Dubstep · Rave",H*(W<560?.52:.48),Math.max(13,mid*.8),fade(t,7.2,7.9,10.3,10.9),"#e9dfc8");
+        text("DJ Josh Bouche on the decks",H*(W<560?.57:.54),Math.max(13,mid*.8),fade(t,8.1,8.8,10.3,10.9),"#ff9a8a");}
+      text("THE CREW SAILS TONIGHT",H*.82,mid*1.2,fade(t,11.2,11.8,13,13.4),"#f6d67a",3);
+      text("Gaspar's Grotto · 7th Avenue, Ybor City",H*.82,mid*1.05,fade(t,13.7,14.3,15.5,15.9),"#f6d67a");
+      text("Paintings by Waldo Nahuel",H*.3,mid*1.15,fade(t,16.2,16.8,18,18.4),"#f6d67a");
+      text("EVERY GAME UNLOCKED",H*.3,mid*1.35,fade(t,18.7,19.2,LEN,LEN+1),"#f6d67a",3);
+      text("Free to play. Pops & Pippy saved you a seat.",H*.3+mid*2,Math.max(13,mid*.8),fade(t,19.3,19.9,LEN,LEN+1),"#e9dfc8");
+      if(t>=LEN)finish();
+    }
+  }
+  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);
+    document.body.removeAttribute("data-beats-manual");el.classList.add("out");setTimeout(function(){el.style.display="none";},950);
+    if(auto&&!sound&&B){var go=function(){document.removeEventListener("pointerdown",go,true);if(!B.isOn()&&B.pref()!=="off")B.start(undefined,false);};document.addEventListener("pointerdown",go,true);}
+    var f=document.querySelector(".ship-hero .btn");if(f)try{f.focus({preventScroll:true});}catch(e){}}
+  function roll(){el.classList.add("auto");document.getElementById("opGo").textContent="🔊 Tap for sound";document.getElementById("opQuiet").textContent="Skip the opening";
+    document.getElementById("opSkip").hidden=false;sound=false;playing=true;t0=performance.now();fired=[];dropped=false;sparks=[];}
+  function play(music){
+    if(auto&&playing){
+      if(!music){finish();return;}
+      sound=true;document.getElementById("opGate").style.display="none";
+      if(B){if(B.pref()==="off"){try{localStorage.setItem("py_beat","east");}catch(e){}}
+        if((performance.now()-t0)/1000>=6){dropped=true;B.start(B.pref()==="off"?"east":undefined,false);B.fx("crash");}else B.fx("riser");}
+      return;}
+    sound=!!music;
+    document.getElementById("opGate").style.display="none";document.getElementById("opSkip").hidden=false;
+    if(!music){if(B)B.stop();finish();return;}
+    if(B){if(B.pref()==="off"){try{localStorage.setItem("py_beat","east");}catch(e){}}B.fx("riser");}
+    if(reduce){if(B)B.start(B.pref()==="off"?"east":undefined,false);finish();return;}
+    playing=true;t0=performance.now();fired=[];dropped=false;sparks=[];
+  }
+  function open(){done=false;playing=false;el.style.display="";el.classList.remove("out");document.getElementById("opGate").style.display="";document.getElementById("opSkip").hidden=true;
+    document.body.setAttribute("data-beats-manual","");fit();raf=requestAnimationFrame(draw);if(auto)roll();}
+  document.getElementById("opGo").addEventListener("click",function(){play(true);});
+  document.getElementById("opQuiet").addEventListener("click",function(){play(false);});
+  document.getElementById("opSkip").addEventListener("click",function(){if(B&&!B.isOn())B.start(B.pref()==="off"?"east":undefined,false);finish();});
+  document.getElementById("opReplay").addEventListener("click",function(){if(B)B.stop(false);open();});
+  window.addEventListener("resize",function(){if(!done)fit();});
+  fit();raf=requestAnimationFrame(draw);if(auto)roll();
+})();
+</script>
+<script src="assets/site.js"></script>
+</body></html>
+
+</body></html>

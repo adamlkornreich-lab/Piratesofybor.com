@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doubloon Shop — The Pirates of Ybor</title>
+<meta name="description" content="Spend the doubloons you win in any Pirates of Ybor game on arena challengers, crosshair skins and doubloon rain styles.">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Doubloon Shop. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+.purse{display:inline-block;font:700 1.6rem Georgia,serif;color:var(--gold2,#f6d67a);border:2px solid #d9a944;border-radius:999px;padding:8px 22px;background:#17181d;margin:6px 0 10px}
+.shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.item{background:#17181d;border:1px solid rgba(217,169,68,.45);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.item .ic{font-size:2.2rem}.item h3{margin:0;color:var(--gold2,#f6d67a);font-size:1.1rem}.item p{margin:0;color:var(--fog,#c9c2b4);font-size:.93rem;flex:1}
+.item .price{color:#ffd35a;font-weight:700}
+.item button{font:700 1rem Georgia,serif;min-height:44px;border-radius:10px;border:2px solid #f6d67a;background:linear-gradient(180deg,#f0c860,#b9872a);color:#15100a;cursor:pointer;padding:8px 12px}
+.item button.owned{background:#22242c;color:#f3ead7;border-color:#6b4b12}.item button.on{background:#1f6b4a;color:#fff;border-color:#8cff3c}
+.item button:disabled{opacity:.5;cursor:not-allowed}
+.note{background:#17181d;border:1px dashed rgba(217,169,68,.6);border-radius:12px;padding:14px 16px;color:var(--fog,#c9c2b4)}
+h2{margin-top:30px}
+</style></head>
+<body>
+<main class="wrap">
+  <section class="hero"><span class="kick">Spend what you win</span><h1>🪙 Doubloon Shop</h1>
+    <p class="lead">Every win in every game pays doubloons into one purse. Spend them here on new arena challengers, crosshair skins and the way your doubloons rain.</p>
+    <div class="purse" id="purse" aria-live="polite">🪙 0</div>
+  </section>
+  <section><h2>New characters</h2><div class="shop" id="chars"></div></section>
+  <section><h2>Skins</h2><div class="shop" id="skins"></div></section>
+  <section><h2>Doubloon packs</h2>
+    <p class="note" id="payNote"></p>
+    <div class="shop" id="packs"></div>
+  </section>
+</main>
+<script src="assets/store-config.js"></script>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+  var CHARS=[["char-sable","🗡","Sable","A new arena challenger in black and silver. Fast on the draw.",300],["char-tiago","🔥","Tiago","A new arena challenger in ember red and gold.",300],["char-wren","🌊","Wren","A new arena challenger in sea green. Loves the far crates.",300]];
+  var SKINS=[["cross","cross-gold","🎯","Gold crosshair","Solid gold sights in the Alonso Arena.",150],["cross","cross-neon","💠","Neon crosshair","Miami-pink and teal sights in the Alonso Arena.",150],["rain","rain-gems","💎","Gem rain","Diamonds fall with your doubloons when you win.",200],["rain","rain-skulls","🏴‍☠️","Jolly Roger rain","Flags and skulls fall with your doubloons when you win.",200]];
+  function $(i){return document.getElementById(i);}
+  function draw(){
+    $("purse").textContent="🪙 "+PY.doubloons()+" doubloons";var own=PY.owned();
+    $("chars").innerHTML=CHARS.map(function(c){var has=own.indexOf(c[0])>=0;return '<div class="item"><div class="ic">'+c[1]+'</div><h3>'+c[2]+'</h3><p>'+c[3]+'</p><div class="price">'+(has?"🔓 Unlocked":"🪙 "+c[4])+'</div><button type="button" data-buy="'+c[0]+'" data-cost="'+c[4]+'"'+(has?' class="owned" disabled':'')+'>'+(has?"In your arena roster":"Buy")+'</button></div>';}).join("");
+    $("skins").innerHTML=SKINS.map(function(k){var has=own.indexOf(k[1])>=0,on=PY.equipped(k[0])===k[1];return '<div class="item"><div class="ic">'+k[2]+'</div><h3>'+k[3]+'</h3><p>'+k[4]+'</p><div class="price">'+(has?"🔓 Unlocked":"🪙 "+k[5])+'</div><button type="button" '+(has?'data-equip="'+k[1]+'" data-slot="'+k[0]+'" class="'+(on?"on":"owned")+'"':'data-buy="'+k[1]+'" data-cost="'+k[5]+'"')+'>'+(has?(on?"Equipped · tap to take off":"Equip"):"Buy")+'</button></div>';}).join("");
+    var cfg=window.POY_STORE||{packs:[]},live=!!cfg.cardPaymentsOn;
+    $("payNote").textContent=live?"Card payments are handled by Stripe. Doubloons are added to your purse once the payment is confirmed.":"Card payments are not switched on yet, so nothing here can charge you. For now, doubloons are earned by winning games.";
+    $("packs").innerHTML=(cfg.packs||[]).map(function(p){var ok=live&&p.stripeLink;return '<div class="item"><div class="ic">💰</div><h3>'+p.doubloons+' doubloons</h3><p>A chest of doubloons for the shop.</p><div class="price">'+p.price+'</div>'+(ok?'<a class="btn" href="'+p.stripeLink+'">Buy with card</a>':'<button type="button" disabled>Not available yet</button>')+'</div>';}).join("");
+  }
+  document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("button[data-buy],button[data-equip]");if(!b)return;
+    if(b.dataset.buy){var cost=+b.dataset.cost;if(!PY.spend(cost)){b.textContent="Need "+(cost-PY.doubloons())+" more";setTimeout(draw,1400);return;}PY.own(b.dataset.buy);if(PY.coin)PY.coin();}
+    else{var s=b.dataset.slot,id=b.dataset.equip;PY.equip(s,PY.equipped(s)===id?"":id);}
+    draw();});
+  draw();
+  /* Back from Stripe: ask the claim server to confirm the payment, then pay the doubloons in once. */
+  (function(){var q=new URLSearchParams(location.search),sid=q.get("session_id"),cfg=window.POY_STORE||{};if(!sid||!cfg.claimUrl)return;
+    try{history.replaceState(null,"",location.pathname);}catch(e){}
+    var done=[];try{done=JSON.parse(localStorage.getItem("py_claimed")||"[]");}catch(e){}
+    var note=$("payNote");if(done.indexOf(sid)>=0){note.textContent="That purchase is already in your purse.";return;}
+    note.textContent="Checking your payment with Stripe…";
+    fetch(cfg.claimUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:sid})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(j.ok){done.push(sid);try{localStorage.setItem("py_claimed",JSON.stringify(done));}catch(e){}PY.celebrate(j.doubloons);draw();note.textContent="Payment confirmed: "+j.doubloons+" doubloons added to your purse. Thank you!";}
+        else{note.textContent={already_claimed:"That purchase was already added to a purse.",not_paid:"Stripe hasn't confirmed this payment yet. Refresh in a minute.",payments_not_configured:"Card payments aren't switched on yet, so nothing was charged here."}[j.error]||"We couldn't confirm that payment. Email adamlkornreich@gmail.com with your Stripe receipt and we'll sort it out.";}
+      }).catch(function(){note.textContent="We couldn't reach the payment server. Refresh this page to try again.";});
+  })();
+})();
+</script>
+</body></html>
