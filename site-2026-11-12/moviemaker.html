@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Movie Maker — The Pirates of Ybor</title>
+<meta name="description" content="Direct your own Pirates of Ybor movie from the site's real Gaspar's Grotto clips and pictures, or your own photos and videos, with captions, cinematic looks and DJ Josh Bouche's music.">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Movie Maker. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+.mm{display:grid;grid-template-columns:1fr;gap:18px}@media(min-width:900px){.mm{grid-template-columns:1fr 1.2fr}}
+.box{background:#17181d;border:1px solid rgba(217,169,68,.45);border-radius:12px;padding:16px}
+.box h2{margin:0 0 4px;color:var(--gold2,#f6d67a);font-size:1.3rem}.box p.s{margin:0 0 12px;color:var(--fog,#c9c2b4);font-size:.93rem}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.lib button{position:relative;padding:0;border:2px solid #2a2c35;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:1;cursor:pointer}
+.lib button:hover,.lib button:focus-visible{border-color:#f6d67a}
+.lib img,.lib video{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.85)}
+.lib .tag{position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.7);color:#fff;font:600 .7rem system-ui,sans-serif;padding:2px 6px;border-radius:6px}
+.lib .plus{position:absolute;right:4px;top:4px;background:#d9a944;color:#15100a;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;font-weight:700}
+.up{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.up label{cursor:pointer}
+.tl{display:flex;flex-direction:column;gap:8px;min-height:80px}
+.shot{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;background:#101116;border:1px solid #2a2c35;border-radius:10px;padding:8px}
+.shot .th{width:64px;height:64px;border-radius:8px;overflow:hidden;background:#000}.shot .th img,.shot .th video{width:100%;height:100%;object-fit:cover}
+.shot .f{display:grid;gap:6px}.shot input[type=text]{width:100%;min-height:36px;border-radius:8px;border:1px solid #3a3c45;background:#0b0c10;color:#f3ead7;padding:4px 8px;font:inherit}
+.shot .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:#c9c2b4}
+.shot select{min-height:34px;border-radius:8px;border:1px solid #3a3c45;background:#0b0c10;color:#f3ead7;padding:2px 6px}
+.shot .ctl{display:flex;flex-direction:column;gap:4px}.shot .ctl button{min-width:40px;min-height:34px;border-radius:8px;border:1px solid #3a3c45;background:#22242c;color:#f3ead7;cursor:pointer}
+.empty{color:#8f887a;text-align:center;padding:20px;border:1px dashed #3a3c45;border-radius:10px}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
+.set label{display:grid;gap:4px;font-size:.88rem;color:#c9c2b4}.set input,.set select{min-height:40px;border-radius:8px;border:1px solid #3a3c45;background:#0b0c10;color:#f3ead7;padding:4px 8px;font:inherit}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.acts .btn{min-height:46px}
+.msg{min-height:1.4em;color:#f6d67a;margin:8px 0 0}
+</style></head>
+<body data-no-cine data-beats-manual>
+<main class="wrap">
+  <section class="hero"><span class="kick">Lights, camera, plunder</span><h1>🎬 Movie Maker</h1>
+    <p class="lead">Direct your own Pirates of Ybor movie. Tap clips and pictures from Gaspar's Grotto, or add your own, write the captions, pick a look and a beat, and press Play.</p></section>
+  <div class="mm">
+    <section class="box"><h2>1 · Pick your shots</h2><p class="s">Real Gaspar's Grotto clips and pictures from the site. Tap one to add it to your movie.</p>
+      <div class="lib" id="lib"></div>
+      <div class="up"><label class="btn ghost" for="file">📷 Add your own photos or videos</label><input id="file" type="file" accept="image/*,video/*" multiple hidden><span class="s" style="color:#8f887a;font-size:.85rem">They stay on your device.</span></div>
+    </section>
+    <section class="box"><h2>2 · Direct it</h2><p class="s">Write a caption for each shot, set how long it runs and add an effect. Use the arrows to change the order.</p>
+      <div class="tl" id="tl"></div>
+      <div class="set">
+        <label>Movie title<input id="mTitle" type="text" maxlength="40" value="THE PIRATES OF YBOR"></label>
+        <label>Look<select id="mLook"><option value="dark">Dark pirate</option><option value="classic">Old film</option><option value="neon">Neon Miami</option></select></label>
+        <label>Music<select id="mBeat"><option value="dubstep">Dubstep</option><option value="miami">Miami Bass</option><option value="east">East Coast</option><option value="west">West Coast</option><option value="rave">Rave</option><option value="off">No music</option></select></label>
+      </div>
+      <div class="acts"><button class="btn" type="button" id="play">▶ Play my movie</button><button class="btn ghost" type="button" id="auto">🎲 Director's cut</button><button class="btn ghost" type="button" id="save">💾 Save</button><button class="btn ghost" type="button" id="clear">🗑 Start over</button></div>
+      <p class="msg" id="msg" aria-live="polite"></p>
+      <p class="s" style="margin-top:10px">Want the full story instead? <a href="movie.html">Watch The Pirates of Ybor: The Movie</a>.</p>
+    </section>
+  </div>
+</main>
+<script src="assets/beats.js"></script>
+<script src="assets/grotto-intro.js"></script>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);};
+  var LIB=[["vid","assets/clips/stage.mp4","Stage"],["vid","assets/clips/courtyard.mp4","Courtyard"],["vid","assets/clips/crew-pose-1.mp4","Crew"],["vid","assets/clips/crew-pose-2.mp4","Crew"],
+    ["img","assets/crew/jazz-1.jpg","Jazz night"],["img","assets/crew/jazz-2.jpg","Jazz night"],["img","assets/crew/grotto-crew.jpg","The crew"],["img","assets/crew/grotto-bar.jpg","The bar"],["img","assets/crew/pirate.jpg","Pirate"],
+    ["img","assets/pirates-of-ybor-treasure-ship.jpg","Treasure ship"],["img","assets/pops-pippy-official.jpg","Pops & Pippy"],["img","assets/crew/pops-pippy-poster-2.jpg","Legends poster"],["img","assets/crew/party.jpg","Party"],
+    ["img","assets/crew/pippy.jpg","Pippy"],["img","assets/crew/pippy-pool.jpg","Pippy"],["img","assets/waldo-painting.jpg","Waldo painting"],["img","assets/crew/studio.jpg","Waldo"]];
+  var own=[],shots=[],FX=[["","No effect"],["thunder","Thunder"],["flash","Flash cut"],["drop","Bass drop + title"]];
+  function media(k,src){return k==="vid"?'<video src="'+src+'" muted playsinline preload="metadata"></video>':'<img src="'+src+'" alt="" loading="lazy">';}
+  function drawLib(){$("lib").innerHTML=LIB.concat(own).map(function(m,i){return '<button type="button" data-add="'+i+'" aria-label="Add '+m[2]+'">'+media(m[0],m[1])+'<span class="tag">'+(m[0]==="vid"?"🎞 ":"")+m[2]+'</span><span class="plus">+</span></button>';}).join("");}
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  function drawTl(){var tl=$("tl");if(!shots.length){tl.innerHTML='<div class="empty">No shots yet. Tap clips or pictures on the left, or press 🎲 Director\'s cut.</div>';return;}
+    tl.innerHTML=shots.map(function(s,i){return '<div class="shot"><div class="th">'+media(s.k,s.src)+'</div><div class="f"><input type="text" maxlength="60" placeholder="Caption (optional)" value="'+esc(s.cap||"")+'" data-cap="'+i+'" aria-label="Caption for shot '+(i+1)+'"><div class="row"><label>Length <select data-d="'+i+'">'+[1.5,2,2.5,3,4,5].map(function(d){return '<option'+(d===s.d?" selected":"")+'>'+d+'</option>';}).join("")+'</select> s</label><label>Effect <select data-fx="'+i+'">'+FX.map(function(f){return '<option value="'+f[0]+'"'+(f[0]===(s.fx||"")?" selected":"")+'>'+f[1]+'</option>';}).join("")+'</select></label></div></div><div class="ctl"><button type="button" data-up="'+i+'" aria-label="Move up">▲</button><button type="button" data-dn="'+i+'" aria-label="Move down">▼</button><button type="button" data-rm="'+i+'" aria-label="Remove">✕</button></div></div>';}).join("");}
+  function add(m){shots.push({k:m[0],src:m[1],name:m[2],d:m[0]==="vid"?3:2.5,cap:"",fx:""});drawTl();say("Shot "+shots.length+" added: "+m[2]+".");}
+  function say(t){$("msg").textContent=t;}
+  $("lib").addEventListener("click",function(e){var b=e.target.closest("[data-add]");if(b)add(LIB.concat(own)[+b.dataset.add]);});
+  $("tl").addEventListener("input",function(e){var c=e.target.dataset.cap;if(c!==undefined)shots[+c].cap=e.target.value;});
+  $("tl").addEventListener("change",function(e){var d=e.target.dataset;if(d.d!==undefined)shots[+d.d].d=+e.target.value;if(d.fx!==undefined)shots[+d.fx].fx=e.target.value;});
+  $("tl").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var d=b.dataset,i;
+    if(d.up!==undefined&&(i=+d.up)>0){shots.splice(i-1,0,shots.splice(i,1)[0]);}
+    else if(d.dn!==undefined&&(i=+d.dn)<shots.length-1){shots.splice(i+1,0,shots.splice(i,1)[0]);}
+    else if(d.rm!==undefined)shots.splice(+d.rm,1);else return;drawTl();});
+  $("file").addEventListener("change",function(){[].forEach.call(this.files||[],function(f){var k=/^video\//.test(f.type)?"vid":"img";own.push([k,URL.createObjectURL(f),f.name.replace(/\.[^.]+$/,"").slice(0,18)||"Yours"]);});drawLib();say("Added "+(this.files||[]).length+" of your own. Tap them to put them in the movie.");this.value="";});
+  function build(){var title=$("mTitle").value.trim()||"THE PIRATES OF YBOR",hasTitle=false;
+    var out=shots.map(function(s,i){var z=i%2?[1.16,1.04]:[1.04,1.18];var o={k:s.k,src:s.src,d:s.d,z:z,p:[.5,.45,.5,.5]};if(s.cap){o.cap=s.cap;o.small=s.cap.length>22?1:0;}
+      if(s.fx==="drop"){o.fx="drop";o.gold=1;o.title=title;hasTitle=true;}else if(s.fx)o.fx=s.fx;return o;});
+    if(!hasTitle&&out.length){var last=out[out.length-1];last.title=title;last.gold=1;last.fx=last.fx||"drop";}
+    return out;}
+  $("play").addEventListener("click",function(){if(!shots.length){say("Add a few shots first, or press 🎲 Director's cut.");return;}
+    var beat=$("mBeat").value;var B=window.PoyBeats;if(beat==="off"&&B)B.stop(false);
+    PoyIntro.play({shots:build(),look:$("mLook").value,style:beat==="off"?undefined:beat,autoplay:beat!=="off",gateTitle:$("mTitle").value,gateSub:"Your movie, directed by you.",onDone:function(){say("That's a wrap. Change anything and play it again.");}});});
+  $("auto").addEventListener("click",function(){var pick=LIB.slice().sort(function(){return Math.random()-.5;}),vids=pick.filter(function(m){return m[0]==="vid";}).slice(0,3),imgs=pick.filter(function(m){return m[0]==="img";}).slice(0,4);
+    var caps=["After dark on 7th Avenue","The crew sails tonight","No quarter","Gaspar's Grotto","Every doubloon has a story",""];shots=[];
+    [imgs[0],vids[0],imgs[1],vids[1],imgs[2],vids[2],imgs[3]].forEach(function(m,i){if(!m)return;shots.push({k:m[0],src:m[1],name:m[2],d:m[0]==="vid"?2.6:2.2,cap:caps[i]||"",fx:i===2?"thunder":i===4?"flash":""});});
+    shots[shots.length-1].fx="drop";drawTl();say("Here's a director's cut. Change anything you like, then press Play.");});
+  $("save").addEventListener("click",function(){var keep=shots.filter(function(s){return !/^blob:/.test(s.src);});try{localStorage.setItem("py_movie",JSON.stringify({s:keep,t:$("mTitle").value,l:$("mLook").value,b:$("mBeat").value}));say("Saved on this device"+(keep.length<shots.length?" (your own uploads can't be saved, add them again next time)":"")+".");}catch(e){say("This browser won't save here.");}});
+  $("clear").addEventListener("click",function(){shots=[];drawTl();say("Fresh reel.");});
+  try{var sv=JSON.parse(localStorage.getItem("py_movie")||"null");if(sv){shots=sv.s||[];$("mTitle").value=sv.t||$("mTitle").value;$("mLook").value=sv.l||"dark";$("mBeat").value=sv.b||"dubstep";}}catch(e){}
+  drawLib();drawTl();
+})();
+</script>
+</body></html>

@@ -10,7 +10,7 @@ export function startClub3D(host,opts={}){
  const phone=Math.min(screen.width,screen.height)<700;
  let ren;try{ren=new THREE.WebGLRenderer({antialias:!phone,powerPreference:'high-performance'})}catch(e){return null}
  if(!ren.getContext())return null;
- ren.setPixelRatio(Math.min(phone?1.5:2,window.devicePixelRatio||1));ren.outputColorSpace=THREE.SRGBColorSpace;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;
+ let DPR=Math.min(phone?1.25:1.5,window.devicePixelRatio||1);ren.setPixelRatio(DPR);ren.outputColorSpace=THREE.SRGBColorSpace;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;
  const cv=ren.domElement;cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;display:block';host.appendChild(cv);
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x05040a);scene.fog=new THREE.FogExp2(0x0a0812,.028);
  const cam=new THREE.PerspectiveCamera(52,16/10,.1,200);
@@ -37,25 +37,37 @@ export function startClub3D(host,opts={}){
  scene.add(tiles);
 
  /* ---------- LED screens ---------- */
- const scrC=document.createElement('canvas');scrC.width=1024;scrC.height=512;const sg=scrC.getContext('2d');
+ const scrC=document.createElement('canvas');scrC.width=768;scrC.height=384;const sg=scrC.getContext('2d');
  const scrT=new THREE.CanvasTexture(scrC);scrT.colorSpace=THREE.SRGBColorSpace;
  const frameM=new THREE.MeshStandardMaterial({color:0x101014,roughness:.4,metalness:.8});
  function screen(w,h,x,y,z,ry,mat){const g=new THREE.Group();const f=new THREE.Mesh(new THREE.BoxGeometry(w+.3,h+.3,.2),frameM);g.add(f);const s=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);s.position.z=.11;g.add(s);g.position.set(x,y,z);g.rotation.y=ry;scene.add(g);return s}
- screen(9,4.5,0,5.1,-8.8,0,new THREE.MeshBasicMaterial({map:scrT,toneMapped:false}));
- const vids=[];
- function vidMat(src){const v=document.createElement('video');v.src=src;v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.crossOrigin='anonymous';v.preload='auto';const p=v.play();if(p&&p.catch)p.catch(()=>{});vids.push(v);
-  const t=new THREE.VideoTexture(v);t.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:t,toneMapped:false,color:0xdddddd})}
+ const vids=[],CLIPS=['assets/clips/stage.mp4','assets/clips/courtyard.mp4','assets/clips/crew-pose-1.mp4','assets/clips/crew-pose-2.mp4'];
+ const vtex=CLIPS.map(src=>{const v=document.createElement('video');v.src=src;v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');v.preload='auto';const p=v.play();if(p&&p.catch)p.catch(()=>{});vids.push(v);const t=new THREE.VideoTexture(v);t.colorSpace=THREE.SRGBColorSpace;return t});
+ document.addEventListener('pointerdown',()=>vids.forEach(v=>{if(v.paused){const p=v.play();if(p&&p.catch)p.catch(()=>{})}}),{once:true,capture:true});
  const poster=new THREE.TextureLoader().load('assets/pops-pippy-official.jpg');poster.colorSpace=THREE.SRGBColorSpace;
- const sideL=screen(4.2,2.4,-9.4,4.6,-6.6,.55,vidMat('assets/clips/stage.mp4'));
- const sideR=screen(4.2,2.4,9.4,4.6,-6.6,-.55,vidMat('assets/clips/courtyard.mp4'));
- screen(2.6,3.4,-12.9,4.4,1,Math.PI/2,new THREE.MeshBasicMaterial({map:poster,toneMapped:false,color:0xbbbbbb}));
- screen(2.6,3.4,12.9,4.4,1,-Math.PI/2,new THREE.MeshBasicMaterial({map:poster,toneMapped:false,color:0xbbbbbb}));
+ const chrome=new THREE.MeshStandardMaterial({color:0xb8bcc6,metalness:1,roughness:.22});
+ /* screens hung on articulating steel arms: wall plate, two arm links, two knuckles and a tilt head */
+ function armScreen(w,h,wall,ry,len){const G=new THREE.Group();G.position.set(...wall);G.rotation.y=ry;scene.add(G);
+  const plate=new THREE.Mesh(new THREE.BoxGeometry(.6,.9,.08),chrome);G.add(plate);
+  const s1=new THREE.Group();G.add(s1);const l1=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,len,12),chrome);l1.rotation.x=Math.PI/2;l1.position.z=len/2;s1.add(l1);
+  const k1=new THREE.Mesh(new THREE.SphereGeometry(.12,14,10),chrome);k1.position.z=len;s1.add(k1);
+  const s2=new THREE.Group();s2.position.z=len;s1.add(s2);const l2=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,len*.8,12),chrome);l2.rotation.x=Math.PI/2;l2.position.z=len*.4;s2.add(l2);
+  const k2=new THREE.Mesh(new THREE.SphereGeometry(.11,14,10),chrome);k2.position.z=len*.8;s2.add(k2);
+  const head=new THREE.Group();head.position.z=len*.8;s2.add(head);const back=new THREE.Mesh(new THREE.BoxGeometry(w+.25,h+.25,.18),frameM);back.position.z=.2;head.add(back);
+  const mat=new THREE.MeshBasicMaterial({map:vtex[0],toneMapped:false,color:0xdddddd});const scr=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);scr.position.z=.3;head.add(scr);
+  return{s1,s2,head,mat,ph:Math.random()*6}}
+ const arms=[armScreen(4,2.25,[-12.9,4.6,-3.5],Math.PI/2,1.6),armScreen(4,2.25,[12.9,4.6,-3.5],-Math.PI/2,1.6),armScreen(3.2,1.8,[-12.9,4.2,4],Math.PI/2,1.2),armScreen(3.2,1.8,[12.9,4.2,4],-Math.PI/2,1.2)];
+ arms[2].mat.map=poster;arms[3].mat.map=vtex[2];
+ const mainScr=screen(9,4.5,0,5.1,-8.8,0,new THREE.MeshBasicMaterial({map:scrT,toneMapped:false}));
+ let clipT=0,clipI=0,cutFlash=0;
+ function cutClips(){clipI++;arms[0].mat.map=vtex[clipI%4];arms[1].mat.map=vtex[(clipI+1)%4];arms[3].mat.map=clipI%3===0?poster:vtex[(clipI+2)%4];arms[2].mat.map=clipI%3===1?poster:vtex[(clipI+3)%4];
+  mainScr.material.map=clipI%2?vtex[clipI%4]:scrT;for(const a of arms)a.mat.needsUpdate=true;mainScr.material.needsUpdate=true;cutFlash=1}
  const bars=new Float32Array(48);
- function drawScreen(t,p,pc){const W=1024,H=512,c=pc.map(h=>'#'+h.toString(16).padStart(6,'0'));sg.fillStyle='#05040a';sg.fillRect(0,0,W,H);
+ function drawScreen(t,p,pc){const W=768,H=384,c=pc.map(h=>'#'+h.toString(16).padStart(6,'0'));sg.fillStyle='#05040a';sg.fillRect(0,0,W,H);
   const gr=sg.createRadialGradient(W/2,H*.55,20,W/2,H*.55,W*.6);gr.addColorStop(0,c[1]+'66');gr.addColorStop(1,'#05040a');sg.fillStyle=gr;sg.fillRect(0,0,W,H);
   for(let i=0;i<bars.length;i++){const tgt=.15+.85*p*Math.abs(Math.sin(i*.7+t*3))*(.5+.5*Math.sin(i*.21+t));bars[i]+= (tgt-bars[i])*.25;const bw=W/bars.length,h=bars[i]*H*.55;sg.fillStyle=i%2?c[0]:c[1];sg.fillRect(i*bw+2,H-h,bw-4,h)}
-  sg.save();sg.translate(W/2,H*.38);sg.rotate(Math.sin(t*.7)*.03);sg.textAlign='center';sg.shadowColor=c[0];sg.shadowBlur=30+40*p;sg.fillStyle='#fff';sg.font='700 120px Georgia,serif';sg.fillText(under()?'UNDERGROUND':'FLEX GROTTO',0,0);
-  sg.shadowBlur=12;sg.fillStyle=c[2];sg.font='600 40px system-ui,sans-serif';sg.fillText('DJ JOSH BOUCHE · '+((B&&B.styles[style()])?B.styles[style()].name.toUpperCase():'LIVE'),0,70);sg.restore();
+  sg.save();sg.translate(W/2,H*.38);sg.rotate(Math.sin(t*.7)*.03);sg.textAlign='center';sg.shadowColor=c[0];sg.shadowBlur=30+40*p;sg.fillStyle='#fff';sg.font='700 90px Georgia,serif';sg.fillText(under()?'UNDERGROUND':'FLEX GROTTO',0,0);
+  sg.shadowBlur=12;sg.fillStyle=c[2];sg.font='600 30px system-ui,sans-serif';sg.fillText('DJ JOSH BOUCHE · '+((B&&B.styles[style()])?B.styles[style()].name.toUpperCase():'LIVE'),0,70);sg.restore();
   sg.fillStyle='rgba(0,0,0,.18)';for(let y=0;y<H;y+=4)sg.fillRect(0,y,W,2);scrT.needsUpdate=true}
 
  /* ---------- VRML set pieces ---------- */
@@ -80,11 +92,11 @@ export function startClub3D(host,opts={}){
  dotsG.setAttribute('position',new THREE.BufferAttribute(DP,3));const dots=new THREE.Points(dotsG,new THREE.PointsMaterial({size:.08,color:0xffffff,transparent:true,opacity:.6,blending:THREE.AdditiveBlending,depthWrite:false}));dots.position.y=0;scene.add(dots);
  /* haze sheets */
  const hz=document.createElement('canvas');hz.width=hz.height=128;const hg=hz.getContext('2d'),rg=hg.createRadialGradient(64,64,4,64,64,64);rg.addColorStop(0,'rgba(255,255,255,.35)');rg.addColorStop(1,'rgba(255,255,255,0)');hg.fillStyle=rg;hg.fillRect(0,0,128,128);
- const hzT=new THREE.CanvasTexture(hz),haze=[];for(let i=0;i<(phone?6:12);i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:hzT,color:0x8888aa,transparent:true,opacity:.12,depthWrite:false}));s.scale.setScalar(9+Math.random()*6);s.position.set((Math.random()-.5)*20,2+Math.random()*4,(Math.random()-.5)*12);scene.add(s);haze.push(s)}
+ const hzT=new THREE.CanvasTexture(hz),haze=[];for(let i=0;i<(phone?4:8);i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:hzT,color:0x8888aa,transparent:true,opacity:.12,depthWrite:false}));s.scale.setScalar(9+Math.random()*6);s.position.set((Math.random()-.5)*20,2+Math.random()*4,(Math.random()-.5)*12);scene.add(s);haze.push(s)}
 
  /* ---------- people ---------- */
  const COATS=[0x5c1720,0x1c2f6b,0x2b2d33,0x1f6b4a,0x6a2c91,0x8c1c13,0x15151a,0xc2571a],SK=[0xc99570,0x8a5a3c,0xe0b48c,0x6b4026,0xd9a67c,0xa8734c];
- const crowd=[],NC=phone?16:28;
+ const crowd=[],NC=phone?12:22;
  for(let i=0;i<NC;i++){const lady=i%2===1,o={coat:COATS[i%COATS.length],skin:SK[(i*5)%SK.length],trim:[0xd9a944,0xcfd6e6,0xff3fa4,0x22e0d0][i%4],skirt:[0x6d1f3c,0x15151a,0x1c2f6b,0x6a2c91][i%4]};
   const P=lady?makeLady(o):makePirate({...o,beard:i%3===0});const row=Math.floor(i/7),colI=i%7;
   P.R.position.set((colI-3)*1.35+(row%2?.6:0)+(Math.random()-.5)*.3,0,-1.6+row*1.5+(Math.random()-.5)*.3);P.R.rotation.y=Math.PI+(Math.random()-.5)*.6;
@@ -118,7 +130,7 @@ export function startClub3D(host,opts={}){
  const lp=new THREE.Vector3(),la=new THREE.Vector3(),tmp=new THREE.Vector3();
 
  /* ---------- loop ---------- */
- let last=performance.now(),running=true,raf=0,T=0;
+ let last=performance.now(),running=true,raf=0,T=0,frameN=0,fpsAcc=0,fpsN=0;
  function size(){const w=host.clientWidth||960,h=host.clientHeight||600;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
  const ro=window.ResizeObserver?new ResizeObserver(size):null;if(ro)ro.observe(host);else window.addEventListener('resize',size);size();
  function frame(now){if(!running)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;
@@ -147,8 +159,12 @@ export function startClub3D(host,opts={}){
   for(const d of crowd){d.ph+=dt;dance(d.P,T,bp+d.ph*.02,d.amp,d.style,on?hype:.25)}
   dance(dj.P||dj,T,bp,.6,0,.3);dj.ua.rotation.x=-.9+snr*.4;dj.ub.rotation.x=-1.1+pulse*.3;dj.la.rotation.x=-1.2;dj.lb.rotation.x=-1.3;
   dance(lita,T,bp,.9,1,hype);lita.ub.rotation.x=-2.2+snr*.3;
-  /* screens */
-  drawScreen(T,on?pulse:.2,P3);
+  /* screens: fast cuts between every clip, arms flex a little with the beat */
+  clipT+=dt;if(clipT>(on?2.4:4)){clipT=0;cutClips()}if(pulse>.95&&clipT>.9&&on&&Math.random()<.12){clipT=0;cutClips()}
+  cutFlash=Math.max(0,cutFlash-dt*4);const cf=1-cutFlash*.6;for(const a of arms){a.mat.color.setScalar(.87*cf+(cutFlash>.5?.3:0));if(!reduce){a.s1.rotation.y=Math.sin(T*.5+a.ph)*.18;a.s2.rotation.y=-Math.sin(T*.5+a.ph)*.3+pulse*.04;a.head.rotation.y=Math.sin(T*.5+a.ph)*.12;a.head.rotation.x=Math.sin(T*.7+a.ph)*.04}}
+  frameN++;if(frameN%2===0&&mainScr.material.map===scrT)drawScreen(T,on?pulse:.2,P3);
+  /* keep it smooth: drop resolution if frames run slow, raise it back when there is room */
+  fpsAcc+=dt;fpsN++;if(fpsAcc>2){const f=fpsN/fpsAcc;fpsAcc=0;fpsN=0;window.__clubFps=Math.round(f);if(f<45&&DPR>.75){DPR=Math.max(.75,DPR-.25);ren.setPixelRatio(DPR);size()}else if(f>58&&DPR<Math.min(phone?1.25:1.5,window.devicePixelRatio||1)){DPR+=.125;ren.setPixelRatio(DPR);size()}}
   /* camera */
   shotT+=dt;if(shotT>shotLen&&!reduce)nextShot();const S=SHOTS[reduce?0:shot],k=Math.min(1,shotT/shotLen),e=k*k*(3-2*k);
   tmp.set(S.from[0]+(S.to[0]-S.from[0])*e,S.from[1]+(S.to[1]-S.from[1])*e,S.from[2]+(S.to[2]-S.from[2])*e);

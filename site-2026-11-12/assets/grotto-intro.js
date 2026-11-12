@@ -5,22 +5,23 @@
   if(window.PoyIntro)return;
   var me=document.currentScript,root=me&&me.src?me.src.replace(/assets\/grotto-intro\.js.*$/,""):"";
   var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function shots(o){return[
-    {k:"img",src:"assets/crew/jazz-1.jpg",d:3.4,z:[1.04,1.2],p:[.5,.45,.55,.5],cap:"GASPAR'S GROTTO PRESENTS",small:1,fx:"thunder"},
-    {k:"vid",src:"assets/clips/stage.mp4",d:4,z:[1.06,1.12],p:[.5,.5,.5,.5],cap:"7th Avenue · Ybor City",small:1},
-    {k:"img",src:"assets/crew/grotto-crew.jpg",d:3.2,z:[1.18,1.04],p:[.5,.55,.5,.5],cap:"THE CREW"},
-    {k:"vid",src:"assets/clips/courtyard.mp4",d:3.6,z:[1.05,1.15],p:[.5,.5,.5,.45]},
-    {k:"vid",src:"assets/clips/crew-pose-2.mp4",d:3,z:[1.1,1.02],p:[.5,.5,.5,.5],fx:"flash"},
-    {k:"img",src:"assets/crew/pirate.jpg",d:3,z:[1.02,1.22],p:[.5,.18,.5,.22],cap:"NO QUARTER",fx:"thunder"},
-    {k:"img",src:"assets/pirates-of-ybor-treasure-ship.jpg",d:3.6,z:[1.05,1.3],p:[.45,.5,.62,.62],title:o.title||"THE PIRATES OF YBOR",gold:1,fx:"drop"},
-    {k:"img",src:"assets/pops-pippy-official.jpg",d:3.6,z:[1.22,1.06],p:[.5,.3,.5,.4],cap:o.sub||"Pops & Pippy saved you a seat"}
+  function shots(o){if(o.shots&&o.shots.length)return o.shots;return[
+    {k:"img",src:"assets/crew/jazz-1.jpg",d:2.6,z:[1.04,1.2],p:[.5,.45,.55,.5],cap:"GASPAR'S GROTTO PRESENTS",small:1,fx:"thunder"},
+    {k:"vid",src:"assets/clips/stage.mp4",d:2.8,z:[1.06,1.14],p:[.5,.5,.5,.5],cap:"7th Avenue · Ybor City",small:1},
+    {k:"img",src:"assets/crew/grotto-crew.jpg",d:2.3,z:[1.18,1.04],p:[.5,.55,.5,.5],cap:"THE CREW"},
+    {k:"vid",src:"assets/clips/crew-pose-1.mp4",d:2.4,z:[1.04,1.12],p:[.5,.45,.5,.5],fx:"flash"},
+    {k:"vid",src:"assets/clips/courtyard.mp4",d:2.6,z:[1.05,1.15],p:[.5,.5,.5,.45]},
+    {k:"vid",src:"assets/clips/crew-pose-2.mp4",d:2.3,z:[1.1,1.02],p:[.5,.5,.5,.5],fx:"flash"},
+    {k:"img",src:"assets/crew/pirate.jpg",d:2.4,z:[1.02,1.22],p:[.5,.18,.5,.22],cap:"NO QUARTER",fx:"thunder"},
+    {k:"img",src:"assets/pirates-of-ybor-treasure-ship.jpg",d:3.2,z:[1.05,1.3],p:[.45,.5,.62,.62],title:o.title||"THE PIRATES OF YBOR",gold:1,fx:"drop"},
+    {k:"img",src:"assets/pops-pippy-official.jpg",d:3,z:[1.22,1.06],p:[.5,.3,.5,.4],cap:o.sub||"Pops & Pippy saved you a seat"}
   ]}
   function play(o){
     o=o||{};var B=window.PoyBeats,S=shots(o),base=o.base!==undefined?o.base:root;
     var el=document.createElement("div");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Gaspar's Grotto opening film");
     el.style.cssText="position:fixed;inset:0;z-index:600;background:#000;overflow:hidden;font-family:Georgia,serif;color:#f3ead7";
-    var css="#pyi .sh{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}#pyi .sh.on{opacity:1}"+
-      "#pyi .sh>img,#pyi .sh>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform;filter:brightness(.74) contrast(1.28) saturate(1.15) sepia(.2)}"+
+    var css="#pyi .sh{position:absolute;inset:0;opacity:0;transition:opacity .42s ease}#pyi .sh.on{opacity:1}"+
+      "#pyi .sh>img,#pyi .sh>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform;filter:brightness(.74) contrast(1.28) saturate(1.15) sepia(.2)}"+"#pyi.classic .sh>img,#pyi.classic .sh>video{filter:sepia(.55) contrast(1.1) brightness(.9)}#pyi.classic .grade{background:linear-gradient(rgba(200,160,100,.35),rgba(150,110,60,.35))}#pyi.neon .sh>img,#pyi.neon .sh>video{filter:brightness(.8) contrast(1.35) saturate(1.6) hue-rotate(-12deg)}#pyi.neon .grade{background:linear-gradient(rgba(255,63,164,.4),rgba(34,224,208,.4))}"+
       "#pyi .grade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(170,70,55,.42),rgba(110,40,60,.46));mix-blend-mode:multiply}"+
       "#pyi .vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 34%,rgba(0,0,0,.85) 100%)}"+
       "#pyi .bar{position:absolute;left:0;right:0;height:11%;background:#000;z-index:5}#pyi .bar.t{top:0}#pyi .bar.b{bottom:0}"+
@@ -35,11 +36,11 @@
       "#pyi .go{font:700 1.2rem Georgia,serif;color:#15100a;background:linear-gradient(180deg,#f0c860,#b9872a);border:2px solid #f6d67a;border-radius:12px;padding:14px 30px;cursor:pointer;min-height:48px}"+
       "#pyi .skip,#pyi .quiet{background:rgba(0,0,0,.55);color:#f3ead7;border:1px solid #6b4b12;border-radius:8px;padding:10px 14px;font:600 .95rem Georgia,serif;min-height:44px;cursor:pointer}"+
       "#pyi .skip{position:absolute;right:14px;top:calc(11% + 10px);z-index:8}#pyi .quiet{display:block;margin:12px auto 0;background:none;border:0;text-decoration:underline}";
-    el.id="pyi";el.innerHTML="<style>"+css+"</style>";
+    el.id="pyi";if(o.look&&o.look!=="dark")el.className=o.look;el.innerHTML="<style>"+css+"</style>";
     var layers=S.map(function(s){var d=document.createElement("div");d.className="sh";var m;
       if(s.k==="vid"){m=document.createElement("video");m.muted=true;m.loop=true;m.playsInline=true;m.setAttribute("playsinline","");m.setAttribute("muted","");m.preload="auto";}
       else{m=document.createElement("img");m.alt="";m.decoding="async";}
-      m.src=base+s.src;d.appendChild(m);el.appendChild(d);return{d:d,m:m,s:s};});
+      m.src=/^(blob:|data:|https?:)/.test(s.src)?s.src:base+s.src;d.appendChild(m);el.appendChild(d);return{d:d,m:m,s:s};});
     el.insertAdjacentHTML("beforeend",'<div class="grade"></div><div class="vig"></div><canvas class="grain" width="96" height="96"></canvas><canvas class="gold"></canvas><div class="bar t"></div><div class="bar b"></div><div class="cap"></div><div class="title"></div><div class="flash"></div><button type="button" class="skip" hidden>Skip ▸</button>'+
       '<div class="gate"><div><h2>'+(o.gateTitle||"Gaspar's Grotto")+'</h2><p>'+(o.gateSub||"After dark on 7th Avenue. Turn your sound up.")+'</p><button type="button" class="go">▶ Play the opening</button><button type="button" class="quiet">Skip the opening</button></div></div>');
     document.body.appendChild(el);

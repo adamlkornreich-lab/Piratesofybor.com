@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pirate Social Club — The Pirates of Ybor</title>
+<meta name="description" content="Start your own pirate social club: raise a flag, write the motto, invent a secret handshake, sign the articles and hand out member cards.">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Pirate Social Club. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+.box{background:#17181d;border:1px solid rgba(217,169,68,.45);border-radius:12px;padding:16px;margin:0 0 18px}
+.box h2{margin:0 0 4px;color:var(--gold2,#f6d67a);font-size:1.3rem}.s{margin:0 0 12px;color:var(--fog,#c9c2b4);font-size:.93rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px}.tabs button{font:600 1rem Georgia,serif;color:#f3ead7;background:#17181d;border:2px solid #6b4b12;border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer}
+.tabs button[aria-selected=true]{background:linear-gradient(180deg,#d9a944,#a8741c);color:#15100a;border-color:#f6d67a}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.form label{display:grid;gap:4px;font-size:.9rem;color:#c9c2b4}.form input,.form select,textarea{min-height:42px;border-radius:8px;border:1px solid #3a3c45;background:#0b0c10;color:#f3ead7;padding:6px 10px;font:inherit}
+.flags{display:flex;gap:6px;flex-wrap:wrap}.flags button{font-size:1.6rem;width:52px;height:52px;border-radius:10px;border:2px solid #2a2c35;background:#0b0c10;cursor:pointer}.flags button[aria-pressed=true]{border-color:#f6d67a;background:#2a2112}
+.moves{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:420px}.moves button{min-height:64px;border-radius:12px;border:2px solid #3a3c45;background:#22242c;color:#f3ead7;font:600 .85rem system-ui,sans-serif;cursor:pointer;display:grid;place-items:center;gap:2px}.moves button b{font-size:1.6rem}
+.moves button.hit{background:#f6d67a;color:#111}
+.seq{display:flex;gap:6px;flex-wrap:wrap;min-height:52px;align-items:center;margin:10px 0;padding:8px;border:1px dashed #3a3c45;border-radius:10px}.seq span{font-size:1.6rem;background:#0b0c10;border-radius:8px;padding:4px 8px}
+.stage{display:grid;place-items:center;height:150px;border-radius:12px;background:radial-gradient(circle at 50% 50%,#2a1a10,#0b0c10);font-size:4rem;position:relative;overflow:hidden;margin:10px 0}
+.stage .l,.stage .r{position:absolute;top:50%;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}.stage .l{left:22%;transform:translate(-50%,-50%) scaleX(-1)}.stage .r{right:22%;transform:translate(50%,-50%)}
+.stage.go .l{transform:translate(20%,-50%) scaleX(-1) rotate(-8deg)}.stage.go .r{transform:translate(-20%,-50%) rotate(8deg)}
+.stage .bang{position:absolute;inset:0;display:grid;place-items:center;font-size:2.4rem;opacity:0;transition:opacity .2s}.stage.go .bang{opacity:1}
+.sig{width:100%;max-width:520px;height:160px;background:#f3ead7;border-radius:10px;touch-action:none;cursor:crosshair;display:block}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.acts .btn{min-height:46px}
+.msg{min-height:1.4em;color:#f6d67a;margin:10px 0 0}
+#card{width:100%;max-width:560px;height:auto;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.6);display:block;margin:10px 0}
+.code{width:100%;min-height:80px;font:.85rem/1.4 ui-monospace,monospace}
+.mem{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.mem div{background:#0b0c10;border:1px solid #2a2c35;border-radius:10px;padding:8px;text-align:center}.mem img{width:100%;height:50px;object-fit:contain;background:#f3ead7;border-radius:6px}
+[hidden]{display:none!important}
+</style></head>
+<body data-no-cine>
+<main class="wrap">
+  <section class="hero"><span class="kick">Articles of the crew</span><h1>🏴‍☠️ Pirate Social Club</h1>
+    <p class="lead">Start a club of your own or join a friend's. Raise a flag, invent a secret handshake, sign the articles and get your member card.</p></section>
+  <div class="tabs" role="tablist"><button role="tab" type="button" id="tStart" aria-selected="true">⚓ Start a club</button><button role="tab" type="button" id="tJoin" aria-selected="false">🤝 Join with a code</button><button role="tab" type="button" id="tMine" aria-selected="false">🪪 My clubs</button></div>
+
+  <section class="box" id="pStart"><h2>1 · Raise your flag</h2><p class="s">Name the club, pick a flag and write the motto every member swears by.</p>
+    <div class="form"><label>Club name<input id="cName" maxlength="32" placeholder="The Grotto Gentlemen"></label><label>Motto<input id="cMotto" maxlength="60" placeholder="No quarter, no curfew"></label>
+      <label>Home port<select id="cPort"><option>Gaspar's Grotto</option><option>Flex Grotto</option><option>The Plank Bar</option><option>Alonso Arena</option><option>Ybor Cay</option><option>Acropolis</option><option>7th Avenue</option></select></label>
+      <label>Club colour<input id="cCol" type="color" value="#9c1f1f"></label></div>
+    <p class="s" style="margin-top:12px">Flag</p><div class="flags" id="flags"></div>
+    <h2 style="margin-top:18px">2 · Invent the secret handshake</h2><p class="s">Tap 4 to 6 moves. Members must repeat it to get in.</p>
+    <div class="moves" id="moves"></div><div class="seq" id="seq" aria-live="polite"></div>
+    <div class="acts"><button class="btn ghost" type="button" id="undo">↩ Undo</button><button class="btn ghost" type="button" id="demo">▶ Show the handshake</button></div>
+    <div class="stage" id="stg" aria-hidden="true"><span class="l">🤚</span><span class="r">🤚</span><span class="bang"></span></div>
+    <h2 style="margin-top:18px">3 · Sign the articles</h2><p class="s">Your pirate name and your signature as founding captain.</p>
+    <div class="form"><label>Your pirate name<input id="cMe" maxlength="28" placeholder="Captain Adam"></label></div>
+    <canvas class="sig" id="sig" width="1040" height="320" aria-label="Signature pad: draw your signature with your finger or mouse"></canvas>
+    <div class="acts"><button class="btn ghost" type="button" id="sigClr">Clear signature</button><button class="btn" type="button" id="found">🏴‍☠️ Found the club</button></div>
+    <p class="msg" id="msgS" aria-live="polite"></p>
+  </section>
+
+  <section class="box" id="pJoin" hidden><h2>Join a club</h2><p class="s">Paste the invite code your captain sent you. Then prove you know the handshake and sign the articles.</p>
+    <textarea class="code" id="jCode" placeholder="Paste the invite code here"></textarea>
+    <div class="acts"><button class="btn" type="button" id="jLoad">Open the invite</button></div>
+    <div id="jStep" hidden>
+      <h2 style="margin-top:16px" id="jTitle"></h2><p class="s" id="jMotto"></p>
+      <p class="s">Do the secret handshake: tap the moves in the right order.</p>
+      <div class="moves" id="jMoves"></div><div class="seq" id="jSeq"></div>
+      <div class="stage" id="jStg" aria-hidden="true"><span class="l">🤚</span><span class="r">🤚</span><span class="bang"></span></div>
+      <div id="jSign" hidden><div class="form"><label>Your pirate name<input id="jMe" maxlength="28"></label></div><canvas class="sig" id="jSig" width="1040" height="320" aria-label="Signature pad"></canvas>
+        <div class="acts"><button class="btn ghost" type="button" id="jSigClr">Clear signature</button><button class="btn" type="button" id="jDone">✍ Sign and join</button></div></div>
+    </div>
+    <p class="msg" id="msgJ" aria-live="polite"></p>
+  </section>
+
+  <section class="box" id="pMine" hidden><h2>My clubs</h2><p class="s">Your member cards and each club's crew on this device.</p><div id="mine"></div></section>
+
+  <section class="box" id="pCard" hidden><h2>Member card</h2><canvas id="card" width="1120" height="680" aria-label="Member card"></canvas>
+    <p class="s">Invite code for this club. Send it to your crew so they can join:</p><textarea class="code" id="iCode" readonly></textarea>
+    <div class="acts"><button class="btn" type="button" id="copy">📋 Copy invite code</button><button class="btn ghost" type="button" id="copyLink">🔗 Copy invite link</button></div><p class="msg" id="msgC" aria-live="polite"></p>
+    <p class="s">Clubs, signatures and cards are kept on this device. Sharing a club across phones uses the invite code; a live online roster comes with crew accounts.</p></section>
+</main>
+<script src="assets/beats.js"></script>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);},B=window.PoyBeats;
+  var MOVES=[["fist","🤜","Fist bump"],["five","✋","High five"],["shake","🤝","Shake"],["slide","🫳","Slide"],["boom","💥","Explode"],["salute","🫡","Salute"],["hook","🪝","Hook grip"],["snap","🫰","Snap"],["skull","☠️","Skull tap"]];
+  var FLAGS=["🏴‍☠️","☠️","⚓","🦜","🗡️","🍺","🎲","🐈‍⬛","🐕","🦈","🌴","👑"];
+  var flag=FLAGS[0],seq=[];
+  function ls(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v));}catch(e){}return null;}
+  function tone(f){try{if(!B)return;B.fx(f>600?"hit":"scratch");}catch(e){}}
+  /* tabs */
+  var tabs=[["tStart","pStart"],["tJoin","pJoin"],["tMine","pMine"]];
+  tabs.forEach(function(t){$(t[0]).addEventListener("click",function(){tabs.forEach(function(u){$(u[0]).setAttribute("aria-selected",String(u===t));$(u[1]).hidden=u!==t;});$("pCard").hidden=true;if(t[1]==="pMine")drawMine();});});
+  /* flags */
+  $("flags").innerHTML=FLAGS.map(function(f){return '<button type="button" aria-pressed="'+(f===flag)+'" data-f="'+f+'">'+f+'</button>';}).join("");
+  $("flags").addEventListener("click",function(e){var b=e.target.closest("[data-f]");if(!b)return;flag=b.dataset.f;[].forEach.call($("flags").children,function(c){c.setAttribute("aria-pressed",String(c===b));});});
+  /* handshake */
+  function movesHTML(){return MOVES.map(function(m){return '<button type="button" data-m="'+m[0]+'"><b>'+m[1]+'</b>'+m[2]+'</button>';}).join("");}
+  function mv(id){for(var i=0;i<MOVES.length;i++)if(MOVES[i][0]===id)return MOVES[i];return MOVES[0];}
+  function seqHTML(s){return s.length?s.map(function(id){return '<span title="'+mv(id)[2]+'">'+mv(id)[1]+'</span>';}).join(""):'<em style="color:#8f887a">No moves yet</em>';}
+  function bump(stg,id){var st=$(stg);st.querySelector(".bang").textContent=mv(id)[1];st.classList.add("go");tone(700);setTimeout(function(){st.classList.remove("go");},260);}
+  $("moves").innerHTML=movesHTML();$("seq").innerHTML=seqHTML(seq);
+  $("moves").addEventListener("click",function(e){var b=e.target.closest("[data-m]");if(!b)return;if(seq.length>=6){say("msgS","Six moves is the most. Undo one to change it.");return;}seq.push(b.dataset.m);$("seq").innerHTML=seqHTML(seq);bump("stg",b.dataset.m);});
+  $("undo").addEventListener("click",function(){seq.pop();$("seq").innerHTML=seqHTML(seq);});
+  function demo(s,stg){s.forEach(function(id,i){setTimeout(function(){bump(stg,id);},i*480);});}
+  $("demo").addEventListener("click",function(){if(!seq.length){say("msgS","Tap some moves first.");return;}demo(seq,"stg");});
+  /* signature pads */
+  function pad(id){var c=$(id),g=c.getContext("2d"),drawing=false,inked=false;g.lineWidth=6;g.lineCap="round";g.lineJoin="round";g.strokeStyle="#1a1206";
+    function p(e){var r=c.getBoundingClientRect();return[(e.clientX-r.left)/r.width*c.width,(e.clientY-r.top)/r.height*c.height];}
+    c.addEventListener("pointerdown",function(e){e.preventDefault();drawing=true;var q=p(e);g.beginPath();g.moveTo(q[0],q[1]);try{c.setPointerCapture(e.pointerId);}catch(x){}});
+    c.addEventListener("pointermove",function(e){if(!drawing)return;var q=p(e);g.lineTo(q[0],q[1]);g.stroke();inked=true;});
+    ["pointerup","pointercancel"].forEach(function(v){c.addEventListener(v,function(){drawing=false;});});
+    return{clear:function(){g.clearRect(0,0,c.width,c.height);inked=false;},get inked(){return inked;},data:function(){return c.toDataURL("image/png");},canvas:c};}
+  var sig=pad("sig"),jsig=pad("jSig");$("sigClr").addEventListener("click",sig.clear);$("jSigClr").addEventListener("click",jsig.clear);
+  function say(id,t){$(id).textContent=t;}
+  /* codes */
+  function enc(o){return "POY1."+btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
+  function dec(t){t=String(t).trim().replace(/ /g,"+");var m=t.match(/POY1\.[A-Za-z0-9+\/=]+/);if(!m)return null;try{return JSON.parse(decodeURIComponent(escape(atob(m[0].slice(5)))));}catch(e){return null;}}
+  function clubs(){return ls("py_clubs")||{};}
+  function save(c){var all=clubs();all[c.id]=c;ls("py_clubs",all);}
+  /* found */
+  $("found").addEventListener("click",function(){var n=$("cName").value.trim(),me=$("cMe").value.trim();
+    if(!n){say("msgS","Give your club a name.");$("cName").focus();return;}if(seq.length<4){say("msgS","The handshake needs at least 4 moves.");return;}
+    if(!me){say("msgS","Sign with your pirate name.");$("cMe").focus();return;}if(!sig.inked){say("msgS","Draw your signature on the articles.");return;}
+    var c={id:"c"+Date.now().toString(36),n:n,m:$("cMotto").value.trim(),p:$("cPort").value,col:$("cCol").value,f:flag,h:seq.slice(),since:new Date().toISOString().slice(0,10),
+      crew:[{name:me,sig:sig.data(),role:"Founding Captain",no:1,date:new Date().toLocaleDateString()}]};
+    save(c);if(B)try{B.fx("horn");}catch(e){}if(window.PY&&PY.celebrate)PY.celebrate(50);showCard(c,c.crew[0]);});
+  /* join */
+  var jc=null,jprog=[];
+  $("jLoad").addEventListener("click",function(){var c=dec($("jCode").value);if(!c||!c.n||!c.h){say("msgJ","That isn't a valid invite code. Ask your captain to copy it again.");return;}
+    jc=c;jprog=[];$("jStep").hidden=false;$("jSign").hidden=true;$("jTitle").textContent=c.f+" "+c.n;$("jMotto").textContent=(c.m?"“"+c.m+"” · ":"")+"Home port: "+c.p;$("jMoves").innerHTML=movesHTML();$("jSeq").innerHTML=seqHTML([]);say("msgJ","Show them you know the handshake. "+c.h.length+" moves.");});
+  $("jMoves").addEventListener("click",function(e){var b=e.target.closest("[data-m]");if(!b||!jc)return;var id=b.dataset.m;bump("jStg",id);
+    if(jc.h[jprog.length]===id){jprog.push(id);$("jSeq").innerHTML=seqHTML(jprog);b.classList.add("hit");setTimeout(function(){b.classList.remove("hit");},200);
+      if(jprog.length===jc.h.length){say("msgJ","Handshake accepted. Welcome aboard, now sign the articles.");if(B)try{B.fx("horn");}catch(x){}$("jSign").hidden=false;$("jMe").focus();}}
+    else{jprog=[];$("jSeq").innerHTML=seqHTML([]);say("msgJ","Wrong move. The crew eyes you suspiciously. Start the handshake again.");if(B)try{B.fx("miss");}catch(x){}}});
+  $("jDone").addEventListener("click",function(){var me=$("jMe").value.trim();if(!me){say("msgJ","Sign with your pirate name.");return;}if(!jsig.inked){say("msgJ","Draw your signature.");return;}
+    var have=clubs()[jc.id],c=have||{id:jc.id,n:jc.n,m:jc.m,p:jc.p,col:jc.col,f:jc.f,h:jc.h,since:jc.since,crew:(jc.cap?[{name:jc.cap,sig:"",role:"Founding Captain",no:1,date:jc.since}]:[])};
+    var m={name:me,sig:jsig.data(),role:"Crew",no:c.crew.length+1,date:new Date().toLocaleDateString()};c.crew.push(m);save(c);if(window.PY&&PY.celebrate)PY.celebrate(25);showCard(c,m);});
+  /* card */
+  function showCard(c,m){$("pCard").hidden=false;var cv=$("card"),g=cv.getContext("2d"),W=cv.width,H=cv.height;
+    var bg=g.createLinearGradient(0,0,W,H);bg.addColorStop(0,"#120d0a");bg.addColorStop(1,c.col||"#5c1720");g.fillStyle=bg;g.fillRect(0,0,W,H);
+    g.strokeStyle="#d9a944";g.lineWidth=10;g.strokeRect(18,18,W-36,H-36);g.lineWidth=2;g.strokeRect(36,36,W-72,H-72);
+    g.font="160px serif";g.textAlign="center";g.fillText(c.f,190,250);
+    g.textAlign="left";g.fillStyle="#f6d67a";g.font="700 64px Georgia,serif";g.fillText(c.n,330,150);
+    g.fillStyle="#efe6d2";g.font="italic 34px Georgia,serif";if(c.m)g.fillText("“"+c.m+"”",330,205);
+    g.font="600 30px system-ui,sans-serif";g.fillStyle="#cfc6b2";g.fillText("Home port: "+c.p+" · Est. "+c.since,330,255);
+    g.fillStyle="#f3ead7";g.font="700 54px Georgia,serif";g.fillText(m.name,80,370);g.font="600 30px system-ui,sans-serif";g.fillStyle="#f6d67a";g.fillText(m.role+" · Member No. "+String(m.no).padStart(3,"0")+" · "+m.date,80,415);
+    g.fillStyle="#f3ead7";g.fillRect(80,450,560,150);
+    var draw=function(){g.fillStyle="#cfc6b2";g.font="600 26px system-ui,sans-serif";g.fillText("SECRET HANDSHAKE",700,480);g.font="56px serif";c.h.forEach(function(id,i){g.fillText(mv(id)[1],700+(i%3)*110,550+Math.floor(i/3)*70);});
+      g.font="600 20px Georgia,serif";g.fillStyle="#d9a944";g.textAlign="right";g.fillText("© 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy",W-60,H-50);g.textAlign="left";};
+    var wm=new Image();wm.onload=function(){g.globalAlpha=.9;g.drawImage(wm,W-330,40,280,280*wm.height/wm.width);g.globalAlpha=1;};wm.src="assets/brand-watermark.png";
+    if(m.sig){var si=new Image();si.onload=function(){g.drawImage(si,80,450,560,150);draw();};si.src=m.sig;}else draw();
+    var code=enc({id:c.id,n:c.n,m:c.m,p:c.p,col:c.col,f:c.f,h:c.h,since:c.since,cap:(c.crew[0]||{}).name});$("iCode").value=code;
+    var link=location.origin+location.pathname+"?join="+encodeURIComponent(code);$("copyLink").dataset.link=link;$("copyLink").hidden=!/^https?:/.test(location.origin)||/claude/.test(location.hostname);
+    say("msgC","");$("pCard").scrollIntoView({behavior:"smooth",block:"start"});}
+  function copy(t,label){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){say("msgC",label+" copied. Send it to your crew.");},function(){$("iCode").select();say("msgC","Select the code above and copy it.");});}else{$("iCode").select();say("msgC","Select the code above and copy it.");}}
+  $("copy").addEventListener("click",function(){copy($("iCode").value,"Invite code");});
+  $("copyLink").addEventListener("click",function(){copy(this.dataset.link,"Invite link");});
+  /* my clubs */
+  function drawMine(){var all=clubs(),ids=Object.keys(all);if(!ids.length){$("mine").innerHTML='<p class="s">No clubs yet. Start one or join a friend\'s.</p>';return;}
+    $("mine").innerHTML=ids.map(function(id){var c=all[id];return '<div class="box" style="background:#0f1014"><h2>'+c.f+' '+c.n.replace(/</g,"&lt;")+'</h2><p class="s">'+(c.m?"“"+c.m.replace(/</g,"&lt;")+"” · ":"")+c.p+' · '+c.crew.length+' aboard</p><div class="mem">'+c.crew.map(function(m,i){return '<div>'+(m.sig?'<img src="'+m.sig+'" alt="Signature of '+m.name.replace(/"/g,"")+'">':"")+'<b>'+m.name.replace(/</g,"&lt;")+'</b><br><small>'+m.role+'</small><br><button type="button" class="btn ghost" style="min-height:36px;margin-top:6px" data-card="'+id+'|'+i+'">Card</button></div>';}).join("")+'</div></div>';}).join("");}
+  $("mine").addEventListener("click",function(e){var b=e.target.closest("[data-card]");if(!b)return;var p=b.dataset.card.split("|"),c=clubs()[p[0]];showCard(c,c.crew[+p[1]]);});
+  /* invite link: ?join=CODE */
+  try{var j=new URLSearchParams(location.search).get("join");if(j){$("tJoin").click();$("jCode").value=j;$("jLoad").click();}}catch(e){}
+})();
+</script>
+</body></html>
