@@ -18,6 +18,8 @@
 .pads button:disabled,.decks button:disabled{opacity:.45;cursor:not-allowed}
 .stage{position:relative;max-width:980px;margin:0 auto;border:3px solid #6b4b12;border-radius:12px;overflow:hidden;box-shadow:0 0 0 3px #15151a,0 18px 40px rgba(0,0,0,.7);background:#05060a}
 .stage canvas{display:block;width:100%;height:auto;touch-action:manipulation}
+#club3d{position:absolute;inset:0;overflow:hidden}.stage #cv{position:relative;z-index:1}
+.camrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0}.camrow button{font:600 .9rem Georgia,serif;color:#f3ead7;background:#17181d;border:1px solid #6b4b12;border-radius:8px;padding:8px 12px;min-height:40px;cursor:pointer}
 .now{text-align:center;color:var(--gold2,#f6d67a);min-height:1.4em;margin:10px 0 0;font-size:1.05rem}
 .lita{text-align:center;color:#f3ead7;min-height:2.8em;margin:4px auto 0;max-width:680px;font-style:italic}
 .taps button{flex:1 1 20%;max-width:150px;min-height:64px;font-size:1.2rem;border-width:3px}
@@ -55,7 +57,8 @@
     <button type="button" id="fUnder" aria-pressed="false">🔦 The Underground Rave</button>
   </div>
 
-  <div class="stage"><canvas id="cv" width="960" height="600" aria-label="Flex Grotto: DJ Josh Bouche at the decks, Lita on the mic, lights and a dance floor moving to the beat"></canvas></div>
+  <div class="stage"><div id="club3d" aria-hidden="true"></div><canvas id="cv" width="960" height="600" aria-label="Flex Grotto: DJ Josh Bouche at the decks, Lita on the mic, lights and a dance floor moving to the beat"></canvas></div>
+  <div class="camrow" role="group" aria-label="Camera"><button type="button" data-cam="0">🎥 Wide</button><button type="button" data-cam="2">🎧 DJ booth</button><button type="button" data-cam="1">💃 Dance floor</button><button type="button" data-cam="3">🚁 Overhead</button></div>
   <p class="now" id="now" aria-live="polite">Tap a deck to start the music.</p>
   <p class="lita" id="lita" aria-live="polite"></p>
 
@@ -172,6 +175,7 @@
     if(!game)hype+=((on?55:12)-hype)*dt*.4;
     spin+=dt*(on?3.4:.2);
     var pal=PAL[B.style()]||PAL.east,under=floor==="under",T=ts/1000,mv=reduce?0:1;
+    if(window.CLUB3D){g.clearRect(0,0,W,H);}else{
     /* room */
     var bg=g.createLinearGradient(0,0,0,H);if(under){bg.addColorStop(0,"#020306");bg.addColorStop(1,"#0a0d12");}else{bg.addColorStop(0,"#0c0710");bg.addColorStop(1,"#1a0d10");}
     g.fillStyle=bg;g.fillRect(0,0,W,H);
@@ -213,6 +217,8 @@
       g.fillStyle=p%2?"#0a0a0e":"#101016";var by2=H+8-(on?(pulse*10+ph*4):0)-(p%3)*8;g.beginPath();g.arc(px,by2-70,17,0,7);g.fill();g.fillRect(px-22,by2-56,44,70);
       if(up){g.strokeStyle=g.fillStyle;g.lineWidth=9;g.lineCap="round";g.beginPath();g.moveTo(px-18,by2-50);g.lineTo(px-30,by2-104-pulse*8);g.moveTo(px+18,by2-50);g.lineTo(px+30,by2-104-pulse*8);g.stroke();}}
     if(under&&!reduce){g.fillStyle="rgba(255,255,255,"+(pulse*.05)+")";g.fillRect(0,0,W,H);}
+    }
+
     /* game */
     if(game){
       var lx=W/2-210,lw=105,hitY=520,top=150,travel=1.7;
@@ -240,5 +246,11 @@
   window.addEventListener("resize",fit);fit();ui();requestAnimationFrame(frame);
   if(ok){say("Lita: Welcome back. Tap a deck and Josh Bouche will take it from there.");}
 })();
+</script>
+<script type="module">
+/* Real-time 3D club. Falls back to the drawn club if WebGL is not available. */
+import {startClub3D} from './world/club3d.js';
+try{const host=document.getElementById('club3d'),c=startClub3D(host);if(c){window.CLUB3D=c;document.querySelectorAll('[data-cam]').forEach(b=>b.addEventListener('click',()=>c.shot(+b.dataset.cam)));}else{document.querySelector('.camrow').hidden=true;}}
+catch(e){console.warn('club3d',e);document.querySelector('.camrow').hidden=true;}
 </script>
 </body></html>
