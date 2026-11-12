@@ -93,14 +93,21 @@ body,body *:not(canvas){font-family:"Pirata One",Georgia,serif !important;letter
 #gpsQuick b{color:#bfe9ff;margin-right:2px}
 #gpsQuick button{min-height:40px;padding:0 13px;border-radius:20px;border:1px solid #4fc3ff88;background:#0f2433cc;color:var(--ink);font-size:.92rem}
 #plist button[data-gps]{border-color:#4fc3ff88;color:#bfe9ff}
+
+/* Dark pirate grade over the 3D view */
+#grade{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 38%,rgba(0,0,0,.72) 100%),linear-gradient(rgba(160,70,55,.55),rgba(120,60,70,.55));mix-blend-mode:multiply;transition:opacity .5s}
+body.lightview #grade{opacity:0}
+#bDark{width:clamp(52px,7vw,64px);display:grid;place-items:center;align-content:center;gap:2px;font-size:1.3rem;cursor:pointer;border-radius:12px;color:var(--ink);min-height:44px}#bDark span{font-size:.7rem;color:#ffd36b;font-weight:700}
+
+body.cine #hud{opacity:0!important;pointer-events:none}
 </style></head>
 <body>
-<canvas id="c" tabindex="0" aria-label="A 3D pirate island you can walk around. Open the places list for links to every room."></canvas>
+<div id="grade" aria-hidden="true"></div><canvas id="c" tabindex="0" aria-label="A 3D pirate island you can walk around. Open the places list for links to every room."></canvas>
 <div id="hud">
  <div id="tl" class="pill"><div id="where" aria-live="polite">Ybor Cay</div><div id="loot"></div><div id="hpW"><span id="hpL">Health</span><div class="bar"><i id="hpB"></i></div></div></div>
  <a id="home" class="ic" href="../index.html" aria-label="Back to the site home">⌂</a><div id="wx" class="pill" aria-live="off"><b>☀ --°F</b><span>Loading weather…</span></div>
  <div id="mon"><div id="monN"></div><div class="bar"><i id="monB"></i></div></div>
- <div id="tr"><button id="miniB" aria-label="Open the map and places list" style="all:unset;cursor:pointer;border-radius:50%"><canvas id="mini" width="344" height="344"></canvas></button><div id="hudrow"><div id="wxSq" class="pill" aria-label="Weather"></div><button id="bNav" type="button" class="pill" aria-label="Navigate: pick a place for the GPS" onclick="document.getElementById('miniB').click()">🧭<span>GPS</span></button></div><div id="gps" class="pill" aria-live="polite"><span id="gpsA" aria-hidden="true">▲</span><span id="gpsT"></span><button id="gpsX" type="button" aria-label="Turn GPS off">×</button></div>
+ <div id="tr"><button id="miniB" aria-label="Open the map and places list" style="all:unset;cursor:pointer;border-radius:50%"><canvas id="mini" width="344" height="344"></canvas></button><div id="hudrow"><div id="wxSq" class="pill" aria-label="Weather"></div><button id="bDark" type="button" class="pill" aria-pressed="true" aria-label="Dark pirate look on or off">🌑<span>Dark</span></button><button id="bNav" type="button" class="pill" aria-label="Navigate: pick a place for the GPS" onclick="document.getElementById('miniB').click()">🧭<span>GPS</span></button></div><div id="gps" class="pill" aria-live="polite"><span id="gpsA" aria-hidden="true">▲</span><span id="gpsT"></span><button id="gpsX" type="button" aria-label="Turn GPS off">×</button></div>
   <div class="btns"><button class="ic" id="bPlaces" type="button" aria-label="Places">Places</button><button class="ic" id="bTime" type="button" aria-label="Change the time of day">☀︎</button><button class="ic" id="bRain" type="button" aria-label="Rain on or off" aria-pressed="false">☂︎</button><button class="ic" id="bParrot" type="button" aria-label="Teach your parrot a word">🦜</button><button class="ic" id="bRadio" type="button" aria-label="Radio on or off" aria-pressed="false">📻</button><button class="ic" id="bSound" type="button" aria-label="Sound on or off">♪</button></div></div>
  <div id="toast" aria-live="polite"></div>
  <button id="act" type="button"><kbd>E</kbd><span id="actT"></span></button>
@@ -119,6 +126,7 @@ window.addEventListener('error',function(e){if(e.filename&&/\/world\/|three\.js/
 setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)g.textContent='Still loading the island…'},12000);
 setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)fail()},60000)})();</script>
 <script src="../assets/beats.js"></script>
+<script>(function(){var on=true;try{on=localStorage.getItem("py_dark")!=="0";}catch(e){}function set(v){on=v;document.body.classList.toggle("lightview",!on);var b=document.getElementById("bDark");if(b)b.setAttribute("aria-pressed",String(on));try{localStorage.setItem("py_dark",on?"1":"0");}catch(e){}}document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("#bDark"))set(!on);});if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){set(on);});else set(on);})();</script>
 <script>document.body.setAttribute("data-no-cine","");</script>
 <script src="../assets/cine.js"></script>
 <script>if(window.PoyCine)PoyCine.card({kick:"Gaspar's Grotto presents",title:"Ybor Cay: Plunder & Heat",sub:["Crack the supply drops. Outrun the marines.","Beat the squall. Claim the bounty.","Every visit, the island deals a new hand."][Math.floor(Math.random()*3)],button:"⚓ Drop anchor"});</script>
