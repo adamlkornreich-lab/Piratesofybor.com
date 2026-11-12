@@ -15,9 +15,30 @@
 .ship-hero .row{position:relative}
 @media (max-width:640px){.ship-hero{min-height:0;background-size:150% auto;background-position:62% 100%;padding-bottom:66vw}
 .ship-hero::before{background:linear-gradient(180deg,rgba(4,10,16,.92) 0%,rgba(4,10,16,.92) calc(100% - 92vw),rgba(4,10,16,0) calc(100% - 60vw),rgba(4,10,16,0) 100%)}}
+/* Opening cinematic */
+#opening{position:fixed;inset:0;z-index:300;background:#020409;display:grid;place-items:center;overflow:hidden;transition:opacity .9s}
+#opening.out{opacity:0;pointer-events:none}
+#opening canvas{position:absolute;inset:0;width:100%;height:100%}
+#opening .gatebox{position:relative;text-align:center;padding:20px;max-width:560px}
+#opening .gatebox h2{font:700 clamp(2rem,8vw,3.6rem)/1.05 Georgia,serif;color:#f6d67a;margin:0 0 6px;text-shadow:0 3px 0 #3a2a08,0 0 30px rgba(0,0,0,.9)}
+#opening .gatebox p{color:#e9dfc8;margin:0 0 18px;text-shadow:0 1px 4px #000}
+#opening .btn{font-size:1.15rem;padding:14px 26px}
+#opening .skip{position:absolute;right:14px;top:14px;z-index:2;background:rgba(0,0,0,.55);color:#f3ead7;border:1px solid #6b4b12;border-radius:8px;padding:10px 14px;font:600 .95rem Georgia,serif;cursor:pointer;min-height:44px}
+#opening .quiet{display:block;margin:14px auto 0;background:none;border:0;color:#cfc6b2;text-decoration:underline;font:1rem Georgia,serif;cursor:pointer;min-height:44px}
+.replay{background:none;border:0;color:var(--gold2,#f6d67a);text-decoration:underline;font:1rem Georgia,serif;cursor:pointer;margin-top:10px;min-height:44px}
 </style>
 </head>
-<body>
+<body data-beats-manual>
+<div id="opening" role="dialog" aria-modal="true" aria-label="Opening">
+  <canvas id="opCv" aria-hidden="true"></canvas>
+  <button class="skip" id="opSkip" type="button" hidden>Skip ▸</button>
+  <div class="gatebox" id="opGate">
+    <h2>The Pirates of Ybor</h2>
+    <p>Gaspar's Grotto presents. Turn your sound up: DJ Bouche is on the decks.</p>
+    <button class="btn" id="opGo" type="button">⚓ Set sail with sound</button>
+    <button class="quiet" id="opQuiet" type="button">Enter with no music</button>
+  </div>
+</div>
 <main class="wrap">
   <section class="hero">
     <div class="ship-hero" role="img" aria-label="Pirates of Ybor treasure ship: a black-sailed pirate ship in a storm with a glowing treasure chest">
@@ -33,11 +54,13 @@
     </div>
     </div>
     <div id="heroArt"></div>
+    <button class="replay" id="opReplay" type="button">🎬 Replay the opening</button>
   </section>
 
   <section>
     <h2>Choose your adventure</h2>
     <div class="grid">
+      <a class="card" href="club.html"><div class="icon">🎧</div><h3>Bouche &amp; Lita's Club</h3><p>DJ Bouche mixes East Coast, West Coast, Miami Bass, Dubstep and Rave live, with an underground rave below. Drop the bass and rock the floor. 21+. New!</p></a>
       <a class="card" href="parrot.html"><div class="icon">🦜</div><h3>Capitán Loro's Trivia</h3><p>A talking parrot reads every question aloud and squawks back in English and Spanish. Cannons, coins and a sea shanty. New!</p></a>
       <a class="card" href="trivia.html"><div class="icon">🧠</div><h3>Pirate Trivia</h3><p>Tampa, Ybor, Florida, the USA, movies and Gaspar's Grotto. Fresh questions every round.</p></a>
       <a class="card" href="treasure.html"><div class="icon">💰</div><h3>Treasure Hunt</h3><p>Dig the island grid for Gaspar's lost chest before your shovels run out.</p></a>
@@ -82,6 +105,77 @@
     </div>
   </section>
 </main>
+<script src="assets/beats.js"></script>
+<script>
+/* Opening cinematic: storm, treasure ship, title, then the beat drops. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+(function(){
+  var el=document.getElementById("opening"),cv=document.getElementById("opCv"),g=cv.getContext("2d"),B=window.PoyBeats;
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var img=new Image();img.src="assets/pirates-of-ybor-treasure-ship.jpg";
+  var W=0,H=0,t0=0,playing=false,done=false,raf=0,rain=[],sparks=[],bolt=0,bolts=[1.1,3.3,5.95],fired=[],dropped=false,LEN=11;
+  /* The opening plays every time the home page loads. */
+  document.body.setAttribute("data-beats-manual","");
+  function fit(){var d=Math.min(2,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0);}
+  function cover(z,fx,fy){if(!img.complete||!img.naturalWidth)return;var s=Math.max(W/img.naturalWidth,H/img.naturalHeight)*z,w=img.naturalWidth*s,h=img.naturalHeight*s;
+    var x=W/2-w*fx,y=H/2-h*fy;x=Math.min(0,Math.max(W-w,x));y=Math.min(0,Math.max(H-h,y));g.imageSmoothingQuality="high";g.drawImage(img,x,y,w,h);return{x:x,y:y,w:w,h:h};}
+  function text(t,y,size,a,col,sp){if(a<=0)return;g.save();g.globalAlpha=Math.min(1,a);g.font="700 "+size+"px Georgia,serif";g.textAlign="center";g.shadowColor="#000";g.shadowBlur=18;g.fillStyle=col||"#f3ead7";
+    if(sp){try{g.letterSpacing=sp+"px";}catch(e){}}g.fillText(t,W/2,y);g.restore();}
+  function fade(t,a,b,c,d){return t<a?0:t<b?(t-a)/(b-a):t<c?1:t<d?1-(t-c)/(d-c):0;}
+  function draw(ts){
+    if(done)return;raf=requestAnimationFrame(draw);
+    var t=playing?(ts-t0)/1000:0,k=Math.min(1,t/LEN),e=k*k*(3-2*k);
+    g.fillStyle="#020409";g.fillRect(0,0,W,H);
+    var r=cover(playing?1.06+e*.5:1.06,.5+e*.16,.5+e*.2);
+    /* storm tint */
+    g.fillStyle="rgba(4,10,18,"+(playing?.38-.2*e:.62)+")";g.fillRect(0,0,W,H);
+    if(playing&&!reduce){
+      /* fog */
+      for(var f=0;f<3;f++){var fx=((t*18*(f+1))%(W+600))-300,gr=g.createRadialGradient(fx,H*(.55+f*.12),10,fx,H*(.55+f*.12),W*.45);gr.addColorStop(0,"rgba(150,170,190,.10)");gr.addColorStop(1,"rgba(150,170,190,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);}
+      /* rain */
+      if(rain.length<160)for(var i=rain.length;i<160;i++)rain.push([Math.random()*W*1.3,Math.random()*H,9+Math.random()*12]);
+      g.strokeStyle="rgba(190,210,230,.35)";g.lineWidth=1;g.beginPath();rain.forEach(function(d){d[0]-=d[2]*.35;d[1]+=d[2];if(d[1]>H){d[1]=-20;d[0]=Math.random()*W*1.3;}g.moveTo(d[0],d[1]);g.lineTo(d[0]+d[2]*.4,d[1]-d[2]*1.3);});g.stroke();
+      /* gold rising from the chest */
+      if(r&&t>3.5){var cx=r.x+r.w*.72,cy=r.y+r.h*.8;if(sparks.length<70)sparks.push([cx+(Math.random()-.5)*r.w*.12,cy,(Math.random()-.5)*.8,-1-Math.random()*2,1]);
+        g.save();g.globalCompositeOperation="lighter";sparks.forEach(function(s){s[0]+=s[2];s[1]+=s[3];s[4]-=.012;g.fillStyle="rgba(255,214,110,"+Math.max(0,s[4])+")";g.beginPath();g.arc(s[0],s[1],1.6+s[4]*2,0,7);g.fill();});g.restore();sparks=sparks.filter(function(s){return s[4]>0;});
+        var cg=g.createRadialGradient(cx,cy,4,cx,cy,r.w*.2);cg.addColorStop(0,"rgba(255,200,90,"+(.25+.2*Math.sin(t*5))+")");cg.addColorStop(1,"rgba(255,200,90,0)");g.fillStyle=cg;g.fillRect(0,0,W,H);}
+      /* lightning */
+      bolts.forEach(function(b,i){if(t>=b&&!fired[i]){fired[i]=1;bolt=1;if(B)B.fx("thunder");}});
+      if(bolt>0){g.fillStyle="rgba(220,235,255,"+bolt*.5+")";g.fillRect(0,0,W,H);bolt-=.06;}
+    }
+    /* vignette and letterbox */
+    var v=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.75);v.addColorStop(0,"rgba(0,0,0,0)");v.addColorStop(1,"rgba(0,0,0,.8)");g.fillStyle=v;g.fillRect(0,0,W,H);
+    if(playing){var lb=H*.09;g.fillStyle="#000";g.fillRect(0,0,W,lb);g.fillRect(0,H-lb,W,lb);
+      var s=Math.min(W,900)/900,big=Math.max(30,74*s),mid=Math.max(16,26*s);
+      text("GASPAR'S GROTTO PRESENTS",H*.3,mid,fade(t,.4,1.2,2.6,3.2),"#e9dfc8",4);
+      text("A Pops & Pippy adventure",H*.3,mid*1.25,fade(t,3.3,4,5.3,5.8),"#f6d67a");
+      if(t>=6){if(!dropped){dropped=true;if(B){B.start(B.pref()==="off"?"east":undefined,false);B.fx("crash");}}
+        var p=Math.min(1,(t-6)/.35),sc=1+(1-p)*.6;g.save();g.translate(W/2,H*.36);g.scale(sc,sc);g.translate(-W/2,-H*.36);
+        if(W<560){text("THE PIRATES",H*.32,big,p,"#f6d67a");text("OF YBOR",H*.32+big*1.05,big,p,"#f6d67a");}else text("THE PIRATES OF YBOR",H*.38,big,p,"#f6d67a");g.restore();
+        text("East Coast · West Coast · Miami Bass · Dubstep · Rave",H*(W<560?.52:.48),Math.max(13,mid*.8),fade(t,7.2,7.9,LEN,LEN+1),"#e9dfc8");
+        text("DJ Bouche on the decks",H*(W<560?.57:.54),Math.max(13,mid*.8),fade(t,8.1,8.8,LEN,LEN+1),"#ff9a8a");}
+      if(t>=LEN)finish();
+    }
+  }
+  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);
+    document.body.removeAttribute("data-beats-manual");el.classList.add("out");setTimeout(function(){el.style.display="none";},950);
+    var f=document.querySelector(".ship-hero .btn");if(f)try{f.focus({preventScroll:true});}catch(e){}}
+  function play(music){
+    document.getElementById("opGate").style.display="none";document.getElementById("opSkip").hidden=false;
+    if(!music){if(B)B.stop();finish();return;}
+    if(B){if(B.pref()==="off"){try{localStorage.setItem("py_beat","east");}catch(e){}}B.fx("riser");}
+    if(reduce){if(B)B.start(B.pref()==="off"?"east":undefined,false);finish();return;}
+    playing=true;t0=performance.now();fired=[];dropped=false;sparks=[];
+  }
+  function open(){done=false;playing=false;el.style.display="";el.classList.remove("out");document.getElementById("opGate").style.display="";document.getElementById("opSkip").hidden=true;
+    document.body.setAttribute("data-beats-manual","");fit();raf=requestAnimationFrame(draw);}
+  document.getElementById("opGo").addEventListener("click",function(){play(true);});
+  document.getElementById("opQuiet").addEventListener("click",function(){play(false);});
+  document.getElementById("opSkip").addEventListener("click",function(){if(B&&!B.isOn())B.start(B.pref()==="off"?"east":undefined,false);finish();});
+  document.getElementById("opReplay").addEventListener("click",function(){if(B)B.stop(false);open();});
+  window.addEventListener("resize",function(){if(!done)fit();});
+  fit();raf=requestAnimationFrame(draw);
+})();
+</script>
 <script src="assets/site.js"></script>
 </body></html>
 

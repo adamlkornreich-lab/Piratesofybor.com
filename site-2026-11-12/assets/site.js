@@ -1,7 +1,9 @@
 /* Shared chrome for The Pirates of Ybor: header, footer, watermark, sign-in stub.
    © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
 (function(){
-  var NAV=[["index.html","Home"],["arcade.html","Arcade"],["world.html","Open World"],["crew.html","Crew"],["merch.html","Merch"],["plank-bar.html","Plank Bar"]];
+  /* DJ Bouche's beat engine: East Coast, West Coast, Miami Bass, Dubstep and Rave on every page. */
+  try{if(!window.PoyBeats){var bs=document.createElement("script");bs.src="assets/beats.js";document.head.appendChild(bs);}}catch(e){}
+  var NAV=[["index.html","Home"],["arcade.html","Arcade"],["world.html","Open World"],["club.html","Club"],["crew.html","Crew"],["merch.html","Merch"],["plank-bar.html","Plank Bar"]];
   var here=location.pathname.split("/").pop()||"index.html";
   var skull='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="30" r="20" fill="#f6d67a"/><circle cx="24" cy="28" r="5" fill="#0b0e14"/><circle cx="40" cy="28" r="5" fill="#0b0e14"/><path d="M28 40h8l-4 6z" fill="#0b0e14"/><rect x="22" y="46" width="20" height="6" rx="2" fill="#f6d67a"/><path d="M8 14 L56 50 M56 14 L8 50" stroke="#f6d67a" stroke-width="5" stroke-linecap="round"/><path d="M12 24c6-16 34-16 40 0-10-6-30-6-40 0z" fill="#b5532a"/></svg>';
   var header='<header class="top"><div class="wrap"><a class="brand" href="index.html">'+skull+'The Pirates of Ybor</a><nav class="main">'+

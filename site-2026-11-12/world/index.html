@@ -102,6 +102,16 @@ body,body *:not(canvas){font-family:"Pirata One",Georgia,serif !important;letter
 window.addEventListener('error',function(e){if(e.filename&&/\/world\/|three\.js/.test(e.filename))fail()});window.addEventListener('unhandledrejection',fail);
 setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)g.textContent='Still loading the island…'},12000);
 setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)fail()},60000)})();</script>
+<script src="../assets/beats.js"></script>
+<script>
+/* Grotto FM is DJ Bouche: the radio button steps through Miami Bass, East Coast, West Coast, Dubstep and Rave, then off. Music starts with the game. */
+(function(){var B=window.PoyBeats;if(!B)return;var ORD=["miami","east","west","dubstep","rave"];
+  function lab(){var b=document.getElementById("bRadio");if(!b)return;var on=B.isOn();b.setAttribute("aria-pressed",String(on));b.textContent=on?"📻 "+B.styles[B.pendingStyle()||B.style()].name:"📻 Off";b.style.width="auto";b.style.padding="0 10px";b.title=on?"Grotto FM with DJ Bouche: tap for the next sound":"Radio off: tap for music";b.setAttribute("aria-label",b.title);}
+  document.addEventListener("click",function(e){var t=e.target&&e.target.closest?e.target.closest("#bRadio,#bSound"):null;if(!t)return;
+    if(t.id==="bRadio"){e.stopPropagation();e.preventDefault();if(!B.isOn())B.start(ORD[0]);else{var i=ORD.indexOf(B.pendingStyle()||B.style());if(i<ORD.length-1)B.mixTo(ORD[i+1]);else B.stop();}lab();}
+    else setTimeout(function(){B.setMuted(t.getAttribute("aria-pressed")==="false");},0);},true);
+  B.onState(lab);if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",lab);else lab();})();
+</script>
 <script src="rooms.js"></script><script type="module" src="main.js" onerror="document.getElementById('no3d').style.display='grid'"></script>
 <script nomodule>document.getElementById('no3d').style.display='grid';document.getElementById('start').style.display='none'</script>
 </body></html>

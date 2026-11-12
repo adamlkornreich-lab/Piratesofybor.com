@@ -152,3 +152,8 @@ input,select{border:1px solid rgba(217,169,68,.45);background:#121318}
 .stat{background:#1b1c21;border:1px solid rgba(217,169,68,.4)}
 .notice{background:rgba(156,31,31,.18);border-color:rgba(224,74,58,.6);color:#ffd9d0}
 @media (prefers-reduced-motion:reduce){body::after{animation:none}}
+
+/* DJ Bouche music controls in the header */
+#beatBtn,#noMusicBtn{background:transparent;border:1px solid rgba(217,169,68,.45);color:var(--gold2);font:inherit;font-size:.95rem;padding:8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;min-height:40px}
+#beatBtn:hover,#noMusicBtn:hover{background:rgba(232,184,74,.14)}
+#noMusicBtn{color:var(--fog);border-color:rgba(255,255,255,.2)}
