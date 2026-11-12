@@ -1,5 +1,5 @@
 /* Pirates of Ybor beat engine: original East Coast and West Coast instrumentals,
-   made in the browser (no samples, nothing copied). DJ Bouche on deck.
+   made in the browser (no samples, nothing copied). DJ Josh Bouche on deck.
    © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
 (function(){
   if(window.PoyBeats)return;
@@ -236,7 +236,7 @@
 
   /* Header control: tap to cycle the five styles, then off. */
   var btn=null,offBtn=null;
-  function label(){if(!btn)return;btn.textContent="🎧 "+S[pending||style].name;btn.setAttribute("aria-pressed",String(on));if(offBtn){offBtn.textContent=on?"🔕 No music":"🎵 Music on";offBtn.title=on?"Turn the music off":"Turn the music back on";}btn.title="DJ Bouche: tap to switch East Coast, West Coast, Miami Bass, Dubstep or Rave";}
+  function label(){if(!btn)return;btn.textContent="🎧 "+S[pending||style].name;btn.setAttribute("aria-pressed",String(on));if(offBtn){offBtn.textContent=on?"🔕 No music":"🎵 Music on";offBtn.title=on?"Turn the music off":"Turn the music back on";}btn.title="DJ Josh Bouche: tap to switch East Coast, West Coast, Miami Bass, Dubstep or Rave";}
   function mount(){
     var nav=document.querySelector("header.top nav.main");if(!nav||document.getElementById("beatBtn"))return;
     btn=document.createElement("button");btn.id="beatBtn";btn.type="button";nav.appendChild(btn);

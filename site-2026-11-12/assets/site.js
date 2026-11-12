@@ -1,7 +1,7 @@
 /* Shared chrome for The Pirates of Ybor: header, footer, watermark, sign-in stub.
    © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
 (function(){
-  /* DJ Bouche's beat engine: East Coast, West Coast, Miami Bass, Dubstep and Rave on every page. */
+  /* DJ Josh Bouche's beat engine: East Coast, West Coast, Miami Bass, Dubstep and Rave on every page. */
   try{if(!window.PoyBeats){var bs=document.createElement("script");bs.src="assets/beats.js";document.head.appendChild(bs);}}catch(e){}
   /* Cinematic title card as each game opens. */
   try{if(!window.PoyCine){var cs=document.createElement("script");cs.src="assets/cine.js";document.head.appendChild(cs);}}catch(e){}

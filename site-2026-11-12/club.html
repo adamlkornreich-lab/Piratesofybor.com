@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bouche &amp; Lita's Club — The Pirates of Ybor</title>
-<meta name="description" content="DJ Bouche and Lita's club on Ybor Cay: East Coast, West Coast, Miami Bass, Dubstep and Rave, mixed live, with an underground rave floor and a rhythm game.">
+<title>Flex Grotto — The Pirates of Ybor</title>
+<meta name="description" content="Flex Grotto, Josh Bouche and Lita's club on Ybor Cay: East Coast, West Coast, Miami Bass, Dubstep and Rave, mixed live, with an underground rave floor and a rhythm game.">
 <link rel="stylesheet" href="assets/site.css">
 <style>
-/* Bouche & Lita's Club. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+/* Flex Grotto: Josh Bouche & Lita's club. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
 .club-head{text-align:center;padding:26px 0 8px}
 .club-head .kick{display:block;color:var(--ember,#e2622b);letter-spacing:.28em;text-transform:uppercase;font-size:.8rem}
 .club-head h1{margin:4px 0 4px;font-size:clamp(2rem,6.5vw,3.6rem);color:var(--gold2,#f6d67a);text-shadow:0 0 24px rgba(255,63,164,.45),0 3px 0 #2a1608}
@@ -36,7 +36,7 @@
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT">
   <div class="box">
     <div class="age" aria-hidden="true">21+</div>
-    <h2 id="gateT">Bouche &amp; Lita's is 21 and over</h2>
+    <h2 id="gateT">Flex Grotto is 21 and over</h2>
     <p>Lita is on the door. No one under 21 gets into the club. Everything else on the ship is open to all ages.</p>
     <button class="btn" id="gateYes" type="button">I'm 21 or older — let me in</button>
     <a class="btn ghost" href="arcade.html">I'm under 21 — back to the Arcade</a>
@@ -45,9 +45,9 @@
 
 <main class="wrap">
   <section class="club-head">
-    <span class="kick">Ybor Cay after dark · 21+</span>
-    <h1>Bouche &amp; Lita's</h1>
-    <p>DJ Bouche on the decks. Lita runs the room. Five sounds, mixed live on the bar line, and an underground rave below the floorboards.</p>
+    <span class="kick">Josh Bouche &amp; Lita's club · Ybor Cay after dark · 21+</span>
+    <h1>Flex Grotto</h1>
+    <p>DJ Josh Bouche on the decks. Lita runs the room. Five sounds mixed live on the bar line, a Miami-style laser show on both floors, and an underground rave below the floorboards.</p>
   </section>
 
   <div class="floors" role="group" aria-label="Choose a floor">
@@ -55,7 +55,7 @@
     <button type="button" id="fUnder" aria-pressed="false">🔦 The Underground Rave</button>
   </div>
 
-  <div class="stage"><canvas id="cv" width="960" height="600" aria-label="The club: DJ Bouche at the decks, Lita on the mic, lights and a dance floor moving to the beat"></canvas></div>
+  <div class="stage"><canvas id="cv" width="960" height="600" aria-label="Flex Grotto: DJ Josh Bouche at the decks, Lita on the mic, lights and a dance floor moving to the beat"></canvas></div>
   <p class="now" id="now" aria-live="polite">Tap a deck to start the music.</p>
   <p class="lita" id="lita" aria-live="polite"></p>
 
@@ -90,17 +90,17 @@
   /* 21+ door */
   var gate=$("gate"),ok=false;try{ok=sessionStorage.getItem("py_club21")==="1";}catch(e){}
   if(ok)gate.hidden=true;
-  $("gateYes").addEventListener("click",function(){gate.hidden=true;try{sessionStorage.setItem("py_club21","1");}catch(e){}B.start(B.pref()==="off"?"east":B.style());say("Lita: Welcome to Bouche & Lita's. Coats on the cannon, drinks at the bar, Bouche has the decks.");});
+  $("gateYes").addEventListener("click",function(){gate.hidden=true;try{sessionStorage.setItem("py_club21","1");}catch(e){}B.start(B.pref()==="off"?"east":B.style());say("Lita: Welcome to Flex Grotto. Coats on the cannon, drinks at the bar, Josh Bouche has the decks.");});
 
   /* decks */
   var decks=$("decks");
   B.order.forEach(function(k){var b=document.createElement("button");b.type="button";b.dataset.k=k;b.innerHTML=B.styles[k].name+"<small>"+TAG[k]+"</small>";decks.appendChild(b);
     b.addEventListener("click",function(){if(game)return;if(!B.isOn()){B.start(k);say(line("start",k));}else if(k!==B.style()||B.pendingStyle()){B.mixTo(k);say(line("mix",k));}ui();});});
   function line(kind,k){var n=k&&B.styles[k]?B.styles[k].name:"";
-    var L={start:["Lita: "+n+" to open the night. Hands up, Ybor!","DJ Bouche: "+n+" on deck one. Let's work."],
-      mix:["DJ Bouche: Bringing in "+n+" on the bar line. Wait for the drop…","Lita: Hold tight, "+n+" is coming in. Here it comes…"],
-      drop:["Lita: BASS! Everybody down low, then jump!","DJ Bouche: Here comes the drop. Three, two, one…"],
-      under:["Lita: Down the hatch. The Underground is open: lasers on, phones away.","DJ Bouche: Underground set. Dubstep, rave, Miami bass, whatever you call for."],
+    var L={start:["Lita: "+n+" to open the night. Hands up, Ybor!","DJ Josh Bouche: "+n+" on deck one. Let's work."],
+      mix:["DJ Josh Bouche: Bringing in "+n+" on the bar line. Wait for the drop…","Lita: Hold tight, "+n+" is coming in. Here it comes…"],
+      drop:["Lita: BASS! Everybody down low, then jump!","DJ Josh Bouche: Here comes the drop. Three, two, one…"],
+      under:["Lita: Down the hatch. The Underground is open: lasers on, phones away.","DJ Josh Bouche: Underground set. Dubstep, rave, Miami bass, whatever you call for."],
       main:["Lita: Back upstairs to the Main Floor. East to West, we play it all."]};
     var a=L[kind];return a[Math.floor(Math.random()*a.length)];}
   function say(t){$("lita").textContent=t;}
@@ -135,7 +135,7 @@
   function endGame(done){if(!game)return;var r=game;game=null;notes=[];$("taps").hidden=true;
     if(done){try{if(window.PY&&PY.best)best=PY.best("club",r.score);}catch(e){}
       var tot=r.hits+r.miss,acc=tot?Math.round(r.hits/tot*100):0;
-      say("Lita: Set over. "+r.score+" points, "+acc+"% on beat, best streak "+r.max+". "+(acc>=80?"The floor is PACKED. Bouche wants you back tomorrow.":acc>=50?"Good crowd. Run it again and fill the corners.":"Shake it off and try another sound."));
+      say("Lita: Set over. "+r.score+" points, "+acc+"% on beat, best streak "+r.max+". "+(acc>=80?"The floor is PACKED. Josh Bouche wants you back tomorrow.":acc>=50?"Good crowd. Run it again and fill the corners.":"Shake it off and try another sound."));
       if(acc>=80&&window.PY&&PY.celebrate)PY.celebrate();}
     ui();}
   $("pGame").addEventListener("click",function(){if(game)endGame(false);else startGame();});
@@ -178,12 +178,16 @@
     if(under){g.strokeStyle="rgba(120,130,140,.22)";g.lineWidth=14;for(var a=0;a<4;a++){g.beginPath();g.arc(W/2,330,300+a*130,Math.PI,0);g.stroke();}
       g.strokeStyle="rgba(90,100,110,.35)";g.lineWidth=7;g.beginPath();g.moveTo(0,46);g.lineTo(W,46);g.moveTo(0,66);g.lineTo(W,66);g.stroke();}
     else{g.fillStyle="rgba(255,255,255,.025)";for(var by=0;by<8;by++)for(var bx=0;bx<17;bx++)g.fillRect(bx*60+(by%2?30:0)-20,by*34+10,54,28);}
-    glowText(under?"THE UNDERGROUND":"BOUCHE & LITA'S",W/2,74,under?46:52,pal[0],.75+.25*pulse);
-    glowText(under?"RAVE · DUBSTEP · MIAMI BASS":"EAST · WEST · MIAMI · ALL NIGHT",W/2,104,17,pal[1],.8);
+    glowText(under?"THE UNDERGROUND":"FLEX GROTTO",W/2,74,under?46:56,pal[0],.75+.25*pulse);
+    glowText(under?"FLEX GROTTO · RAVE · DUBSTEP · MIAMI BASS":"JOSH BOUCHE & LITA'S · EAST · WEST · MIAMI",W/2,104,17,pal[1],.8);
     /* lights */
     g.save();g.globalCompositeOperation="lighter";
-    if(under){for(var l=0;l<14;l++){var ox=l%2?150:W-150,ang=Math.sin(T*.9*mv+l*.7)*.9+(l%2?.5:-.5)+Math.PI/2;g.strokeStyle=pal[l%pal.length];g.globalAlpha=.16+.3*pulse;g.lineWidth=2;g.beginPath();g.moveTo(ox,60);g.lineTo(ox+Math.cos(ang)*900,60+Math.sin(ang)*900);g.stroke();}}
-    else{for(var l2=0;l2<6;l2++){var x0=110+l2*148,an=Math.sin(T*.7*mv+l2*1.3)*.5,x1=x0+an*420;var gr=g.createLinearGradient(x0,40,x1,H);gr.addColorStop(0,pal[l2%2]);gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.globalAlpha=.16+.22*pulse;g.beginPath();g.moveTo(x0-6,40);g.lineTo(x0+6,40);g.lineTo(x1+90,H);g.lineTo(x1-90,H);g.closePath();g.fill();}}
+    /* Miami-style laser show on both floors: two truss heads throwing fans that open and close on the beat */
+    var fanN=under?11:7,spread=(under?.95:.6)*(.55+.45*Math.sin(T*.5*mv))+pulse*.12;
+    [[150,58,1],[W-150,58,-1],[W/2,46,0]].forEach(function(hd,hi){var aim=Math.PI/2+hd[2]*-.45+Math.sin(T*(.6+hi*.17)*mv+hi)*.35;
+      for(var l=0;l<fanN;l++){var ang=aim+(l/(fanN-1)-.5)*spread*2;g.strokeStyle=pal[(l+hi)%pal.length];g.globalAlpha=(under?.2:.13)+.3*pulse;g.lineWidth=under?2:1.6;g.beginPath();g.moveTo(hd[0],hd[1]);g.lineTo(hd[0]+Math.cos(ang)*900,hd[1]+Math.sin(ang)*900);g.stroke();}
+      g.globalAlpha=.9;g.fillStyle="#fff";g.beginPath();g.arc(hd[0],hd[1],3+pulse*3,0,7);g.fill();});
+    if(!under){for(var l2=0;l2<6;l2++){var x0=110+l2*148,an=Math.sin(T*.7*mv+l2*1.3)*.5,x1=x0+an*420;var gr=g.createLinearGradient(x0,40,x1,H);gr.addColorStop(0,pal[l2%2]);gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.globalAlpha=.12+.18*pulse;g.beginPath();g.moveTo(x0-6,40);g.lineTo(x0+6,40);g.lineTo(x1+90,H);g.lineTo(x1-90,H);g.closePath();g.fill();}}
     g.restore();
     /* speakers */
     [70,W-70].forEach(function(sx){var sc=1+pulse*.05;g.save();g.translate(sx,300);g.scale(sc,sc);g.fillStyle="#0c0c10";g.strokeStyle="#3a3a44";g.lineWidth=3;g.fillRect(-48,-120,96,240);g.strokeRect(-48,-120,96,240);
@@ -195,7 +199,7 @@
     g.globalAlpha=1;
     /* booth */
     g.fillStyle="#120d0a";g.strokeStyle="#6b4b12";g.lineWidth=4;g.beginPath();g.rect(W/2-170,300,340,74);g.fill();g.stroke();
-    glowText("DJ BOUCHE",W/2,350,22,pal[1],.9);
+    glowText("DJ JOSH BOUCHE",W/2,350,20,pal[1],.9);
     var bob=on?pulse*7:0;
     person(W/2,304,1.05,{hat:1,coat:"#1c2a4a",trim:"#f6d67a",skin:"#8a5a3c",bob:bob,arm:on?.25+snr*.5:0,arm2:on?.2+pulse*.3:0});
     [-108,108].forEach(function(dx,q){g.save();g.translate(W/2+dx,292);g.scale(1,.38);g.fillStyle="#0a0a0d";g.beginPath();g.arc(0,0,44,0,7);g.fill();g.strokeStyle="#444";g.lineWidth=2;for(var rr=14;rr<44;rr+=9){g.beginPath();g.arc(0,0,rr,0,7);g.stroke();}
@@ -234,7 +238,7 @@
   }
   function fit(){var dpr=Math.min(2,window.devicePixelRatio||1),w=cv.clientWidth||960;cv.width=Math.round(w*dpr);cv.height=Math.round(w*H/W*dpr);g.setTransform(cv.width/W,0,0,cv.height/H,0,0);}
   window.addEventListener("resize",fit);fit();ui();requestAnimationFrame(frame);
-  if(ok){say("Lita: Welcome back. Tap a deck and Bouche will take it from there.");}
+  if(ok){say("Lita: Welcome back. Tap a deck and Josh Bouche will take it from there.");}
 })();
 </script>
 </body></html>

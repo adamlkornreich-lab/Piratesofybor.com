@@ -107,9 +107,9 @@ setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)fail(
 <script src="../assets/cine.js"></script>
 <script>if(window.PoyCine)PoyCine.card({kick:"Gaspar's Grotto presents",title:"Ybor Cay: Plunder & Heat",sub:["Crack the supply drops. Outrun the marines.","Beat the squall. Claim the bounty.","Every visit, the island deals a new hand."][Math.floor(Math.random()*3)],button:"⚓ Drop anchor"});</script>
 <script>
-/* Grotto FM is DJ Bouche: the radio button steps through Miami Bass, East Coast, West Coast, Dubstep and Rave, then off. Music starts with the game. */
+/* Grotto FM is DJ Josh Bouche: the radio button steps through Miami Bass, East Coast, West Coast, Dubstep and Rave, then off. Music starts with the game. */
 (function(){var B=window.PoyBeats;if(!B)return;var ORD=["miami","east","west","dubstep","rave"];
-  function lab(){var b=document.getElementById("bRadio");if(!b)return;var on=B.isOn();b.setAttribute("aria-pressed",String(on));b.textContent=on?"📻 "+B.styles[B.pendingStyle()||B.style()].name:"📻 Off";b.style.width="auto";b.style.padding="0 10px";b.title=on?"Grotto FM with DJ Bouche: tap for the next sound":"Radio off: tap for music";b.setAttribute("aria-label",b.title);}
+  function lab(){var b=document.getElementById("bRadio");if(!b)return;var on=B.isOn();b.setAttribute("aria-pressed",String(on));b.textContent=on?"📻 "+B.styles[B.pendingStyle()||B.style()].name:"📻 Off";b.style.width="auto";b.style.padding="0 10px";b.title=on?"Grotto FM with DJ Josh Bouche: tap for the next sound":"Radio off: tap for music";b.setAttribute("aria-label",b.title);}
   document.addEventListener("click",function(e){var t=e.target&&e.target.closest?e.target.closest("#bRadio,#bSound"):null;if(!t)return;
     if(t.id==="bRadio"){e.stopPropagation();e.preventDefault();if(!B.isOn())B.start(ORD[0]);else{var i=ORD.indexOf(B.pendingStyle()||B.style());if(i<ORD.length-1)B.mixTo(ORD[i+1]);else B.stop();}lab();}
     else setTimeout(function(){B.setMuted(t.getAttribute("aria-pressed")==="false");},0);},true);

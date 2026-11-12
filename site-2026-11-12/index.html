@@ -34,7 +34,7 @@
   <button class="skip" id="opSkip" type="button" hidden>Skip ▸</button>
   <div class="gatebox" id="opGate">
     <h2>The Pirates of Ybor</h2>
-    <p>Gaspar's Grotto presents. Turn your sound up: DJ Bouche is on the decks.</p>
+    <p>Gaspar's Grotto presents. Turn your sound up: DJ Josh Bouche is on the decks.</p>
     <button class="btn" id="opGo" type="button">⚓ Set sail with sound</button>
     <button class="quiet" id="opQuiet" type="button">Enter with no music</button>
   </div>
@@ -60,7 +60,7 @@
   <section>
     <h2>Choose your adventure</h2>
     <div class="grid">
-      <a class="card" href="club.html"><div class="icon">🎧</div><h3>Bouche &amp; Lita's Club</h3><p>DJ Bouche mixes East Coast, West Coast, Miami Bass, Dubstep and Rave live, with an underground rave below. Drop the bass and rock the floor. 21+. New!</p></a>
+      <a class="card" href="club.html"><div class="icon">🎧</div><h3>Flex Grotto</h3><p>Josh Bouche &amp; Lita's club. DJ Josh Bouche mixes East Coast, West Coast, Miami Bass, Dubstep and Rave live, with an underground rave below, with a laser show on both floors. Drop the bass and rock the floor. 21+. New!</p></a>
       <a class="card" href="parrot.html"><div class="icon">🦜</div><h3>Capitán Loro's Trivia</h3><p>A talking parrot reads every question aloud and squawks back in English and Spanish. Cannons, coins and a sea shanty. New!</p></a>
       <a class="card" href="trivia.html"><div class="icon">🧠</div><h3>Pirate Trivia</h3><p>Tampa, Ybor, Florida, the USA, movies and Gaspar's Grotto. Fresh questions every round.</p></a>
       <a class="card" href="treasure.html"><div class="icon">💰</div><h3>Treasure Hunt</h3><p>Dig the island grid for Gaspar's lost chest before your shovels run out.</p></a>
@@ -152,7 +152,7 @@
         var p=Math.min(1,(t-6)/.35),sc=1+(1-p)*.6;g.save();g.translate(W/2,H*.36);g.scale(sc,sc);g.translate(-W/2,-H*.36);
         if(W<560){text("THE PIRATES",H*.32,big,p,"#f6d67a");text("OF YBOR",H*.32+big*1.05,big,p,"#f6d67a");}else text("THE PIRATES OF YBOR",H*.38,big,p,"#f6d67a");g.restore();
         text("East Coast · West Coast · Miami Bass · Dubstep · Rave",H*(W<560?.52:.48),Math.max(13,mid*.8),fade(t,7.2,7.9,LEN,LEN+1),"#e9dfc8");
-        text("DJ Bouche on the decks",H*(W<560?.57:.54),Math.max(13,mid*.8),fade(t,8.1,8.8,LEN,LEN+1),"#ff9a8a");}
+        text("DJ Josh Bouche on the decks",H*(W<560?.57:.54),Math.max(13,mid*.8),fade(t,8.1,8.8,LEN,LEN+1),"#ff9a8a");}
       if(t>=LEN)finish();
     }
   }
