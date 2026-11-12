@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Island League — The Pirates of Ybor</title>
+<meta name="description" content="Every island in Ybor Cay has its own football or basketball team. Pick a team, step into its stadium and take the shootout.">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Island League. Original teams for every island. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
+.lg{max-width:1100px;margin:0 auto;padding:10px 12px 110px}
+.tw{position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(217,169,68,.5);background:#000}
+#cv{display:block;width:100%;height:auto;aspect-ratio:16/10;touch-action:none}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:10px}.tbl th,.tbl td{padding:8px 6px;border-bottom:1px solid #2a2c35;text-align:left}.tbl th{color:#f6d67a;font:700 .85rem Georgia,serif}
+.tbl tr[data-t]{cursor:pointer}.tbl tr[data-t]:hover,.tbl tr.sel{background:#2a2112}
+.tbl .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.bar .btn{min-height:46px}
+.pp-watermark{pointer-events:none}
+</style></head>
+<body>
+<main class="lg">
+  <section class="hero" style="padding:6px 0 4px"><span class="kick">Every island has a team</span><h1>🏟 Island League</h1>
+    <p class="lead">Football and basketball on every island. Pick a team and take the shootout: hit the sweet spot on the power meter and beat the wind. Fight Night is on Danny Alonso Island.</p></section>
+  <div class="tw"><canvas id="cv" width="960" height="600" aria-label="Shootout"></canvas></div>
+  <div class="bar"><button class="btn" type="button" id="shoot">🎯 Shoot (tap the screen or Space)</button><button class="btn ghost" type="button" id="again">🔁 New game</button><a class="btn ghost" href="fight.html">🥊 Fight Night</a><a class="btn ghost" href="world.html">🗺 Open World</a></div>
+  <p id="msg" aria-live="polite" style="color:#f6d67a;min-height:1.4em"></p>
+  <table class="tbl"><thead><tr><th>Team</th><th>Home</th><th>Sport</th><th>W-L</th></tr></thead><tbody id="tb"></tbody></table>
+</main>
+<script src="assets/beats.js"></script>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+var T=[["main","Ybor Cay Cannons","Ybor Cay","football","#f6d67a"],["gaspar","Gaspar's Rock Krakens","Gaspar's Rock","football","#ff5a3c"],["mangrove","Mangrove Key Gators","Mangrove Key","basketball","#8dff8a"],
+ ["ruben","Ruben's Rhythm Raiders","Ruben Alvarez Island","basketball","#ffb347"],["adamashlee","Adam & Ashlee Admirals","Adam and Ashlee Island","football","#ff6fb1"],["ericshere","Eric & Shere Sharpshooters","Eric and Shere Island","basketball","#ff5a3c"],
+ ["landonshere","Landon & Shere Lagoon Lions","Landon and Shere Island","football","#7be0ff"],["seavey","Andy Seavey Swingers","Andy Seavey Golf Club","basketball","#8dff8a"],["evanelise","Evan & Elise Emperors","Evan and Elise Island","football","#ffd24d"],
+ ["ambervick","Amber & Vick Vipers","Amber and Vick Island","basketball","#c9a0ff"],["gerald","Gerald's Gold Galleons","Gerald I. Kornreich Island","football","#ffd24d"],["kevincraig","Kevin & Craig Corsairs","Kevin and Craig Island","basketball","#ff8a3c"],
+ ["lorilarry","Lori & Larry Lighthouse Keepers","Aunt Lori and Uncle Larry Island","football","#ff6fb1"],["sadie","Sadie's Sea Stars","Sadie Island","basketball","#7be0ff"],["megan","Megan's Moonrakers","Megan Massok Island","football","#8dff8a"],
+ ["greg","Greg's Gulf Hammerheads","Greg Biggerstaff Island","basketball","#ffb347"],["brenner","Brenner Brigantines","Mark Brenner Island","football","#c9a0ff"],["lafferty","Lafferty Longboats","Ed Lafferty Island","basketball","#ff5a3c"],
+ ["nakamura","Nakamura Nightingales","Daisuke Nakamura and Family Island","football","#ffd24d"],["message","Message Island Messengers","Message Island","basketball","#35f0d8"],["chile","Chile Island Cóndores","Chile Island","football","#ff5a3c"]];
+var $=function(i){return document.getElementById(i);},rec;try{rec=JSON.parse(localStorage.getItem("py_league")||"{}");}catch(e){rec={};}
+var q=new URLSearchParams(location.search).get("team"),cur=T.find(function(t){return t[0]===q;})||T[0];
+function drawT(){$("tb").innerHTML=T.map(function(t){var r=rec[t[0]]||[0,0];return '<tr data-t="'+t[0]+'"'+(t===cur?' class="sel"':'')+' tabindex="0"><td><span class="sw" style="background:'+t[4]+'"></span>'+t[1]+'</td><td>'+t[2]+'</td><td>'+(t[3]==="football"?"🏈 Football":"🏀 Basketball")+'</td><td>'+r[0]+'-'+r[1]+'</td></tr>';}).join("");}
+$("tb").addEventListener("click",function(e){var r=e.target.closest("[data-t]");if(!r)return;cur=T.find(function(t){return t[0]===r.dataset.t;});drawT();reset();window.scrollTo({top:0,behavior:"smooth"});});
+$("tb").addEventListener("keydown",function(e){if(e.key==="Enter")e.target.click();});
+var cv=$("cv"),g=cv.getContext("2d"),W=960,H=600,S;
+function reset(){S={shots:0,made:0,max:10,meter:0,dir:1,aim:0,adir:1,ball:null,wind:(Math.random()-.5)*2,msg:"",crowd:0,done:false};$("msg").textContent=cur[1]+" · "+(cur[3]==="football"?"kick 10 field goals":"shoot 10 from the arc")+". Make 7 to win.";}
+function shoot(){if(S.done){reset();return;}if(S.ball)return;var p=S.meter,a=S.aim;S.shots++;S.ball={t:0,p:p,a:a};try{PY&&PY.knock&&PY.knock();}catch(e){}}
+$("shoot").onclick=shoot;$("again").onclick=reset;cv.addEventListener("pointerdown",function(e){e.preventDefault();shoot();});
+addEventListener("keydown",function(e){if(e.code==="Space"&&document.activeElement.tagName!=="BUTTON"){e.preventDefault();shoot();}});
+function land(ok){if(ok){S.made++;S.crowd=1;try{PoyBeats&&PoyBeats.fx("hit");}catch(e){}}else{try{PoyBeats&&PoyBeats.fx("miss");}catch(e){}}S.msg=ok?(cur[3]==="football"?"IT'S GOOD!":"SWISH!"):"NO GOOD";S.mt=1.2;
+  if(S.shots>=S.max){S.done=true;var won=S.made>=7,r=rec[cur[0]]||[0,0];r[won?0:1]++;rec[cur[0]]=r;try{localStorage.setItem("py_league",JSON.stringify(rec));}catch(e){}drawT();
+    if(won&&window.PY)PY.celebrate(60+S.made*10);$("msg").textContent=(won?"🏆 Win for the "+cur[1]+"! ":"Close one. ")+S.made+" of 10. Tap to play again.";}
+  else S.wind=(Math.random()-.5)*2;}
+var last=performance.now();
+function loop(now){var dt=Math.min(.05,(now-last)/1000);last=now;S.meter+=S.dir*dt*1.5;if(S.meter>1){S.meter=1;S.dir=-1;}if(S.meter<0){S.meter=0;S.dir=1;}S.aim+=S.adir*dt*1.1;if(S.aim>1){S.aim=1;S.adir=-1;}if(S.aim<-1){S.aim=-1;S.adir=1;}
+  S.crowd=Math.max(0,S.crowd-dt*.7);if(S.mt)S.mt-=dt;draw(now/1000,dt);requestAnimationFrame(loop);}
+function draw(t,dt){var sx=cv.width/W;g.setTransform(sx,0,0,sx,0,0);var fb=cur[3]==="football",col=cur[4];
+  var sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#05070d");sky.addColorStop(.55,"#1a1030");sky.addColorStop(1,"#0b0c10");g.fillStyle=sky;g.fillRect(0,0,W,H);
+  /* stands and crowd */for(var r=0;r<4;r++){g.fillStyle=["#1a1418","#201820","#261c24","#2c2028"][r];g.fillRect(0,90+r*40,W,42);for(var i=0;i<34;i++){var x=(i+.5)/34*W+(r%2)*12,y=110+r*40+Math.sin(t*(4+S.crowd*8)+i*1.7+r)*(1+S.crowd*6);g.fillStyle=i%5===0?col:["#e0b48c","#a86d48","#f1c9a5","#6a3e22"][(i+r)%4];g.beginPath();g.arc(x,y,7,0,6.29);g.fill();}}
+  for(var k=0;k<4;k++){var lg=g.createRadialGradient(120+k*240,40,5,120+k*240,40,200);lg.addColorStop(0,"rgba(255,248,220,.5)");lg.addColorStop(1,"rgba(255,248,220,0)");g.fillStyle=lg;g.fillRect(k*240-80,0,400,240);g.fillStyle="#fffbe6";g.fillRect(100+k*240,30,40,14);}
+  /* banner */g.fillStyle="#0b0c10";g.fillRect(240,8,480,52);g.strokeStyle=col;g.lineWidth=3;g.strokeRect(240,8,480,52);g.fillStyle=col;g.font="700 26px Georgia";g.textAlign="center";g.fillText(cur[1],480,43);
+  /* field / court */
+  if(fb){g.fillStyle="#2f8a3a";g.beginPath();g.moveTo(0,H);g.lineTo(240,250);g.lineTo(720,250);g.lineTo(W,H);g.fill();g.strokeStyle="rgba(255,255,255,.6)";g.lineWidth=2;for(var l=0;l<6;l++){var yy=260+l*l*12+l*20;g.beginPath();g.moveTo(240-(yy-250)*.72,yy);g.lineTo(720+(yy-250)*.72,yy);g.stroke();}
+    /* uprights */g.strokeStyle="#ffd24d";g.lineWidth=6;g.beginPath();g.moveTo(480,250);g.lineTo(480,205);g.moveTo(420,205);g.lineTo(540,205);g.moveTo(420,205);g.lineTo(420,110);g.moveTo(540,205);g.lineTo(540,110);g.stroke();}
+  else{g.fillStyle="#b07a3e";g.beginPath();g.moveTo(0,H);g.lineTo(200,280);g.lineTo(760,280);g.lineTo(W,H);g.fill();g.strokeStyle="rgba(255,255,255,.7)";g.lineWidth=3;g.beginPath();g.ellipse(480,330,170,40,0,0,Math.PI);g.stroke();g.fillStyle=col;g.globalAlpha=.35;g.beginPath();g.moveTo(400,280);g.lineTo(560,280);g.lineTo(590,360);g.lineTo(370,360);g.fill();g.globalAlpha=1;
+    /* hoop */g.fillStyle="#eee";g.fillRect(420,110,120,80);g.strokeStyle="#c22a2a";g.lineWidth=4;g.strokeRect(455,140,50,36);g.fillStyle="#555";g.fillRect(476,190,8,90);g.strokeStyle="#ff6a1e";g.lineWidth=5;g.beginPath();g.ellipse(480,196,26,7,0,0,6.29);g.stroke();
+    g.strokeStyle="rgba(255,255,255,.7)";g.lineWidth=1.5;for(var n=0;n<6;n++){g.beginPath();g.moveTo(456+n*9.6,198);g.lineTo(466+n*5.6,226);g.stroke();}}
+  /* wind */g.fillStyle="#9fd8ff";g.font="700 16px system-ui";g.textAlign="left";g.fillText("WIND "+(S.wind<0?"◀ ":"")+Math.abs(S.wind*10).toFixed(0)+" mph"+(S.wind>0?" ▶":""),24,30);
+  g.textAlign="right";g.fillStyle="#fff";g.fillText("MADE "+S.made+" / "+S.shots+"   ·   "+(S.max-S.shots)+" left",936,30);
+  /* ball flight */var bx=480,by=560;if(S.ball){var b=S.ball;b.t+=dt/1.1;var k2=Math.min(1,b.t),tgtY=fb?150:196,off=b.a*130+S.wind*45,pw=b.p,short=pw<.62?(.62-pw)*500:0,long=pw>.9?(pw-.9)*500:0;
+    var ex=480+off,ey=tgtY+short-long*.3;bx=480+(ex-480)*k2;by=560+(ey-560)*k2-Math.sin(k2*Math.PI)*(fb?260:200)*(.6+pw*.6);var rad=22*(1-.6*k2);
+    g.save();g.translate(bx,by);g.rotate(t*9);if(fb){g.fillStyle="#7a3e1a";g.beginPath();g.ellipse(0,0,rad*1.3,rad*.8,0,0,6.29);g.fill();g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.moveTo(-rad*.4,0);g.lineTo(rad*.4,0);g.stroke();}else{g.fillStyle="#e2661e";g.beginPath();g.arc(0,0,rad,0,6.29);g.fill();g.strokeStyle="#2a1206";g.lineWidth=2;g.beginPath();g.arc(0,0,rad,0,6.29);g.moveTo(-rad,0);g.lineTo(rad,0);g.moveTo(0,-rad);g.lineTo(0,rad);g.stroke();}g.restore();
+    if(b.t>=1){var ok=fb?Math.abs(off)<55&&short<40&&long<60:Math.abs(off)<20&&short<14&&long<20;S.ball=null;land(ok);}}
+  else{g.fillStyle=fb?"#7a3e1a":"#e2661e";g.beginPath();g.ellipse(480,560,fb?28:22,fb?17:22,0,0,6.29);g.fill();}
+  /* meters */g.fillStyle="rgba(0,0,0,.6)";g.fillRect(890,300,40,240);var zg=g.createLinearGradient(0,540,0,300);zg.addColorStop(0,"#c22a2a");zg.addColorStop(.62,"#ffd24d");zg.addColorStop(.76,"#2fbf5a");zg.addColorStop(.9,"#ffd24d");zg.addColorStop(1,"#c22a2a");g.fillStyle=zg;g.fillRect(894,304,32,232);
+  g.fillStyle="#fff";g.fillRect(886,536-S.meter*232,48,5);g.font="700 13px system-ui";g.textAlign="center";g.fillText("POWER",910,560);
+  g.fillStyle="rgba(0,0,0,.6)";g.fillRect(330,575,300,16);g.fillStyle="#2fbf5a";g.fillRect(465,575,30,16);g.fillStyle="#fff";g.fillRect(478+S.aim*148,571,5,24);
+  if(S.mt>0&&S.msg){g.globalAlpha=Math.min(1,S.mt*2);g.font="900 64px Georgia";g.textAlign="center";g.lineWidth=7;g.strokeStyle="#000";g.strokeText(S.msg,480,330);g.fillStyle=S.msg==="NO GOOD"?"#ff5a3c":"#f6d67a";g.fillText(S.msg,480,330);g.globalAlpha=1;}}
+function size(){var r=cv.getBoundingClientRect(),w=Math.round(r.width*Math.min(2,devicePixelRatio||1));if(w&&Math.abs(cv.width-w)>8){cv.width=w;cv.height=Math.round(w*H/W);}}addEventListener("resize",size);
+reset();drawT();size();requestAnimationFrame(loop);
+})();
+</script>
+</body></html>

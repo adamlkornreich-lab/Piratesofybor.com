@@ -12,6 +12,7 @@ import {makePirate,makeLady,animatePirate,makePops,makePippy,animatePet,makeChic
 import {makeBattle} from './monsters.js';
 import {makeHeat} from './heat.js';
 import {makeShow} from './show.js';
+import {makeVenues} from './venues.js';
 import {makeGPS} from './gps.js';
 import {buildFolk,SEVENTH} from './folk.js';
 import {audio} from './audio.js';
@@ -181,6 +182,7 @@ async function main(){
    if(q==='chest'){let best=null,bd=1e9;for(const h of CH)if(!h.opened){const d=Math.hypot(h.x-pp.x,h.z-pp.z);if(d<bd){bd=d;best=h}}if(best)G.set({name:'Treasure chest',x:best.x,z:best.z,r:6});else toast('Every chest is open')}
    showPlaces(false)})}catch(e){console.warn('gps',e)}
  const show=makeShow({root,P,groundAt,heightAt,toast,audio,$,QL,hour:()=>hour});
+ let venues=null;try{venues=makeVenues({root,P,groundAt,heightAt,$,QL})}catch(e){console.warn('venues',e)}
  const heat=makeHeat({root,P,groundAt,heightAt,burst,toast,audio,store,save,$,makePirate,animatePirate,sailing:()=>sailing,paused:()=>$('places').classList.contains('show'),rescue(){if(sailing)return;P.R.position.set(38,heightAt(38,176),176);V.x=V.y=V.z=0;petsTo(38,176);fA=0}});
  folk=buildFolk({root,scene,ctx,M,glowsN,addPerson,makePirate,makeLady,npcs,crowd,P,QL,toast,clamp,lerp});
  {const MAP={'crew-awards/':['../crew.html','The Crew'],'store/':['../merch.html',"The Merch Store"]};const SEV={acropolis:'../acropolis.html',armwrestle:'../armwrestle.html'};
@@ -290,7 +292,7 @@ setTime(true);
   let cx=tgt.x+dirx*dist,cy=tgt.y+diry*dist,cz=tgt.z+dirz*dist;const gh=Math.max(heightAt(cx,cz),waveAt(cx,cz,t)*.4+.05)+.45;if(cy<gh)cy=gh;camX.lerp(vv.set(cx,cy,cz),attract?1:Math.min(1,dt*(sailing?7:16)));if(fA<1){fA=1;camX.set(cx,cy,cz)}camera.position.copy(camX);camera.lookAt(tgt)}
  function frame(ts){requestAnimationFrame(frame);if(document.hidden||window.__poyPause){last=ts;return}if(DBG){const W=window.__W;if(W&&W.hold){if(!W.n){last=ts;return}W.n--;last=ts-33;}}const real=(ts-last)/1000,dt=Math.min(real,.05);last=ts;now=ts/1000;const t=now;ema=lerp(ema,real*1000,.05);
   if(!DBG){adaptT+=real;if(adaptT>3){adaptT=0;if(ema>30&&dpr>.72){dpr=Math.max(.72,dpr*.84);renderer.setPixelRatio(dpr);resize()}else if(ema>42&&renderer.shadowMap.enabled&&sun.shadow.mapSize.x>1024){sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}}}
-  if(started){heat.update(dt,t);show.update(dt,t);drawNav(dt);if(window.__gps)window.__gps.tick(t);if(!Q.has('h')){hour=(hour+real/60*1.5)%24;}updatePlayer(dt,t);if(chill>.25&&!sailing){breathT-=dt;if(breathT<0){breathT=2.4;const bp=P.R.position;burst(bp.x+Math.sin(pYaw)*.35,bp.y+1.62,bp.z+Math.cos(pYaw)*.35,3,.86,.89,.93,.35,.42,-.25,1.1)}}cur=findAct();const a=$('act');if(cur&&!$('places').classList.contains('show')){$('actT').textContent=cur.t;a.classList.add('show')}else a.classList.remove('show');const fp=P.R.position,shoreD=Math.abs(heightAt(fp.x,fp.z)),gd=Math.hypot(fp.x+56,fp.z-74);audio.update(1-smooth(0,40,heightAt(fp.x,fp.z)),(1-smooth(4,70,gd))*.32,Math.hypot(V.x,V.z)+Math.abs(B.sp));miniT-=dt;if(miniT<0){miniT=.1;drawMini()}}
+  if(started){heat.update(dt,t);show.update(dt,t);if(venues)venues.update(dt,t);drawNav(dt);if(window.__gps)window.__gps.tick(t);if(!Q.has('h')){hour=(hour+real/60*1.5)%24;}updatePlayer(dt,t);if(chill>.25&&!sailing){breathT-=dt;if(breathT<0){breathT=2.4;const bp=P.R.position;burst(bp.x+Math.sin(pYaw)*.35,bp.y+1.62,bp.z+Math.cos(pYaw)*.35,3,.86,.89,.93,.35,.42,-.25,1.1)}}cur=findAct();const a=$('act');if(cur&&!$('places').classList.contains('show')){$('actT').textContent=cur.t;a.classList.add('show')}else a.classList.remove('show');const fp=P.R.position,shoreD=Math.abs(heightAt(fp.x,fp.z)),gd=Math.hypot(fp.x+56,fp.z-74);audio.update(1-smooth(0,40,heightAt(fp.x,fp.z)),(1-smooth(4,70,gd))*.32,Math.hypot(V.x,V.z)+Math.abs(B.sp));miniT-=dt;if(miniT<0){miniT=.1;drawMini()}}
   updWeather(real,t);setTimeOfDay(real);updWorld(dt,t);battle.update(dt,t,started);updCam(dt,t);const c=camera.position;sky.mesh.position.set(0,0,0);water.u.cam.value.copy(c);const pp=attract?tgt:P.R.position,snap=4;vv.set(Math.round(pp.x/snap)*snap,0,Math.round(pp.z/snap)*snap);const ld=sunD.y>-.02?sunD:new THREE.Vector3(-sunD.x,Math.abs(sunD.y)+.25,-sunD.z).normalize();sun.target.position.copy(vv);sun.position.copy(vv).addScaledVector(ld,220);SC.far=500;const rv=smooth(.32,.92,storm);rain.set(rv,reduced?t*.35:t,c);ripples.update(dt,t,rv,c,(x,z)=>groundAt(x,z,c.y+6),(x,z,t2,h)=>waveAt(x,z,t2)*clamp(-h/3.5,.08,1));renderer.render(scene,camera);document.documentElement.setAttribute('data-world-frame','1')}
  function updWeather(real,t){const was=storm;if(started&&wxAuto){wxT-=real;if(wxT<0)setRain(stormGoal===0,false)}
   if(storm!==stormGoal){const d=stormRate*real;storm=stormGoal>storm?Math.min(stormGoal,storm+d):Math.max(stormGoal,storm-d);if(Math.abs(storm-was)>0&&(Math.floor(storm*40)!==Math.floor(was*40)||storm===stormGoal))setTime(false)}
