@@ -4,7 +4,7 @@
 (function(){
   if(window.PoyCine)return;
   var me=document.currentScript,base=me&&me.src?me.src.replace(/cine\.js.*$/,""):"assets/";
-  var SKIP=["index.html","","club.html","arcade.html","crew.html","merch.html","legal.html","messages.html","card.html","plank-bar.html","island.html","station.html","travel.html","surfshop.html","rumors.html","world.html"];
+  var SKIP=["index.html","","club.html","shop.html","arcade.html","crew.html","merch.html","legal.html","messages.html","card.html","plank-bar.html","island.html","station.html","travel.html","surfshop.html","rumors.html","world.html"];
   var LOOKS=[{tint:"4,10,18",a:.42,gold:"#f6d67a"},{tint:"52,8,10",a:.4,gold:"#ffb39a"},{tint:"44,30,4",a:.34,gold:"#ffe9a8"},{tint:"8,26,30",a:.42,gold:"#a8fff0"},{tint:"26,8,44",a:.4,gold:"#e7c2ff"}];
   var LINES=["Chart your course. Take the treasure.","Storm's coming. So are we.","Iron, brass and blood-red sails.","Every doubloon has a story.","From Gaspar's Grotto to the high seas.","Pops and Pippy saved you a seat.","Seventh Avenue never sleeps.","No quarter. No refunds. No mercy."];
   function card(o){

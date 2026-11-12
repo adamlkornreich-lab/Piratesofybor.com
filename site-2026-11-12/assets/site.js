@@ -10,7 +10,7 @@
   var skull='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="30" r="20" fill="#f6d67a"/><circle cx="24" cy="28" r="5" fill="#0b0e14"/><circle cx="40" cy="28" r="5" fill="#0b0e14"/><path d="M28 40h8l-4 6z" fill="#0b0e14"/><rect x="22" y="46" width="20" height="6" rx="2" fill="#f6d67a"/><path d="M8 14 L56 50 M56 14 L8 50" stroke="#f6d67a" stroke-width="5" stroke-linecap="round"/><path d="M12 24c6-16 34-16 40 0-10-6-30-6-40 0z" fill="#b5532a"/></svg>';
   var header='<header class="top"><div class="wrap"><a class="brand" href="index.html">'+skull+'The Pirates of Ybor</a><nav class="main">'+
     NAV.map(function(n){return '<a href="'+n[0]+'"'+(here===n[0]?' class="active"':'')+'>'+n[1]+'</a>';}).join("")+
-    '<a href="#" id="signinLink">⚓ Sign in</a><button id="soundBtn" type="button"></button><button id="shantyBtn" type="button" aria-pressed="false">🎻 Shanty</button></nav></div></header>';
+    '<a href="shop.html" id="dblLink" title="Your doubloons. Open the Doubloon Shop."'+(here==="shop.html"?' class="active"':'')+'>🪙 0</a><a href="#" id="signinLink">⚓ Sign in</a><button id="soundBtn" type="button"></button><button id="shantyBtn" type="button" aria-pressed="false">🎻 Shanty</button></nav></div></header>';
   var footer='<footer class="site"><div>Built by R.A. Consulting · Gaspar\'s Grotto · Ybor City, Tampa FL · <a href="crew.html">Credits</a> · <a href="legal.html">Legal &amp; Privacy</a> · <a href="mailto:adamlkornreich@gmail.com">Contact</a></div>'+
     '<div class="copy">© 2026 Adam Kornreich / R.A. Consulting ❤ Pops &amp; Pippy. All rights reserved.</div></footer>';
   /* Official Pops & Pippy art, blended in with sparkles and the copyright line. */
@@ -30,6 +30,21 @@
   var slot=document.getElementById("heroArt");if(slot){slot.innerHTML='<img class="hero-art" src="assets/pops-pippy-official.jpg" alt="Pops the bar cat and Pippy the pirate chihuahua">';}
   /* simple local high-score helper */
   window.PY={best:function(key,val){try{var k="py_"+key,b=parseFloat(localStorage.getItem(k)||"0");if(val!==undefined&&val>b){localStorage.setItem(k,val);b=val;}return b;}catch(e){return val||0;}}};
+  /* One doubloon purse for every game: earned on wins, spent in the Doubloon Shop. Kept on this device. */
+  var mem={d:0,o:[],e:{}};
+  function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){}return null;}
+  function dGet(){var v=ls("py_doubloons");return v===null?mem.d:(parseInt(v,10)||0);}
+  function dSet(n){n=Math.max(0,Math.round(n));mem.d=n;ls("py_doubloons",String(n));var el=document.getElementById("dblLink");if(el)el.textContent="🪙 "+n;return n;}
+  function jGet(k,d){var v=ls(k);if(v===null)return d;try{return JSON.parse(v);}catch(e){return d;}}
+  window.PY.doubloons=dGet;
+  window.PY.earn=function(n,why){var t=dSet(dGet()+n);note("+"+n+" doubloons"+(why?" · "+why:""));return t;};
+  window.PY.spend=function(n){if(dGet()<n)return false;dSet(dGet()-n);return true;};
+  window.PY.owned=function(){return jGet("py_owned",mem.o);};
+  window.PY.own=function(id){var o=window.PY.owned();if(o.indexOf(id)<0)o.push(id);mem.o=o;ls("py_owned",JSON.stringify(o));};
+  window.PY.equipped=function(slot){return jGet("py_equip",mem.e)[slot]||"";};
+  window.PY.equip=function(slot,id){var e=jGet("py_equip",mem.e);e[slot]=id;mem.e=e;ls("py_equip",JSON.stringify(e));};
+  function note(t){var n=document.createElement("div");n.setAttribute("role","status");n.textContent="🪙 "+t;n.style.cssText="position:fixed;left:50%;top:76px;transform:translateX(-50%);z-index:500;background:#17181d;color:#f6d67a;border:2px solid #d9a944;border-radius:999px;padding:8px 18px;font:700 1rem Georgia,serif;box-shadow:0 8px 24px rgba(0,0,0,.6);transition:opacity .6s,top .6s";document.body.appendChild(n);setTimeout(function(){n.style.opacity="0";n.style.top="56px";},1700);setTimeout(function(){n.remove();},2400);}
+  dSet(dGet());
   /* Sound and celebration: small sounds made in the browser, only after a tap */
   var muted=false,actx=null;try{muted=localStorage.getItem("py_mute")==="1";}catch(e){}
   function tone(f,t,d,v){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain(),s=actx.currentTime+t;o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(v||.05,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(actx.destination);o.start(s);o.stop(s+d);}catch(e){}}
@@ -49,7 +64,7 @@
   shb.addEventListener("click",function(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state!=="running")actx.resume()}catch(e){return}shOn=!shOn;shb.setAttribute("aria-pressed",String(shOn));shb.textContent=shOn?"🎻 Shanty on":"🎻 Shanty";
    if(shOn){if(!shGain){shGain=actx.createGain();shGain.connect(actx.destination)}shGain.gain.setTargetAtTime(muted?0:.9,actx.currentTime,.1);shNext=actx.currentTime+.08;shStep=0;clearInterval(shTimer);shTimer=setInterval(shTick,60)}else{clearInterval(shTimer);if(shGain)shGain.gain.setTargetAtTime(0,actx.currentTime,.1)}});
   sb.addEventListener("click",function(){if(shGain&&actx)shGain.gain.setTargetAtTime(muted||!shOn?0:.9,actx.currentTime,.1)});
-  window.PY.celebrate=function(){[392,523,659,784,1047].forEach(function(f,i){tone(f,i*.1,.34,.055);});[659,784,1047].forEach(function(f){tone(f,.55,.7,.035)});for(var c=0;c<9;c++)tone(1200+Math.random()*900,.15+c*.07,.12,.03);
+  window.PY.celebrate=function(amt){window.PY.earn(typeof amt==="number"?amt:25,"winner");var RAIN={"":["🪙","🪙","🪙","🪙","✨"],"rain-gems":["💎","🪙","💎","🪙","✨"],"rain-skulls":["🏴‍☠️","🪙","🪙","☠️","✨"]}[window.PY.equipped("rain")]||["🪙","🪙","🪙","🪙","✨"];[392,523,659,784,1047].forEach(function(f,i){tone(f,i*.1,.34,.055);});[659,784,1047].forEach(function(f){tone(f,.55,.7,.035)});for(var c=0;c<9;c++)tone(1200+Math.random()*900,.15+c*.07,.12,.03);
     if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-    for(var i=0;i<34;i++){var c=document.createElement("div");c.className="coin";c.textContent=i%5?"🪙":"✨";c.style.left=Math.random()*100+"vw";c.style.animationDuration=(1.3+Math.random()*1.5)+"s";c.style.animationDelay=Math.random()*.5+"s";document.body.appendChild(c);(function(n){setTimeout(function(){n.remove();},3600);})(c);}};
+    for(var i=0;i<90;i++){var c=document.createElement("div");c.className="coin";c.textContent=RAIN[i%5];c.style.left=Math.random()*100+"vw";c.style.animationDuration=(1.3+Math.random()*1.5)+"s";c.style.animationDelay=Math.random()*1.4+"s";document.body.appendChild(c);(function(n){setTimeout(function(){n.remove();},4800);})(c);}};
 })();
