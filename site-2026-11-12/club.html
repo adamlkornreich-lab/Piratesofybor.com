@@ -77,6 +77,7 @@
 </main>
 
 <script src="assets/beats.js"></script>
+<script src="assets/grotto-intro.js"></script>
 <script src="assets/site.js"></script>
 <script>
 (function(){
@@ -93,7 +94,7 @@
   /* 21+ door */
   var gate=$("gate"),ok=false;try{ok=sessionStorage.getItem("py_club21")==="1";}catch(e){}
   if(ok)gate.hidden=true;
-  $("gateYes").addEventListener("click",function(){gate.hidden=true;try{sessionStorage.setItem("py_club21","1");}catch(e){}B.start(B.pref()==="off"?"east":B.style());say("Lita: Welcome to Flex Grotto. Coats on the cannon, drinks at the bar, Josh Bouche has the decks.");});
+  $("gateYes").addEventListener("click",function(){gate.hidden=true;try{sessionStorage.setItem("py_club21","1");}catch(e){}if(window.PoyIntro)PoyIntro.play({autoplay:true,title:"FLEX GROTTO",sub:"Josh Bouche & Lita's · lasers on",style:"miami"});else B.start(B.pref()==="off"?"east":B.style());say("Lita: Welcome to Flex Grotto. Coats on the cannon, drinks at the bar, Josh Bouche has the decks.");});
 
   /* decks */
   var decks=$("decks");

@@ -129,7 +129,8 @@ setTimeout(function(){var g=document.getElementById('go');if(g&&g.disabled)fail(
 <script>(function(){var on=true;try{on=localStorage.getItem("py_dark")!=="0";}catch(e){}function set(v){on=v;document.body.classList.toggle("lightview",!on);var b=document.getElementById("bDark");if(b)b.setAttribute("aria-pressed",String(on));try{localStorage.setItem("py_dark",on?"1":"0");}catch(e){}}document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("#bDark"))set(!on);});if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){set(on);});else set(on);})();</script>
 <script>document.body.setAttribute("data-no-cine","");</script>
 <script src="../assets/cine.js"></script>
-<script>if(window.PoyCine)PoyCine.card({kick:"Gaspar's Grotto presents",title:"Ybor Cay: Plunder & Heat",sub:["Crack the supply drops. Outrun the marines.","Beat the squall. Claim the bounty.","Every visit, the island deals a new hand."][Math.floor(Math.random()*3)],button:"⚓ Drop anchor"});</script>
+<script src="../assets/grotto-intro.js"></script>
+<script>if(window.PoyIntro)PoyIntro.play({base:"../",title:"YBOR CAY",sub:"The Pippy is waiting, Captain",gateTitle:"Ybor Cay",gateSub:"Gaspar's Grotto after dark, then out to sea. Turn your sound up.",style:"miami"});else if(window.PoyCine)PoyCine.card({title:"Ybor Cay"});</script>
 <script>
 /* Grotto FM is DJ Josh Bouche: the radio button steps through Miami Bass, East Coast, West Coast, Dubstep and Rave, then off. Music starts with the game. */
 (function(){var B=window.PoyBeats;if(!B)return;var ORD=["miami","east","west","dubstep","rave"];

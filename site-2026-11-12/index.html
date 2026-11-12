@@ -110,6 +110,7 @@
   </section>
 </main>
 <script src="assets/beats.js"></script>
+<script src="assets/grotto-intro.js"></script>
 <script>
 /* Opening cinematic: storm, treasure ship, title, then the beat drops. © 2026 Adam Kornreich / R.A. Consulting ❤ Pops & Pippy */
 (function(){
@@ -204,9 +205,11 @@
   document.getElementById("opGo").addEventListener("click",function(){play(true);});
   document.getElementById("opQuiet").addEventListener("click",function(){play(false);});
   document.getElementById("opSkip").addEventListener("click",function(){if(B&&!B.isOn())B.start(B.pref()==="off"?"east":undefined,false);finish();});
-  document.getElementById("opReplay").addEventListener("click",function(){if(B)B.stop(false);open();});
+  document.getElementById("opReplay").addEventListener("click",function(){if(B)B.stop(false);if(window.PoyIntro){PoyIntro.play({});return;}open();});
   window.addEventListener("resize",function(){if(!done)fit();});
-  fit();raf=requestAnimationFrame(draw);if(auto)roll();
+  /* The real-footage Gaspar's Grotto film is the opening; the drawn version stays as a fallback. */
+  if(window.PoyIntro){done=true;el.style.display="none";PoyIntro.play({onDone:function(){document.body.removeAttribute("data-beats-manual");var f=document.querySelector(".ship-hero .btn");if(f)try{f.focus({preventScroll:true});}catch(e){}}});}
+  else{fit();raf=requestAnimationFrame(draw);if(auto)roll();}
 })();
 </script>
 <script src="assets/site.js"></script>
