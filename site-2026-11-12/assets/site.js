@@ -39,7 +39,10 @@
   window.PY.doubloons=dGet;
   window.PY.earn=function(n,why){var t=dSet(dGet()+n);note("+"+n+" doubloons"+(why?" · "+why:""));return t;};
   window.PY.spend=function(n){if(dGet()<n)return false;dSet(dGet()-n);return true;};
-  window.PY.owned=function(){return jGet("py_owned",mem.o);};
+  /* Everything is unlocked for everyone: every arena challenger and every skin. */
+  var ALL_UNLOCKED=["char-sable","char-tiago","char-wren","cross-gold","cross-neon","rain-gems","rain-skulls"];
+  window.PY.unlockedAll=true;
+  window.PY.owned=function(){var o=jGet("py_owned",mem.o).slice();ALL_UNLOCKED.forEach(function(id){if(o.indexOf(id)<0)o.push(id);});return o;};
   window.PY.own=function(id){var o=window.PY.owned();if(o.indexOf(id)<0)o.push(id);mem.o=o;ls("py_owned",JSON.stringify(o));};
   window.PY.equipped=function(slot){return jGet("py_equip",mem.e)[slot]||"";};
   window.PY.equip=function(slot,id){var e=jGet("py_equip",mem.e);e[slot]=id;mem.e=e;ls("py_equip",JSON.stringify(e));};

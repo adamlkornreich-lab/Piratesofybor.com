@@ -348,7 +348,7 @@ function drawHome(){$("coins").textContent="💰 "+S.coins;const me=$("me");me.t
   $("tabs").innerHTML=["Stamps","Avatars","Crowns","Frames","Sayings"].map(t=>`<button role="tab" aria-selected="${t===tab}" class="${t===tab?"on":""}" data-t="${t}">${t}</button>`).join("");
   const b=$("tabBody"),k=seasonKey(),sn=seasonNow(),pts=S.season[k]||0;
   if(tab==="Stamps"){let n=0;b.innerHTML=`<p style="color:var(--mute);margin:0">Collect a stamp every 5 levels. ${S.stamps} of 16 collected.</p><div class="album">`+ALBUMS.map(a=>`<h3>${a[0]}</h3><div class="stamps">`+a[1].map(s=>{const on=n++<S.stamps;return `<div class="stamp${on?"":" locked"}"><i>${s[0]}</i>${s[1]}</div>`;}).join("")+"</div>").join("")+"</div>";}
-  if(tab==="Avatars")b.innerHTML=`<p style="color:var(--mute);margin:0 0 10px">Tap to wear one, or buy it with doubloons.</p><div class="avatars">`+AVATARS.map(a=>{const own=S.owned.includes(a[0]);return `<button data-av="${a[0]}" data-cost="${a[2]}" class="${S.avatar===a[0]?"on":""}"><i>${a[0]}</i>${a[1]}<br>${own?(S.avatar===a[0]?"Wearing":"Owned"):"💰 "+a[2]}</button>`;}).join("")+"</div>";
+  if(tab==="Avatars")b.innerHTML=`<p style="color:var(--mute);margin:0 0 10px">Every avatar is unlocked. Tap to wear one.</p><div class="avatars">`+AVATARS.map(a=>{const own=S.owned.includes(a[0]);return `<button data-av="${a[0]}" data-cost="${a[2]}" class="${S.avatar===a[0]?"on":""}"><i>${a[0]}</i>${a[1]}<br>${S.avatar===a[0]?"Wearing":"Unlocked"}</button>`;}).join("")+"</div>";
   const seas=(have,goal,label,icon)=>`<p style="margin:0;color:var(--mute)">${sn} season: ${pts} of ${goal} points. A puzzle is 1 point and the Daily is 3.</p><div class="meter"><span style="width:${Math.min(100,pts/goal*100)}%"></span></div><div class="seasons">`+["Fall","Winter","Spring","Summer"].map(s=>{const on=have.some(x=>x.startsWith(s));return `<div class="season ${s} ${on?"":"off"}" ${label==="Frames"&&on?`data-frame="${s}" style="cursor:pointer"`:""}><b>${s}</b><i>${on?icon(s):"🔒"}</i>${label==="Crowns"?CROWNS[s][1]:S.frameOn===s?"Wearing":s+" frame"}</div>`;}).join("")+"</div>";
   if(tab==="Crowns")b.innerHTML=seas(S.crowns,25,"Crowns",s=>CROWNS[s][0]);
   if(tab==="Frames")b.innerHTML=seas(S.frames,10,"Frames",()=>"⭕");
@@ -364,7 +364,7 @@ $("packs").innerHTML=PACKS.map(p=>`<button data-p="${p[0]}">${p[1]}</button>`).j
 $("packs").onclick=e=>{const p=e.target.dataset.p;if(p)begin("pack",p);};
 $("tabs").onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;drawHome();}};
 $("tabBody").onclick=e=>{const f=e.target.closest("[data-frame]");if(f){S.frameOn=S.frameOn===f.dataset.frame?null:f.dataset.frame;save();drawHome();return;}
-  const a=e.target.closest("[data-av]");if(!a)return;const v=a.dataset.av,c=+a.dataset.cost;if(!S.owned.includes(v)){if(S.coins<c)return;S.coins-=c;S.owned.push(v);}S.avatar=v;save();drawHome();};
+  const a=e.target.closest("[data-av]");if(!a)return;const v=a.dataset.av,c=0;if(!S.owned.includes(v)){if(S.coins<c)return;S.coins-=c;S.owned.push(v);}S.avatar=v;save();drawHome();};
 $("grid").onclick=e=>{const b=e.target.closest("[data-x]");if(!b)return;const x=+b.dataset.x,y=+b.dataset.y;if(x===cx&&y===cy)dirA=!dirA;cx=x;cy=y;drawGrid();};
 $("prev").onclick=()=>jump(-1);$("nxt").onclick=()=>jump(1);
 $("kb").innerHTML=["QWERTYUIOP","ASDFGHJKL","ZXCVBNM⌫"].map(r=>"<div>"+[...r].map(k=>`<button data-k="${k}" class="${k==="⌫"?"wide":""}" aria-label="${k==="⌫"?"Delete":k}">${k}</button>`).join("")+"</div>").join("");

@@ -38,8 +38,8 @@ h2{margin-top:30px}
   function $(i){return document.getElementById(i);}
   function draw(){
     $("purse").textContent="🪙 "+PY.doubloons()+" doubloons";var own=PY.owned();
-    $("chars").innerHTML=CHARS.map(function(c){var has=own.indexOf(c[0])>=0;return '<div class="item"><div class="ic">'+c[1]+'</div><h3>'+c[2]+'</h3><p>'+c[3]+'</p><div class="price">🪙 '+c[4]+'</div><button type="button" data-buy="'+c[0]+'" data-cost="'+c[4]+'"'+(has?' class="owned" disabled':'')+'>'+(has?"In your arena roster":"Buy")+'</button></div>';}).join("");
-    $("skins").innerHTML=SKINS.map(function(k){var has=own.indexOf(k[1])>=0,on=PY.equipped(k[0])===k[1];return '<div class="item"><div class="ic">'+k[2]+'</div><h3>'+k[3]+'</h3><p>'+k[4]+'</p><div class="price">🪙 '+k[5]+'</div><button type="button" '+(has?'data-equip="'+k[1]+'" data-slot="'+k[0]+'" class="'+(on?"on":"owned")+'"':'data-buy="'+k[1]+'" data-cost="'+k[5]+'"')+'>'+(has?(on?"Equipped · tap to take off":"Equip"):"Buy")+'</button></div>';}).join("");
+    $("chars").innerHTML=CHARS.map(function(c){var has=own.indexOf(c[0])>=0;return '<div class="item"><div class="ic">'+c[1]+'</div><h3>'+c[2]+'</h3><p>'+c[3]+'</p><div class="price">'+(has?"🔓 Unlocked":"🪙 "+c[4])+'</div><button type="button" data-buy="'+c[0]+'" data-cost="'+c[4]+'"'+(has?' class="owned" disabled':'')+'>'+(has?"In your arena roster":"Buy")+'</button></div>';}).join("");
+    $("skins").innerHTML=SKINS.map(function(k){var has=own.indexOf(k[1])>=0,on=PY.equipped(k[0])===k[1];return '<div class="item"><div class="ic">'+k[2]+'</div><h3>'+k[3]+'</h3><p>'+k[4]+'</p><div class="price">'+(has?"🔓 Unlocked":"🪙 "+k[5])+'</div><button type="button" '+(has?'data-equip="'+k[1]+'" data-slot="'+k[0]+'" class="'+(on?"on":"owned")+'"':'data-buy="'+k[1]+'" data-cost="'+k[5]+'"')+'>'+(has?(on?"Equipped · tap to take off":"Equip"):"Buy")+'</button></div>';}).join("");
     var cfg=window.POY_STORE||{packs:[]},live=!!cfg.cardPaymentsOn;
     $("payNote").textContent=live?"Card payments are handled by Stripe. Doubloons are added to your purse once the payment is confirmed.":"Card payments are not switched on yet, so nothing here can charge you. For now, doubloons are earned by winning games.";
     $("packs").innerHTML=(cfg.packs||[]).map(function(p){var ok=live&&p.stripeLink;return '<div class="item"><div class="ic">💰</div><h3>'+p.doubloons+' doubloons</h3><p>A chest of doubloons for the shop.</p><div class="price">'+p.price+'</div>'+(ok?'<a class="btn" href="'+p.stripeLink+'">Buy with card</a>':'<button type="button" disabled>Not available yet</button>')+'</div>';}).join("");
@@ -56,7 +56,7 @@ h2{margin-top:30px}
     var note=$("payNote");if(done.indexOf(sid)>=0){note.textContent="That purchase is already in your purse.";return;}
     note.textContent="Checking your payment with Stripe…";
     fetch(cfg.claimUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:sid})})
-      .then(function(r){return r.json().then(function(j){return j;});})
+      .then(function(r){return r.json();})
       .then(function(j){
         if(j.ok){done.push(sid);try{localStorage.setItem("py_claimed",JSON.stringify(done));}catch(e){}PY.celebrate(j.doubloons);draw();note.textContent="Payment confirmed: "+j.doubloons+" doubloons added to your purse. Thank you!";}
         else{note.textContent={already_claimed:"That purchase was already added to a purse.",not_paid:"Stripe hasn't confirmed this payment yet. Refresh in a minute.",payments_not_configured:"Card payments aren't switched on yet, so nothing was charged here."}[j.error]||"We couldn't confirm that payment. Email adamlkornreich@gmail.com with your Stripe receipt and we'll sort it out.";}
